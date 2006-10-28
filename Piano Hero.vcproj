@@ -247,7 +247,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\_reusable\string_util.h"
+					RelativePath=".\src\string_util.h"
 					>
 				</File>
 			</Filter>
