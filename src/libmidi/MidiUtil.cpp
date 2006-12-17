@@ -3,7 +3,7 @@
 // See license.txt for license information
 
 #include "MidiUtil.h"
-#include "string_util.h"
+#include "../string_util.h"
 
 using namespace std;
 

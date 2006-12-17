@@ -6,7 +6,7 @@
 #include "MidiUtil.h"
 #include "Note.h"
 
-#include "string_util.h"
+#include "../string_util.h"
 using namespace std;
 
 MidiEvent MidiEvent::ReadFromStream(istream &stream, unsigned char last_status)
@@ -223,6 +223,17 @@ unsigned char MidiEvent::Channel() const
 {
    // The channel is held in the lower nibble of the status code
    return (m_status & 0x0F);
+}
+
+void MidiEvent::SetChannel(unsigned char channel)
+{
+   if (channel > 15) return;
+
+   // Clear out the old channel
+   m_status = m_status & 0xF0;
+
+   // Set the new channel
+   m_status = m_status | channel;
 }
 
 bool MidiEvent::HasText() const
