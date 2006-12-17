@@ -76,6 +76,8 @@ public:
    // channel argument.
    unsigned char Channel() const;
 
+   void SetChannel(unsigned char channel);
+
    // Does this event type allow arbitrary text
    bool HasText() const;
 
