@@ -243,13 +243,14 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
    int keyboard_width = key_width*key_count + key_space*(key_count-1);
 
    // Fill the background of the note-falling area
-   HBRUSH fill_brush = CreateSolidBrush(RGB(0x60, 0x60, 0x60));
+   HBRUSH fill_dark = CreateSolidBrush(RGB(0x54, 0x54, 0x54));
+   HBRUSH fill_lite = CreateSolidBrush(RGB(0x60, 0x60, 0x60));
+
    RECT fill_rect = { x_offset, y, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard };
-   FillRect(hdc, &fill_rect, fill_brush);
-   DeleteObject(fill_brush);
+   FillRect(hdc, &fill_rect, fill_dark);
 
 
-   HPEN guide_pen = CreatePen(PS_SOLID, 1, RGB(0x40, 0x40, 0x40));
+   HPEN guide_pen = CreatePen(PS_SOLID, 1, RGB(0x48, 0x48, 0x48));
    HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, guide_pen));
 
    // Draw horizontal-lines
@@ -260,13 +261,59 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
    MoveToEx(hdc, x_offset,                  y + y_offset - PixelsOffKeyboard - 1, 0);
    LineTo  (hdc, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard - 1);
 
+   int octave_start_x = x_offset;
+   bool use_lite_fill = false;
+
+   char current_white = GetStartingNote() - 1;
+   int current_octave = GetStartingOctave() + 1;
    for (int i = 0; i < key_count+1; ++i)
    {
       const int key_x = i * (key_width + key_space) + x_offset - 1;
 
-      MoveToEx(hdc, key_x, y, 0);
-      LineTo  (hdc, key_x, y + y_offset - PixelsOffKeyboard);
+      // Every octave, toggle the background color
+      if (current_white == 'B')
+      {
+         use_lite_fill = !use_lite_fill;
+         if (use_lite_fill)
+         {
+            RECT background_section = { octave_start_x, y+1, key_x, y + y_offset - PixelsOffKeyboard-1 };
+            FillRect(hdc, &background_section, fill_lite);
+         }
+         octave_start_x = key_x;
+      }
+
+      current_white++;
+      if (current_white == 'H') current_white = 'A';
+      if (current_white == 'C') current_octave++;
    }
+
+
+   current_white = GetStartingNote() - 1;
+   current_octave = GetStartingOctave() + 1;
+   for (int i = 0; i < key_count+1; ++i)
+   {
+      const int key_x = i * (key_width + key_space) + x_offset - 1;
+
+      switch (current_white)
+      {
+      case 'A':
+      case 'C':
+      case 'D':
+      case 'F':
+      case 'G':
+         {
+            MoveToEx(hdc, key_x, y, 0);
+            LineTo  (hdc, key_x, y + y_offset - PixelsOffKeyboard);
+         }
+      }
+
+      current_white++;
+      if (current_white == 'H') current_white = 'A';
+      if (current_white == 'C') current_octave++;
+   }
+
+   DeleteObject(fill_dark);
+   DeleteObject(fill_lite);
 
    SelectObject(hdc, old_pen);
    DeleteObject(guide_pen);
