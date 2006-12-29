@@ -6,6 +6,7 @@ Visit http://pianohero.sourceforge.net/ for more information.
 Originally written by Nicholas Piegdon, the following people have also contributed to the project:
 
 Luis Anton with an early version of the MIDI input code
+Troy Ramos with a suggestion to use Klavarskribo staff notation
 
 --------------------------
 

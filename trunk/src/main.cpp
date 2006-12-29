@@ -7,7 +7,7 @@
 
 #include <set>
 #include <string>
-#include "strsafe.h"
+#include <strsafe.h>
 #include "string_util.h"
 
 #include "PianoHeroError.h"
