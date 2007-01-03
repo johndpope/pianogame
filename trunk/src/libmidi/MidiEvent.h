@@ -50,7 +50,7 @@ public:
    // Returns a friendly name for this particular Note-On or Note-
    // Off event. (e.g. "A#2")  Returns empty string on other types
    // of events.
-   static std::string NoteName(unsigned int note_number);
+   static std::string NoteName(NoteId note_number);
 
    // Returns the "Program to change to" value if this is a Program
    // Change event, 0 otherwise.
