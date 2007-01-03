@@ -41,6 +41,9 @@ public:
    // KeepReading() is false, this will throw MidiError_NoInputAvailable.
    MidiEvent Read();
 
+   // Discard events from the input buffer
+   void Reset();
+
    // Returns whether the input device has more buffered events.
    bool KeepReading() const;
 
