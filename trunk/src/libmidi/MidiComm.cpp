@@ -110,6 +110,13 @@ void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long
    }
 }
 
+void MidiCommIn::Reset()
+{
+   EnterCriticalSection(&m_buffer_mutex);
+   while (!m_event_buffer.empty()) m_event_buffer.pop();
+   LeaveCriticalSection(&m_buffer_mutex);
+}
+
 bool MidiCommIn::KeepReading() const
 {
    bool buffer_empty;
