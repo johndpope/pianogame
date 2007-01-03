@@ -20,7 +20,7 @@ TrackSelectionState::TrackSelectionState(const SharedState &state)
 
 void TrackSelectionState::Init()
 {
-   m_state.midi_out->Reset();
+   if (m_state.midi_out) m_state.midi_out->Reset();
 
    Midi &m = *m_state.midi;
 
@@ -138,7 +138,7 @@ void TrackSelectionState::Update()
 
    if (IsKeyPressed(KeyEscape) || m_back_button.hit)
    {
-      m_state.midi_out->Reset();
+      if (m_state.midi_out) m_state.midi_out->Reset();
       m_state.track_properties = BuildTrackProperties();
       ChangeState(new TitleState(m_state));
       return;
@@ -147,7 +147,7 @@ void TrackSelectionState::Update()
    if (IsKeyPressed(KeyEnter) || m_continue_button.hit)
    {
 
-      m_state.midi_out->Reset();
+      if (m_state.midi_out) m_state.midi_out->Reset();
       m_state.track_properties = BuildTrackProperties();
       ChangeState(new PlayingState(m_state));
 
@@ -192,7 +192,7 @@ void TrackSelectionState::Update()
 
       if (t.HitPreviewButton())
       {
-         m_state.midi_out->Reset();
+         if (m_state.midi_out) m_state.midi_out->Reset();
 
          if (t.IsPreviewOn())
          {
@@ -238,7 +238,7 @@ void TrackSelectionState::PlayTrackPreview(unsigned long long delta_microseconds
       const MidiEvent &ev = i->second;
       if (i->first != m_preview_track_id) continue;
 
-      m_state.midi_out->Write(ev);
+      if (m_state.midi_out) m_state.midi_out->Write(ev);
    }
 }
 
