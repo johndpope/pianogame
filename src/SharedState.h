@@ -11,15 +11,17 @@
 
 class Midi;
 class MidiCommOut;
+class MidiCommIn;
 
 struct SharedState
 {
    SharedState(const std::wstring &title)
-      : midi(0), midi_out(0), song_title(title)
+      : midi(0), midi_out(0), midi_in(0), song_title(title)
    { }
 
    Midi *midi;
    MidiCommOut *midi_out;
+   MidiCommIn *midi_in;
 
    std::vector<TrackProperties> track_properties;
    const std::wstring song_title;

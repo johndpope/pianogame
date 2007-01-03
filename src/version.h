@@ -8,7 +8,8 @@
 #include <string>
 
 // 0.4.0 Initial Release
+// 0.4.1 Klavarskribo staff notation (thanks to Troy Ramos for the suggestion!)
 
-static const std::wstring PianoHeroVersionString = L"0.4.0";
+static const std::wstring PianoHeroVersionString = L"0.4.1";
 
 #endif
