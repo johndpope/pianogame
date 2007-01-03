@@ -58,6 +58,8 @@ public:
 
    std::basic_string<E, T, A> operator() (const std::string& str) const
    {
+      if (str.length() == 0) return std::basic_string<E, T, A>();
+
       typename std::basic_string<E, T, A>::size_type srcLen =
          str.length();
       const char* pSrcBeg = str.c_str();
