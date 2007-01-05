@@ -17,6 +17,12 @@
 
 using namespace std;
 
+const static wstring OutputDeviceKey = L"Last Output Device";
+const static wstring OutputKeySpecialDisabled = L"[no output device]";
+
+const static wstring InputDeviceKey = L"Last Input Device";
+const static wstring InputKeySpecialDisabled = L"[no input device]";
+
 void TitleState::Init()
 {
    m_back_button = ButtonState(Layout::ScreenMarginX,
@@ -27,21 +33,26 @@ void TitleState::Init()
       GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
-   // midi_out could be in one of two states right now.  Either we just started
-   // and we were passed a null MidiCommOut pointer (and its our responsibility
-   // to make a new one) or we've just returned from the track selection state
-   // with a valid MidiCommOut object that we constructed ourselves previously.
+   Registry reg(Registry::CurrentUser, L"Piano Hero");
+
+   wstring last_output_device;
+   reg.Read(OutputDeviceKey, &last_output_device, L"");
+
+   wstring last_input_device;
+   reg.Read(InputDeviceKey, &last_input_device, L"");
+
+   // midi_out could be in one of three states right now:
+   //    1. We just started and were passed a null MidiCommOut pointer
+   // Or, we're returning from track selection either with:
+   //    2. a null MidiCommOut because the user didn't want any output, or
+   //    3. a valid MidiCommOut we constructed previously.
    if (!m_state.midi_out)
    {
       // Try to find the previously used device
-      wstring last_device;
-      Registry reg(Registry::CurrentUser, L"Piano Hero");
-      reg.Read(L"Last Device", &last_device, L"");
-
       MidiCommDescriptionList devices = MidiCommOut::GetDeviceList();
       for (size_t i = 0; i < devices.size(); ++i)
       {
-         if (devices[i].name == last_device)
+         if (devices[i].name == last_output_device)
          {
             m_state.midi_out = new MidiCommOut(devices[i].id);
          }
@@ -49,47 +60,47 @@ void TitleState::Init()
 
       // Next, if we couldn't find a previously used device,
       // use the first one
-      if (!m_state.midi_out && devices.size() > 0)
+      if (last_output_device != OutputKeySpecialDisabled && !m_state.midi_out && devices.size() > 0)
       {
          m_state.midi_out = new MidiCommOut(devices[0].id);
       }
-
-      // Finally, if there simply are no MIDI Output devices,
-      // disable the next button.  (The draw function handles
-      // alerting the user that they cannot proceed.)
-      if (!m_state.midi_out) m_continue_button = ButtonState(-200, -200, 0, 0);
    }
-   
-   unsigned device_id = 0;
+
+   if (!m_state.midi_in)
+   {
+      // Try to find the previously used device
+      MidiCommDescriptionList devices = MidiCommIn::GetDeviceList();
+      for (size_t i = 0; i < devices.size(); ++i)
+      {
+         if (devices[i].name == last_input_device)
+         {
+            m_state.midi_in = new MidiCommIn(devices[i].id);
+         }
+      }
+
+      // If we couldn't find the previously used device,
+      // disabling by default (i.e. leaving it null) is
+      // completely acceptable.
+   }
+
+   int output_device_id = 0;
+   if (last_output_device == OutputKeySpecialDisabled) output_device_id = -1;
+
    if (m_state.midi_out)
    {
-      device_id = m_state.midi_out->GetDeviceDescription().id;
-
+      output_device_id = m_state.midi_out->GetDeviceDescription().id;
       m_state.midi_out->Reset();
    }
 
-   // Alright, it's one or the other.  Say you load a big midi.  A reset with
-   // a different lead-in/lead-out than the previous reset takes a long time.
-   // a Midi object is initialized with lead-in/lead-out of 0.  So, having the
-   // title screen use the same means immediate playback.  Now, the track selection
-   // and playback states use non-zero lead-in/lead-out, so there is a delay
-   // between state changes.
-   //
-   // If the code below is uncommented, it will *force* an update back down to
-   // the default so a device preview will be instantaneous.  Otherwise, if you
-   // preview a track in track selection or play a song is the play state, and
-   // then return to the main menu and try to do a device preview, there will be
-   // a delay.
-   //
-   // That is the greater of two evils.  You choose a device maybe once.  Forcing
-   // an additional delay EVERY time you return to the main menu (which is on the
-   // path for quitting the program) is silly.
+   int input_device_id = -1;
+   if (m_state.midi_in)
+   {
+      input_device_id = m_state.midi_in->GetDeviceDescription().id;
+      m_state.midi_in->Reset();
+   }
 
-   // Get the midi ready for immediate playback
-   //m_state.midi->Reset(0, 0);
-   //PlayDevicePreview(0);
-
-   m_device_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, device_id);
+   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileOutput, output_device_id);
+   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 520, DeviceTileInput,  input_device_id);
 }
 
 void TitleState::Update()
@@ -97,20 +108,50 @@ void TitleState::Update()
    m_continue_button.Update(MouseInfo(Mouse()));
    m_back_button.Update(MouseInfo(Mouse()));
 
-   MouseInfo device_mouse = MouseInfo(Mouse());
-   device_mouse.x -= m_device_tile.GetX();
-   device_mouse.y -= m_device_tile.GetY();
-   m_device_tile.Update(device_mouse);
+   MouseInfo output_mouse = MouseInfo(Mouse());
+   output_mouse.x -= m_output_tile.GetX();
+   output_mouse.y -= m_output_tile.GetY();
+   m_output_tile.Update(output_mouse);
+
+   MouseInfo input_mouse = MouseInfo(Mouse());
+   input_mouse.x -= m_input_tile.GetX();
+   input_mouse.y -= m_input_tile.GetY();
+   m_input_tile.Update(input_mouse);
+
+   // Check to see if we need to switch to a newly selected output device
+   int output_id = m_output_tile.GetDeviceId();
+   if (!m_state.midi_out || output_id != m_state.midi_out->GetDeviceDescription().id)
+   {
+      if (m_state.midi_out) m_state.midi_out->Reset();
+
+      delete m_state.midi_out;
+      m_state.midi_out = 0;
+
+      // Write last device to registry
+      Registry reg(Registry::CurrentUser, L"Piano Hero");
+
+      if (output_id >= 0)
+      {
+         m_state.midi_out = new MidiCommOut(output_id);
+         m_state.midi->Reset(0,0);
+
+         reg.Write(OutputDeviceKey, m_state.midi_out->GetDeviceDescription().name);
+      }
+      else
+      {
+         reg.Write(OutputDeviceKey, OutputKeySpecialDisabled);
+      }
+   }
 
    if (m_state.midi_out)
    {
       PlayDevicePreview(static_cast<unsigned long long>(GetDeltaMilliseconds()) * 1000);
 
-      if (m_device_tile.HitPreviewButton())
+      if (m_output_tile.HitPreviewButton())
       {
          m_state.midi_out->Reset();
 
-         if (m_device_tile.IsPreviewOn())
+         if (m_output_tile.IsPreviewOn())
          {
             const unsigned long long PreviewLeadIn  = 0;
             const unsigned long long PreviewLeadOut = 0;
@@ -119,33 +160,77 @@ void TitleState::Update()
             PlayDevicePreview(0);
          }
       }
+   }
 
-      if (m_device_tile.GetOutId() != m_state.midi_out->GetDeviceDescription().id)
+
+   int input_id = m_input_tile.GetDeviceId();
+   if (!m_state.midi_in || input_id != m_state.midi_in->GetDeviceDescription().id)
+   {
+      if (m_state.midi_in) m_state.midi_in->Reset();
+      m_last_input_note_name = "";
+
+      delete m_state.midi_in;
+      m_state.midi_in = 0;
+
+      // Write last device to registry 
+      Registry reg(Registry::CurrentUser, L"Piano Hero");
+
+      if (input_id >= 0)
       {
-         m_state.midi_out->Reset();
-         delete m_state.midi_out;
-         m_state.midi_out = new MidiCommOut(m_device_tile.GetOutId());
+         m_state.midi_in = new MidiCommIn(input_id);
 
-         m_state.midi->Reset(0,0);
-
-         // Write last device to registry
-         Registry reg(Registry::CurrentUser, L"Piano Hero");
-         reg.Write(L"Last Device", m_state.midi_out->GetDeviceDescription().name);
+         reg.Write(InputDeviceKey, m_state.midi_in->GetDeviceDescription().name);
+      }
+      else
+      {
+         reg.Write(InputDeviceKey, InputKeySpecialDisabled);
       }
    }
+
+   if (m_state.midi_in && m_input_tile.IsPreviewOn())
+   {
+      // Read note events to display on screen
+      while (m_state.midi_in->KeepReading())
+      {
+         MidiEvent ev = m_state.midi_in->Read();
+         if (ev.Type() == MidiEventType_NoteOff || ev.Type() == MidiEventType_NoteOn)
+         {
+            string note = MidiEvent::NoteName(ev.NoteNumber());
+
+            if (ev.Type() == MidiEventType_NoteOn && ev.NoteVelocity() > 0)
+            {
+               m_last_input_note_name = note;
+            }
+            else
+            {
+               if (note == m_last_input_note_name) m_last_input_note_name = "";
+            }
+         }
+      }
+   }
+   else
+   {
+      m_last_input_note_name = "";
+   }
+
 
    if (IsKeyPressed(KeyEscape) || m_back_button.hit)
    {
       delete m_state.midi_out;
       m_state.midi_out = 0;
 
+      delete m_state.midi_in;
+      m_state.midi_in = 0;
+
       PostQuitMessage(0);
       return;
    }
 
-   if (m_state.midi_out && (IsKeyPressed(KeyEnter) || m_continue_button.hit))
+   if (IsKeyPressed(KeyEnter) || m_continue_button.hit)
    {
-      m_state.midi_out->Reset();
+      if (m_state.midi_out) m_state.midi_out->Reset();
+      if (m_state.midi_in) m_state.midi_in->Reset();
+
       ChangeState(new TrackSelectionState(m_state));
       return;
    }
@@ -153,7 +238,7 @@ void TitleState::Update()
 
 void TitleState::PlayDevicePreview(unsigned long long delta_microseconds)
 {
-   if (!m_device_tile.IsPreviewOn()) return;
+   if (!m_output_tile.IsPreviewOn()) return;
 
    MidiEventListWithTrackId evs = m_state.midi->Update(delta_microseconds);
 
@@ -186,7 +271,13 @@ void TitleState::Draw(HDC hdc) const
    Layout::DrawButton(hdc, m_continue_button, L"Choose Tracks", 15);
    Layout::DrawButton(hdc, m_back_button, L"Exit", 55);
 
-   m_device_tile.Draw(hdc);
+   m_output_tile.Draw(hdc);
+
+   m_input_tile.Draw(hdc);
+
+   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY(), hdc, false, Layout::SmallFontSize);
+   Widen<wchar_t> w;
+   last_note << w(m_last_input_note_name);
 
    const static int InstructionsY = 234;
    TextWriter instructions(left, InstructionsY, hdc, false, Layout::SmallFontSize);

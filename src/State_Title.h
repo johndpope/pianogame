@@ -21,7 +21,7 @@ public:
    // You can pass 0 in for state.midi_out to have the title
    // screen pick a device for you.
    TitleState(const SharedState &state)
-      : m_state(state), m_device_tile(0,0,0)
+      : m_state(state), m_output_tile(0,0,DeviceTileOutput,0), m_input_tile(0,0,DeviceTileInput,0)
    { }
 
 protected:
@@ -37,7 +37,10 @@ private:
 
    SharedState m_state;
 
-   DeviceTile m_device_tile;
+   std::string m_last_input_note_name;
+
+   DeviceTile m_output_tile;
+   DeviceTile m_input_tile;
 };
 
 #endif

@@ -11,8 +11,8 @@
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
 
-DeviceTile::DeviceTile(int x, int y, unsigned int out_id)
-   : m_x(x), m_y(y), m_out_id(out_id), m_preview_on(false)
+DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id)
+: m_x(x), m_y(y), m_device_id(device_id), m_preview_on(false), m_tile_type(type)
 {
    // Initialize the size and position of each button
    whole_tile = ButtonState(0, 0, DeviceTileWidth, DeviceTileHeight);
@@ -29,22 +29,30 @@ void DeviceTile::Update(const MouseInfo &translated_mouse)
    button_mode_left.Update(translated_mouse);
    button_mode_right.Update(translated_mouse);
 
-   const MidiCommDescriptionList devices = MidiCommOut::GetDeviceList();
+   const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
+   const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
 
-   if (devices.size() > 0)
+   const MidiCommDescriptionList *devices = 0;
+   switch (m_tile_type)
    {
-      const unsigned int last_device = static_cast<unsigned int>(devices.size() - 1);
+   case DeviceTileOutput: devices = &output_devices; break;
+   case DeviceTileInput:  devices = &input_devices;  break;
+   }
+
+   if (devices && devices->size() > 0)
+   {
+      const int last_device = static_cast<int>(devices->size() - 1);
 
       if (button_mode_left.hit)
       {
-         if (m_out_id == 0) m_out_id = last_device;
-         else --m_out_id;
+         if (m_device_id == -1) m_device_id = last_device;
+         else --m_device_id;
       }
 
       if (button_mode_right.hit)
       {
-         if (m_out_id == last_device) m_out_id = 0;
-         else ++m_out_id;
+         if (m_device_id == last_device) m_device_id = -1;
+         else ++m_device_id;
       }
    }
 
@@ -52,6 +60,7 @@ void DeviceTile::Update(const MouseInfo &translated_mouse)
    {
       m_preview_on = !m_preview_on;
    }
+
 }
 
 int DeviceTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) const
@@ -87,9 +96,12 @@ void DeviceTile::Draw(HDC hdc) const
    SelectObject(tile_hdc, old_pen);
    DeleteObject(pen);
 
-   // Write song info to the tile
    TextWriter title(10, 10, tile_hdc, false, 14);
-   title << Text(L"Choose MIDI Output Device:", light);
+   switch (m_tile_type)
+   {
+   case DeviceTileOutput: title << Text(L"Choose MIDI Output Device:", light); break;
+   case DeviceTileInput:  title << Text(L"Choose MIDI Input Device:", light);  break;
+   }
 
    Image graphics(Image::GetGlobalModuleInstance(), L"BITMAP_TRACKTILE");
    graphics.EnableTransparency();
@@ -107,17 +119,39 @@ void DeviceTile::Draw(HDC hdc) const
 
    graphics.endDrawing();
 
-   const MidiCommDescriptionList devices = MidiCommOut::GetDeviceList();
+
+   const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
+   const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
+
+   const MidiCommDescriptionList *devices = 0;
+   switch (m_tile_type)
+   {
+   case DeviceTileOutput: devices = &output_devices; break;
+   case DeviceTileInput:  devices = &input_devices;  break;
+   }
 
    // Draw mode text
    TextWriter mode(44, 46, tile_hdc, false, 14);
-   if (devices.size() > m_out_id)
+   if (devices->size() == 0)
    {
-      mode << devices[m_out_id].name;
+      mode << L"[No Devices Found]";
    }
    else
    {
-      mode << L"No Midi Output Devices Found!";
+      // A -1 for device_id means "disabled"
+      if (m_device_id >= 0)
+      {
+         MidiCommDescriptionList d = *devices;
+         mode << d[m_device_id].name;
+      }
+      else
+      {
+         switch (m_tile_type)
+         {
+         case DeviceTileOutput: mode << L"[Output Off: Display only with no audio]"; break;
+         case DeviceTileInput:  mode << L"[Input Off: Play along with no scoring]";  break;
+         }
+      }
    }
 
    tile.endDrawingOn();
