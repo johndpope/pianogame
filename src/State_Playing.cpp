@@ -22,7 +22,7 @@ using namespace std;
 
 void PlayingState::ResetSong()
 {
-   m_state.midi_out->Reset();
+   if (m_state.midi_out) m_state.midi_out->Reset();
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
@@ -113,7 +113,7 @@ void PlayingState::Play(unsigned long long delta_microseconds)
          m_keyboard->SetKeyActive(name, (vel > 0), m_state.track_properties[track_id].color);
       }
 
-      if (play) m_state.midi_out->Write(ev);
+      if (play && m_state.midi_out) m_state.midi_out->Write(ev);
    }
 }
 
