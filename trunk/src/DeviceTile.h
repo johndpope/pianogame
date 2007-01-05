@@ -18,29 +18,37 @@ const int DeviceTileHeight = 80;
 
 enum TrackTileGraphic;
 
+enum DeviceTileType
+{
+   DeviceTileOutput,
+   DeviceTileInput
+};
+
 class DeviceTile
 {
 public:
-   DeviceTile(int x, int y, unsigned int out_id);
+   DeviceTile(int x, int y, DeviceTileType type, int device_id);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(HDC hdc) const;
 
-   int GetX() { return m_x; }
-   int GetY() { return m_y; }
+   int GetX() const { return m_x; }
+   int GetY() const { return m_y; }
 
    bool HitPreviewButton() const { return button_preview.hit; }
    bool IsPreviewOn() const { return m_preview_on; }
    void TurnOffPreview() { m_preview_on = false; }
 
-   unsigned int GetOutId() const { return m_out_id; }
+   int GetDeviceId() const { return m_device_id; }
 
 private:
    int m_x;
    int m_y;
 
    bool m_preview_on;
-   unsigned int m_out_id;
+   int m_device_id;
+
+   DeviceTileType m_tile_type;
 
    ButtonState whole_tile;
    ButtonState button_preview;

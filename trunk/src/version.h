@@ -9,7 +9,8 @@
 
 // 0.4.0 Initial Release
 // 0.4.1 Klavarskribo staff notation (thanks to Troy Ramos for the suggestion!)
+// 0.4.2 Input DeviceTile with preview (early version by Luis Anton)
 
-static const std::wstring PianoHeroVersionString = L"0.4.1";
+static const std::wstring PianoHeroVersionString = L"0.4.2";
 
 #endif
