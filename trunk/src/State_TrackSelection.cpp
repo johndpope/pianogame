@@ -82,7 +82,7 @@ void TrackSelectionState::Init()
 
       // The "less 1" here is because the first track
       // is always the tempo track
-      TrackColor color = static_cast<TrackColor>((i-1) % TrackColorCount);
+      TrackColor color = static_cast<TrackColor>((i-1) % UserSelectableColorCount);
 
       // If we came back here from StatePlaying, reload all our preferences
       if (m_state.track_properties.size() > i)

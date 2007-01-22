@@ -53,7 +53,7 @@ void TrackTile::Update(const MouseInfo &translated_mouse, Midi *midi)
    if (button_color.hit && m_mode != ModeNotPlayed && m_mode != ModePlayedButHidden)
    {
       int color = static_cast<int>(m_color) + 1;
-      if (color >= TrackColorCount) color = 0;
+      if (color >= UserSelectableColorCount) color = 0;
 
       m_color = static_cast<TrackColor>(color);
    }
@@ -118,7 +118,7 @@ void TrackTile::Draw(HDC hdc, const Midi *midi) const
    graphics.EnableTransparency();
 
    int color_offset = GraphicHeight * static_cast<int>(m_color);
-   if (gray_out_buttons) color_offset = GraphicHeight * TrackColorCount;
+   if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
 
    graphics.beginDrawing(tile_hdc);
    graphics.draw(BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
