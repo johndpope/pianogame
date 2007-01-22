@@ -29,7 +29,8 @@ const static wchar_t* TrackModeText[TrackModeCount] =
 // with a few changes.  (e.g. Chameleon NoteBlack is a little
 // darker to distinguish it from NoteWhite, ScarletRed is a
 // little brighter to make it easier on the eyes, etc.)
-const static int TrackColorCount = 6;
+const static int TrackColorCount = 7;
+const static int UserSelectableColorCount = TrackColorCount - 1;
 enum TrackColor
 {
    TangoButter = 0,
@@ -37,7 +38,9 @@ enum TrackColor
    TangoOrange,
    TangoSkyBlue,
    TangoPlum,
-   TangoScarletRed
+   TangoScarletRed,
+
+   FlatGray
 };
 
 const static COLORREF TrackColorNoteWhite[TrackColorCount] = {
@@ -46,7 +49,9 @@ const static COLORREF TrackColorNoteWhite[TrackColorCount] = {
    RGB(252, 175,  62),
    RGB(114, 159, 207),
    RGB(173, 127, 168),
-   RGB(238,  94,  94)
+   RGB(238,  94,  94),
+
+   RGB(160, 160, 160)
 };
 
 const static COLORREF TrackColorNoteBlack[TrackColorCount] = {
@@ -55,7 +60,9 @@ const static COLORREF TrackColorNoteBlack[TrackColorCount] = {
    RGB(245, 121,   0),
    RGB( 52, 101, 164),
    RGB(117,  80, 123),
-   RGB(233,  49,  49)
+   RGB(233,  49,  49),
+
+   RGB(100, 100, 100)
 };
 
 const static COLORREF TrackColorNoteBorder[TrackColorCount] = {
@@ -64,7 +71,9 @@ const static COLORREF TrackColorNoteBorder[TrackColorCount] = {
    RGB(206,  92,   0),
    RGB( 32,  74, 135),
    RGB( 92,  53, 102),
-   RGB(164,   0,   0)
+   RGB(164,   0,   0),
+
+   RGB( 40,  40,  40)
 };
 
 struct TrackProperties

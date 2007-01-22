@@ -107,7 +107,7 @@ void DeviceTile::Draw(HDC hdc) const
    graphics.EnableTransparency();
 
    // Choose the last (gray) color in the TrackTile bitmap
-   int color_offset = GraphicHeight * TrackColorCount;
+   int color_offset = GraphicHeight * UserSelectableColorCount;
 
    graphics.beginDrawing(tile_hdc);
    graphics.draw(BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
