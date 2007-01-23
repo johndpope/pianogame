@@ -15,6 +15,7 @@
 struct TrackProperties;
 class Midi;
 class MidiCommOut;
+class MidiCommIn;
 
 class PlayingState : public GameState
 {
@@ -30,9 +31,13 @@ protected:
 private:
 
    int CalcKeyboardHeight() const;
+   TranslatedNoteSet CalculateNoteWindows(const unsigned long long opportunity_length);
 
    void ResetSong();
    void Play(unsigned long long delta_microseconds);
+   void Listen();
+
+   double CalculateScoreMultiplier() const;
 
    bool m_paused;
    int m_playback_speed;
@@ -40,10 +45,12 @@ private:
    KeyboardDisplay *m_keyboard;
    unsigned long long m_show_duration;
    TranslatedNoteSet m_notes;
+   TranslatedNoteSet m_user_note_windows;
 
    bool m_first_update;
 
    SharedState m_state;
+   int m_current_combo;
 };
 
 #endif
