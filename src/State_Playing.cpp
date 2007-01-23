@@ -7,6 +7,7 @@
 #include "version.h"
 
 #include <string>
+#include <iomanip>
 using namespace std;
 
 #include "string_util.h"
@@ -20,6 +21,30 @@ using namespace std;
 
 #include "libmidi\MidiComm.h"
 
+TranslatedNoteSet PlayingState::CalculateNoteWindows(const unsigned long long opportunity_length)
+{
+   TranslatedNoteSet windows;
+
+   const TranslatedNoteSet &notes = m_state.midi->Notes();
+   for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
+   {
+      const TranslatedNote &n = *i;
+      if (m_state.track_properties[n.track_id].mode == ModeYouPlay)
+      {
+         // Start with the actual note
+         TranslatedNote window = n;
+
+         // Adjust the start and end to fit just around the start of the actual note
+         window.start = n.start - (opportunity_length / 2);
+         window.end = n.start + (opportunity_length / 2);
+
+         windows.insert(window);
+      }
+   }
+
+   return windows;
+}
+
 void PlayingState::ResetSong()
 {
    if (m_state.midi_out) m_state.midi_out->Reset();
@@ -27,16 +52,25 @@ void PlayingState::ResetSong()
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
    const static unsigned long long LeadIn = 6000000;
-   const static unsigned long long LeadOut = 2500000;
+   const static unsigned long long LeadOut = 1500000;
+   const static unsigned long long NoteWindowLength = 320000;
 
    if (!m_state.midi) return;
 
    m_state.midi->Reset(LeadIn, LeadOut);
+
    m_notes = m_state.midi->Notes();
+   m_user_note_windows = CalculateNoteWindows(NoteWindowLength);
 
    unsigned long long additional_time = m_state.midi->GetFirstNoteMicroseconds();
    additional_time -= LeadIn;
    Play(additional_time);
+
+   m_state.stats = SongStatistics();
+   m_state.stats.total_note_count = static_cast<int>(m_notes.size());
+   m_state.stats.notes_user_actually_played = static_cast<int>(m_user_note_windows.size());
+
+   m_current_combo = 0;
 }
 
 PlayingState::PlayingState(const SharedState &state)
@@ -105,7 +139,7 @@ void PlayingState::Play(unsigned long long delta_microseconds)
       case ModePlayedAutomatically: draw = true;   play = true;   break;
       }
 
-      if (draw && ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff)
+      if (draw && (ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff))
       {
          int vel = ev.NoteVelocity();
          const string name = MidiEvent::NoteName(ev.NoteNumber());
@@ -114,6 +148,63 @@ void PlayingState::Play(unsigned long long delta_microseconds)
       }
 
       if (play && m_state.midi_out) m_state.midi_out->Write(ev);
+   }
+}
+
+double PlayingState::CalculateScoreMultiplier() const
+{
+   const static double MaxMultiplier = 5.0;
+   double multiplier = 1.0;
+
+   const double combo_addition = m_current_combo / 10.0;
+   multiplier += combo_addition;
+
+   return min(MaxMultiplier, multiplier);
+}
+
+void PlayingState::Listen()
+{
+   while (m_state.midi_in->KeepReading())
+   {
+      unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
+      MidiEvent ev = m_state.midi_in->Read();
+
+      // We're only interested in NoteOn and NoteOff
+      if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff) continue;
+      string note_name = MidiEvent::NoteName(ev.NoteNumber());
+
+      // If this was a key-release, we don't have to do much
+      if (ev.Type() == MidiEventType_NoteOff || ev.NoteVelocity() == 0)
+      {
+         m_keyboard->SetKeyActive(note_name, false, FlatGray);
+         continue;
+      }
+
+      bool any_found = false;
+      TranslatedNoteSet::iterator i = m_user_note_windows.begin();
+      while (i != m_user_note_windows.end())
+      {
+         if (i->start > cur_time) break;
+
+         TranslatedNoteSet::iterator check = i++;
+         if (check->start < cur_time && check->end > cur_time && check->note_id == ev.NoteNumber())
+         {
+            any_found = true;
+            m_keyboard->SetKeyActive(note_name, true, m_state.track_properties[check->track_id].color);
+
+            // Adjust our statistics
+            const static double NoteValue = 10.0;
+            m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
+
+            m_state.stats.notes_user_actually_played++;
+            m_current_combo++;
+            m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
+
+            m_user_note_windows.erase(check);
+         }
+      }
+
+      if (!any_found) m_keyboard->SetKeyActive(note_name, true, FlatGray);
    }
 }
 
@@ -134,19 +225,37 @@ void PlayingState::Update()
    if (!m_first_update)
    {
       Play(delta_microseconds);
+      Listen();
    }
    m_first_update = false;
 
 
-   // Delete notes that are finished playing
    unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
-   for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); )
-   {
-      TranslatedNoteSet::iterator next = i;
-      ++next;
 
-      if (i->end < cur_time) m_notes.erase(i);
-      i = next;
+   // Delete notes that are finished playing
+   TranslatedNoteSet::iterator i = m_notes.begin();
+   while (i != m_notes.end())
+   {
+      if (i->start > cur_time) break;
+
+      TranslatedNoteSet::iterator pending_delete = i++;
+      if (pending_delete->end < cur_time) m_notes.erase(pending_delete);
+   }
+
+   // Remove missed opportunities
+   i = m_user_note_windows.begin();
+   while (i != m_user_note_windows.end())
+   {
+      if (i->start > cur_time) break;
+
+      TranslatedNoteSet::iterator pending_delete = i++;
+      if (pending_delete->end < cur_time)
+      {
+         m_user_note_windows.erase(pending_delete);
+
+         // They missed a note, reset the combo counter
+         m_current_combo = 0;
+      }
    }
 
    if (IsKeyPressed(KeyUp))
@@ -207,7 +316,7 @@ void PlayingState::Draw(HDC hdc) const
    unsigned int tot_sec = static_cast<unsigned int>((tot_seconds/10) % 60);
    unsigned int tot_ten = static_cast<unsigned int>( tot_seconds%10      );
    const wstring total_time = WSTRING(tot_min << L":" << setfill(L'0') << setw(2) << tot_sec << L"." << tot_ten);
-   
+
    unsigned int cur_min = static_cast<unsigned int>((cur_seconds/10) / 60);
    unsigned int cur_sec = static_cast<unsigned int>((cur_seconds/10) % 60);
    unsigned int cur_ten = static_cast<unsigned int>( cur_seconds%10      );
@@ -219,8 +328,10 @@ void PlayingState::Draw(HDC hdc) const
    stats1 << Text(L"Time: ", Gray) << current_time << L" / " << total_time << percent_complete << newline;
    stats1 << Text(L"Speed: ", Gray) << m_playback_speed << L"%" << newline;
 
-   TextWriter stats2(Layout::ScreenMarginX + 220, small_text_y, hdc, false, Layout::SmallFontSize);
-   stats2 << Text(L"Events: ", Gray) << m_state.midi->AggregateEventCount() - m_state.midi->AggregateEventsRemain() << L" / " << m_state.midi->AggregateEventCount() << newline;
-   stats2 << Text(L"Notes: ", Gray) << m_state.midi->AggregateNoteCount() - m_state.midi->AggregateNotesRemain() << L" / " << m_state.midi->AggregateNoteCount() << newline;
+   wstring multiplier_text = WSTRING( L"  x" << fixed << setprecision(1) << CalculateScoreMultiplier());
+
+   TextWriter stats2(Layout::ScreenMarginX + 220, small_text_y, hdc, false, Layout::TitleFontSize);
+   stats2 << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
+      << Text(multiplier_text, CheatYellow) << newline;
 }
 

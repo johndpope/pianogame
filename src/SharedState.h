@@ -13,6 +13,20 @@ class Midi;
 class MidiCommOut;
 class MidiCommIn;
 
+struct SongStatistics
+{
+   SongStatistics() : total_note_count(0), notes_user_could_have_played(0),
+      notes_user_actually_played(0), longest_combo(0), score(0) { }
+
+   int total_note_count;
+   int notes_user_could_have_played;
+   int notes_user_actually_played;
+
+   int longest_combo;
+   double score;
+
+};
+
 struct SharedState
 {
    SharedState(const std::wstring &title)
@@ -22,6 +36,8 @@ struct SharedState
    Midi *midi;
    MidiCommOut *midi_out;
    MidiCommIn *midi_in;
+
+   SongStatistics stats;
 
    std::vector<TrackProperties> track_properties;
    const std::wstring song_title;
