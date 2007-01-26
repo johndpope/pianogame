@@ -10,6 +10,7 @@
 #include "MenuLayout.h"
 #include "TrackProperties.h"
 #include "DeviceTile.h"
+#include "StringTile.h"
 #include <vector>
 
 class Midi;
@@ -21,7 +22,8 @@ public:
    // You can pass 0 in for state.midi_out to have the title
    // screen pick a device for you.
    TitleState(const SharedState &state)
-      : m_state(state), m_output_tile(0,0,DeviceTileOutput,0), m_input_tile(0,0,DeviceTileInput,0)
+      : m_state(state), m_output_tile(0,0,DeviceTileOutput,0), m_input_tile(0,0,DeviceTileInput,0),
+        m_file_tile(0,0), m_skip_next_mouse_up(false)
    { }
 
 protected:
@@ -41,6 +43,9 @@ private:
 
    DeviceTile m_output_tile;
    DeviceTile m_input_tile;
+
+   bool m_skip_next_mouse_up;
+   StringTile m_file_tile;
 };
 
 #endif

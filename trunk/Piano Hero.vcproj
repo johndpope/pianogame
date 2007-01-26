@@ -184,6 +184,14 @@
 			Name="Main"
 			>
 			<File
+				RelativePath=".\src\file_selector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\file_selector.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GameState.cpp"
 				>
 			</File>
@@ -300,6 +308,14 @@
 				</File>
 				<File
 					RelativePath=".\src\SharedState.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\StringTile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\StringTile.h"
 					>
 				</File>
 				<File

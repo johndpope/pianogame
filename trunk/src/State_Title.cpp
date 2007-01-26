@@ -10,6 +10,7 @@
 #include "MenuLayout.h"
 #include "Image.h"
 #include "registry.h"
+#include "file_selector.h"
 
 #include "libmidi\Midi.h"
 #include "libmidi\MidiUtil.h"
@@ -99,24 +100,91 @@ void TitleState::Init()
       m_state.midi_in->Reset();
    }
 
-   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 320, DeviceTileOutput, output_device_id);
-   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileInput,  input_device_id);
+   m_file_tile = StringTile((GetStateWidth() - StringTileWidth) / 2, 320);
+   m_file_tile.SetTitle(L"Song:");
+   m_file_tile.SetString(m_state.song_title);
+
+   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileOutput, output_device_id);
+   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 520, DeviceTileInput,  input_device_id);
+
 }
 
 void TitleState::Update()
 {
-   m_continue_button.Update(MouseInfo(Mouse()));
-   m_back_button.Update(MouseInfo(Mouse()));
+   MouseInfo mouse = Mouse();
+   
+   if (m_skip_next_mouse_up)
+   {
+      mouse.released.left = false;
+      m_skip_next_mouse_up = false;
+   }
 
-   MouseInfo output_mouse = MouseInfo(Mouse());
+   m_continue_button.Update(mouse);
+   m_back_button.Update(mouse);
+
+   MouseInfo output_mouse(mouse);
    output_mouse.x -= m_output_tile.GetX();
    output_mouse.y -= m_output_tile.GetY();
    m_output_tile.Update(output_mouse);
 
-   MouseInfo input_mouse = MouseInfo(Mouse());
+   MouseInfo input_mouse(mouse);
    input_mouse.x -= m_input_tile.GetX();
    input_mouse.y -= m_input_tile.GetY();
    m_input_tile.Update(input_mouse);
+
+   MouseInfo file_mouse(mouse);
+   file_mouse.x -= m_file_tile.GetX();
+   file_mouse.y -= m_file_tile.GetY();
+   m_file_tile.Update(file_mouse);
+
+   // Check to see for clicks on the file box
+   if (m_file_tile.Hit())
+   {
+      m_skip_next_mouse_up = true;
+
+      if (m_state.midi_out)
+      {
+         m_state.midi_out->Reset();
+         m_output_tile.TurnOffPreview();
+      }
+
+      Midi *new_midi = 0;
+
+      std::wstring filename;
+      std::wstring file_title;
+      RequestMidiFilename(&filename, &file_title);
+
+      if (filename != L"")
+      {
+         try
+         {
+            new_midi = new Midi(Midi::ReadFromFile(filename));
+         }
+         catch (const MidiError &e)
+         {
+            const static wstring friendly_app_name = WSTRING(L"Piano Hero " << PianoHeroVersionString);
+            
+            wstring wrapped_description = WSTRING(L"Problem while loading file: " << file_title << L"\n") + e.GetErrorDescription();
+            MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
+
+            new_midi = 0;
+         }
+
+         if (new_midi)
+         {
+            SharedState new_state;
+            new_state.midi = new_midi;
+            new_state.midi_in = m_state.midi_in;
+            new_state.midi_out = m_state.midi_out;
+            new_state.song_title = TrimFilename(filename);
+
+            delete m_state.midi;
+            m_state = new_state;
+
+            m_file_tile.SetString(m_state.song_title);
+         }
+      }
+   }
 
    // Check to see if we need to switch to a newly selected output device
    int output_id = m_output_tile.GetDeviceId();
@@ -222,6 +290,9 @@ void TitleState::Update()
       delete m_state.midi_in;
       m_state.midi_in = 0;
 
+      delete m_state.midi;
+      m_state.midi = 0;
+
       PostQuitMessage(0);
       return;
    }
@@ -272,8 +343,8 @@ void TitleState::Draw(HDC hdc) const
    Layout::DrawButton(hdc, m_back_button, L"Exit", 55);
 
    m_output_tile.Draw(hdc);
-
    m_input_tile.Draw(hdc);
+   m_file_tile.Draw(hdc);
 
    TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, hdc, false, Layout::TitleFontSize);
    Widen<wchar_t> w;
