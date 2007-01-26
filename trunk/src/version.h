@@ -13,7 +13,8 @@
 // 0.4.3 MIDI Input with note matching and scoring (early version by Luis Anton)
 // 0.4.4 Note miss effect
 // 0.4.5 Note hit effect
+// 0.4.6 Set reasonable synthesizer volume, restore on exit
 
-static const std::wstring PianoHeroVersionString = L"0.4.5";
+static const std::wstring PianoHeroVersionString = L"0.4.6";
 
 #endif

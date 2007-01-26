@@ -12,7 +12,8 @@
 
 #include "PianoHeroError.h"
 #include "KeyboardDisplay.h"
-#include "libmidi\Midi.h"
+#include "libmidi/Midi.h"
+#include "libmidi/MidiComm.h"
 
 #include "SharedState.h"
 #include "GameState.h"
@@ -178,6 +179,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       Registry reg(Registry::CurrentUser, L"Piano Hero");
       reg.Write(L"Last File", command_line);
 
+      MidiCommOut::SetReasonableSynthesizerVolume();
+
       ShowWindow (hwnd, iCmdShow);
       UpdateWindow (hwnd);
    
@@ -235,6 +238,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       }
 
       delete midi;
+
+      MidiCommOut::RestoreSynthesizerVolume();
 
       return int(msg.wParam);
    }

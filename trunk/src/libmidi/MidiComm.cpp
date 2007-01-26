@@ -196,3 +196,136 @@ void MidiCommOut::Reset()
 {
    midi_check(midiOutReset(m_output_device));
 }
+
+
+
+// The following Mixer routines are based off Chen Su's Audio Mixer Functions Demo
+// which can be found at: http://www.codeproject.com/audio/admixer.asp
+//
+// NOTE: This code only supports the first audio mixer.  If a system has more than
+// one sound card installed, these will only affect the "first" card.
+
+// TODO: This could use some cleanup.  A ReasonableSynthVolume object with interesting
+// constructor and destructor sounds like a great idea to be plopped down in main.cpp
+// just before the game.run() call.
+
+static LONG g_old_mute = 1;
+static DWORD g_old_volume = 0;
+
+static HMIXER g_mixer = 0;
+static DWORD g_mute_control_id = 0;
+static DWORD g_volume_control_id = 0;
+
+void MidiCommOut::SetReasonableSynthesizerVolume()
+{
+   int mixer_count = mixerGetNumDevs();
+   if (mixer_count == 0) return;
+
+   if (mixerOpen(&g_mixer, 0, 0, 0, MIXER_OBJECTF_MIXER) != MMSYSERR_NOERROR) return;
+
+   MIXERCAPS caps;
+   if (mixerGetDevCaps((UINT_PTR)g_mixer, &caps, sizeof(MIXERCAPS)) != MMSYSERR_NOERROR) return;
+
+   // Open the MIDI "line" of the mixer
+   MIXERLINE line;
+   line.cbStruct = sizeof(MIXERLINE);
+   line.dwComponentType = MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER;
+   if (mixerGetLineInfo(reinterpret_cast<HMIXEROBJ>(g_mixer), &line, MIXER_OBJECTF_HMIXER | MIXER_GETLINEINFOF_COMPONENTTYPE) != MMSYSERR_NOERROR) return;
+
+
+   MIXERLINECONTROLS list;
+   MIXERCONTROL control;
+   list.cbStruct = sizeof(MIXERLINECONTROLS);
+   list.dwLineID = line.dwLineID;
+   list.cControls = 1;
+   list.cbmxctrl = sizeof(MIXERCONTROL);
+   list.pamxctrl = &control;
+
+   // Record the "mute" control ID for the MIDI line
+   list.dwControlType = MIXERCONTROL_CONTROLTYPE_MUTE;
+   if (mixerGetLineControls(reinterpret_cast<HMIXEROBJ>(g_mixer), &list, MIXER_OBJECTF_HMIXER | MIXER_GETLINECONTROLSF_ONEBYTYPE) != MMSYSERR_NOERROR) return;
+   g_mute_control_id = control.dwControlID;
+
+   // Record the "volume" control ID for the MIDI line (as well as min/max volume settings)
+   list.dwControlType = MIXERCONTROL_CONTROLTYPE_VOLUME;
+   if (mixerGetLineControls(reinterpret_cast<HMIXEROBJ>(g_mixer), &list, MIXER_OBJECTF_HMIXER | MIXER_GETLINECONTROLSF_ONEBYTYPE) != MMSYSERR_NOERROR) return;
+   g_volume_control_id = control.dwControlID;
+   DWORD min_volume = control.Bounds.dwMinimum;
+   DWORD max_volume = control.Bounds.dwMaximum;
+
+
+   MIXERCONTROLDETAILS details;
+   details.cbStruct = sizeof(MIXERCONTROLDETAILS);
+   details.cChannels = 1;
+   details.cMultipleItems = 0;
+
+   // Record whether mute is on
+   MIXERCONTROLDETAILS_BOOLEAN muted_details;
+   details.dwControlID = g_mute_control_id;
+   details.cbDetails = sizeof(MIXERCONTROLDETAILS_BOOLEAN);
+   details.paDetails = &muted_details;
+   if (mixerGetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_GETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+   g_old_mute = muted_details.fValue;
+
+   // Always unmute if muted
+   if (g_old_mute == TRUE)
+   {
+      muted_details.fValue = FALSE;
+      if (mixerSetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_SETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+   }
+
+   // Record current volume
+   MIXERCONTROLDETAILS_UNSIGNED volume_details;
+   details.dwControlID = g_volume_control_id;
+   details.cbDetails = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
+   details.paDetails = &volume_details;
+   if (mixerGetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_GETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+   g_old_volume = volume_details.dwValue;
+
+   // Decide whether we should increase the volume
+   if (max_volume == min_volume) return;
+   double volume_percent = (1.0 * g_old_volume - min_volume) / (1.0 * max_volume - min_volume);
+
+   const static double LowVolumePercent = 0.33;
+   const static double ComfortableVolumePercent = 0.75;
+   if (volume_percent < LowVolumePercent)
+   {
+      DWORD comfortable_volume = static_cast<DWORD>(ComfortableVolumePercent * (max_volume - min_volume)) + min_volume;
+
+      volume_details.dwValue = comfortable_volume;
+      if (mixerSetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_SETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+   }
+}
+
+void MidiCommOut::RestoreSynthesizerVolume()
+{
+   MIXERCONTROLDETAILS details;
+   details.cbStruct = sizeof(MIXERCONTROLDETAILS);
+   details.cChannels = 1;
+   details.cMultipleItems = 0;
+
+
+   // Restore Mute
+   MIXERCONTROLDETAILS_BOOLEAN muted_details;
+   details.dwControlID = g_mute_control_id;
+   details.cbDetails = sizeof(MIXERCONTROLDETAILS_BOOLEAN);
+   details.paDetails = &muted_details;
+
+   muted_details.fValue = g_old_mute;
+   if (mixerSetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_SETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+
+
+   // Restore Volume
+   MIXERCONTROLDETAILS_UNSIGNED volume_details;
+   details.dwControlID = g_volume_control_id;
+   details.cbDetails = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
+   details.paDetails = &volume_details;
+
+   volume_details.dwValue = g_old_volume;
+   if (mixerSetControlDetails(reinterpret_cast<HMIXEROBJ>(g_mixer), &details, MIXER_OBJECTF_HMIXER | MIXER_SETCONTROLDETAILSF_VALUE) != MMSYSERR_NOERROR) return;
+
+
+   mixerClose(g_mixer);
+}
+
+
