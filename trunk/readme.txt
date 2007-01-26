@@ -22,6 +22,8 @@ Release 0.5.0
 - MIDI input with note matching and scoring (early version by Luis Anton)
 - Note hit/miss effects
 - If muted, temporarily unmute the selected MIDI device during gameplay
+- Level progress bar along top of game play screen
+- In-game new file dialog
 - Song finish screen with score, rating, and statistics
 
 Release 0.4.0

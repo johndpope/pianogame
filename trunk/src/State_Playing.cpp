@@ -57,12 +57,21 @@ void PlayingState::ResetSong()
 }
 
 PlayingState::PlayingState(const SharedState &state)
-   : m_state(state), m_keyboard(0), m_first_update(true), m_paused(false)
+   : m_state(state), m_keyboard(0), m_first_update(true), m_paused(false), m_any_you_play_tracks(false)
 { }
 
 void PlayingState::Init()
 {
    if (!m_state.midi) throw GameStateError("PlayingState: Init was passed a null MIDI!");
+
+   for (size_t i = 0; i < m_state.track_properties.size(); ++i)
+   {
+      if (m_state.track_properties[i].mode == ModeYouPlay)
+      {
+         m_any_you_play_tracks = true;
+         break;
+      }
+   }
 
    m_playback_speed = 100;
 
@@ -147,6 +156,8 @@ double PlayingState::CalculateScoreMultiplier() const
 
 void PlayingState::Listen()
 {
+   if (!m_state.midi_in) return;
+
    while (m_state.midi_in->KeepReading())
    {
       unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
@@ -228,7 +239,7 @@ void PlayingState::Update()
 
       const unsigned long long window_end = note->start + (KeyboardDisplay::NoteWindowLength / 2);
 
-      if (note->state == UserPlayable && window_end <= cur_time)
+      if (m_state.midi_in && note->state == UserPlayable && window_end <= cur_time)
       {
          note->state = UserMissed;
       }
@@ -284,9 +295,16 @@ void PlayingState::Update()
       m_paused = !m_paused;
    }
 
-   if (IsKeyPressed(KeyEscape) || m_state.midi->GetSongPercentageComplete() >= 1.0)
+   if (IsKeyPressed(KeyEscape))
    {
       ChangeState(new TrackSelectionState(m_state));
+   }
+
+   if (m_state.midi->GetSongPercentageComplete() >= 1.0)
+   {
+      // TODO: Change to statistics screen instead, once it exists
+      if (m_state.midi_in && m_any_you_play_tracks) ChangeState(new TrackSelectionState(m_state));
+      else ChangeState(new TrackSelectionState(m_state);
    }
 }
 
@@ -330,15 +348,18 @@ void PlayingState::Draw(HDC hdc) const
    const wstring percent_complete = WSTRING(L" (" << completion << L"%)");
    */
 
-   int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
+   if (m_state.midi_in && m_any_you_play_tracks)
+   {
+      int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
 
-   wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier());
-   wstring speed_text = WSTRING(m_playback_speed << "%");
+      wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier());
+      wstring speed_text = WSTRING(m_playback_speed << "%");
 
-   TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::TitleFontSize);
-   score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
-      << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
-      << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
-      << newline;
+      TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::TitleFontSize);
+      score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
+         << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
+         << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
+         << newline;
+   }
 }
 

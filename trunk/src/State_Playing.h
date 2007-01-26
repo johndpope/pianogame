@@ -46,6 +46,8 @@ private:
    unsigned long long m_show_duration;
    TranslatedNoteSet m_notes;
 
+   bool m_any_you_play_tracks;
+
    bool m_first_update;
 
    SharedState m_state;
