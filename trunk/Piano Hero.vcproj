@@ -271,6 +271,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\State_Stats.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\State_Stats.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\State_Title.cpp"
 					>
 				</File>

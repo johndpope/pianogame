@@ -4,6 +4,7 @@
 
 #include "State_Playing.h"
 #include "State_TrackSelection.h"
+#include "State_Stats.h"
 #include "version.h"
 
 #include <string>
@@ -297,14 +298,22 @@ void PlayingState::Update()
 
    if (IsKeyPressed(KeyEscape))
    {
+      if (m_state.midi_out) m_state.midi_out->Reset();
+      if (m_state.midi_in) m_state.midi_in->Reset();
+
       ChangeState(new TrackSelectionState(m_state));
+      return;
    }
 
    if (m_state.midi->GetSongPercentageComplete() >= 1.0)
    {
-      // TODO: Change to statistics screen instead, once it exists
-      if (m_state.midi_in && m_any_you_play_tracks) ChangeState(new TrackSelectionState(m_state));
-      else ChangeState(new TrackSelectionState(m_state);
+      if (m_state.midi_out) m_state.midi_out->Reset();
+      if (m_state.midi_in) m_state.midi_in->Reset();
+
+      if (m_state.midi_in && m_any_you_play_tracks) ChangeState(new StatsState(m_state));
+      else ChangeState(new TrackSelectionState(m_state));
+
+      return;
    }
 }
 
