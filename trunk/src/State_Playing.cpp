@@ -285,12 +285,6 @@ void PlayingState::Update()
       if (m_playback_speed > 400) m_playback_speed = 400;
    }
 
-   if (IsKeyPressed(KeyEnter))
-   {
-      ResetSong();
-      m_keyboard->ResetActiveKeys();
-   }
-
    if (IsKeyPressed(KeySpace))
    {
       m_paused = !m_paused;
