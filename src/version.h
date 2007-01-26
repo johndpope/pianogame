@@ -14,7 +14,8 @@
 // 0.4.4 Note miss effect
 // 0.4.5 Note hit effect
 // 0.4.6 Set reasonable synthesizer volume, restore on exit
+// 0.4.7 Level progress bar across top of play screen
 
-static const std::wstring PianoHeroVersionString = L"0.4.6";
+static const std::wstring PianoHeroVersionString = L"0.4.7";
 
 #endif
