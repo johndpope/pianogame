@@ -12,7 +12,8 @@
 // 0.4.2 Input DeviceTile with preview (early version by Luis Anton)
 // 0.4.3 MIDI Input with note matching and scoring (early version by Luis Anton)
 // 0.4.4 Note miss effect
+// 0.4.5 Note hit effect
 
-static const std::wstring PianoHeroVersionString = L"0.4.4";
+static const std::wstring PianoHeroVersionString = L"0.4.5";
 
 #endif

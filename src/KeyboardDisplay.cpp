@@ -13,6 +13,7 @@ struct NoteBrush
 {
    HBRUSH white;
    HBRUSH black;
+   HBRUSH hit;
    HBRUSH outline;
 };
 
@@ -302,6 +303,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
    {
       brushes[i].white   = CreateSolidBrush(TrackColorNoteWhite[i]);
       brushes[i].black   = CreateSolidBrush(TrackColorNoteBlack[i]);
+      brushes[i].hit     = CreateSolidBrush(TrackColorNoteHit[i]);
       brushes[i].outline = CreateSolidBrush(TrackColorNoteBorder[i]);
    }
 
@@ -312,7 +314,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
       if (mode == ModePlayedButHidden) continue;
 
       const TrackColor color = track_properties[i->track_id].color;
-      const NoteBrush &brush_set = (i->state == UserMissed ? brushes[FlatGray] : brushes[color]);
+      const NoteBrush &brush_set = (i->state == UserMissed ? brushes[MissedNote] : brushes[color]);
 
       // This list is sorted by note start time.  The moment we encounter
       // a note scrolled off the window, we're done drawing
@@ -377,8 +379,8 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
       const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
       FillRect(hdc, &outline_rect, brush_set.outline);
 
-      HBRUSH note_brush = brush_set.white;
-      if (is_black) note_brush = brush_set.black;
+      HBRUSH note_brush = (i->state == UserHit ? brush_set.hit : brush_set.white);
+      if (is_black) note_brush = (i->state == UserHit ? brush_set.hit : brush_set.black);
       FillRect(hdc, &note_rect, note_brush);
    }
 
@@ -386,6 +388,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
    {
       DeleteObject(brushes[i].white);
       DeleteObject(brushes[i].black);
+      DeleteObject(brushes[i].hit);
       DeleteObject(brushes[i].outline);
    }
 }
