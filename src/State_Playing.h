@@ -31,7 +31,7 @@ protected:
 private:
 
    int CalcKeyboardHeight() const;
-   TranslatedNoteSet CalculateNoteWindows(const unsigned long long opportunity_length);
+   void SetupNoteState();
 
    void ResetSong();
    void Play(unsigned long long delta_microseconds);
@@ -45,7 +45,6 @@ private:
    KeyboardDisplay *m_keyboard;
    unsigned long long m_show_duration;
    TranslatedNoteSet m_notes;
-   TranslatedNoteSet m_user_note_windows;
 
    bool m_first_update;
 

@@ -21,28 +21,13 @@ using namespace std;
 
 #include "libmidi\MidiComm.h"
 
-TranslatedNoteSet PlayingState::CalculateNoteWindows(const unsigned long long opportunity_length)
+void PlayingState::SetupNoteState()
 {
-   TranslatedNoteSet windows;
-
-   const TranslatedNoteSet &notes = m_state.midi->Notes();
-   for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
+   for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i)
    {
-      const TranslatedNote &n = *i;
-      if (m_state.track_properties[n.track_id].mode == ModeYouPlay)
-      {
-         // Start with the actual note
-         TranslatedNote window = n;
-
-         // Adjust the start and end to fit just around the start of the actual note
-         window.start = n.start - (opportunity_length / 2);
-         window.end = n.start + (opportunity_length / 2);
-
-         windows.insert(window);
-      }
+      i->state = AutoPlayed;
+      if (m_state.track_properties[i->track_id].mode == ModeYouPlay) i->state = UserPlayable;
    }
-
-   return windows;
 }
 
 void PlayingState::ResetSong()
@@ -51,16 +36,15 @@ void PlayingState::ResetSong()
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
-   const static unsigned long long LeadIn = 6000000;
-   const static unsigned long long LeadOut = 1500000;
-   const static unsigned long long NoteWindowLength = 320000;
+   const static unsigned long long LeadIn = 5000000;
+   const static unsigned long long LeadOut = 1000000;
 
    if (!m_state.midi) return;
 
    m_state.midi->Reset(LeadIn, LeadOut);
 
    m_notes = m_state.midi->Notes();
-   m_user_note_windows = CalculateNoteWindows(NoteWindowLength);
+   SetupNoteState();
 
    unsigned long long additional_time = m_state.midi->GetFirstNoteMicroseconds();
    additional_time -= LeadIn;
@@ -68,7 +52,6 @@ void PlayingState::ResetSong()
 
    m_state.stats = SongStatistics();
    m_state.stats.total_note_count = static_cast<int>(m_notes.size());
-   m_state.stats.notes_user_actually_played = static_cast<int>(m_user_note_windows.size());
 
    m_current_combo = 0;
 }
@@ -181,26 +164,31 @@ void PlayingState::Listen()
       }
 
       bool any_found = false;
-      TranslatedNoteSet::iterator i = m_user_note_windows.begin();
-      while (i != m_user_note_windows.end())
+      for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i)
       {
-         if (i->start > cur_time) break;
+         const unsigned long long window_start = i->start - (KeyboardDisplay::NoteWindowLength / 2);
+         const unsigned long long window_end = i->start + (KeyboardDisplay::NoteWindowLength / 2);
 
-         TranslatedNoteSet::iterator check = i++;
-         if (check->start < cur_time && check->end > cur_time && check->note_id == ev.NoteNumber())
+         if (window_start > cur_time) break;
+
+         if (i->state != UserPlayable) continue;
+
+         if (window_end > cur_time && i->note_id == ev.NoteNumber())
          {
             any_found = true;
-            m_keyboard->SetKeyActive(note_name, true, m_state.track_properties[check->track_id].color);
+            m_keyboard->SetKeyActive(note_name, true, m_state.track_properties[i->track_id].color);
 
             // Adjust our statistics
             const static double NoteValue = 10.0;
             m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
 
+            m_state.stats.notes_user_could_have_played++;
             m_state.stats.notes_user_actually_played++;
             m_current_combo++;
             m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
 
-            m_user_note_windows.erase(check);
+            i->state = UserHit;
+            break;
          }
       }
 
@@ -232,29 +220,32 @@ void PlayingState::Update()
 
    unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
-   // Delete notes that are finished playing
+   // Check to see notes that Delete notes that are finished playing
    TranslatedNoteSet::iterator i = m_notes.begin();
    while (i != m_notes.end())
    {
-      if (i->start > cur_time) break;
+      TranslatedNoteSet::iterator note = i++;
 
-      TranslatedNoteSet::iterator pending_delete = i++;
-      if (pending_delete->end < cur_time) m_notes.erase(pending_delete);
-   }
+      const unsigned long long window_end = note->start + (KeyboardDisplay::NoteWindowLength / 2);
 
-   // Remove missed opportunities
-   i = m_user_note_windows.begin();
-   while (i != m_user_note_windows.end())
-   {
-      if (i->start > cur_time) break;
-
-      TranslatedNoteSet::iterator pending_delete = i++;
-      if (pending_delete->end < cur_time)
+      if (note->state == UserPlayable && window_end <= cur_time)
       {
-         m_user_note_windows.erase(pending_delete);
+         note->state = UserMissed;
+      }
 
-         // They missed a note, reset the combo counter
-         m_current_combo = 0;
+      if (note->start > cur_time) break;
+
+      if (note->end < cur_time && window_end < cur_time)
+      {
+         if (note->state == UserMissed)
+         {
+            // They missed a note, reset the combo counter
+            m_current_combo = 0;
+
+            m_state.stats.notes_user_could_have_played++;
+         }
+
+         m_notes.erase(note);
       }
    }
 

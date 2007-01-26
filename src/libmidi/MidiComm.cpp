@@ -69,11 +69,11 @@ MidiCommIn::MidiCommIn(unsigned int device_id)
 
 MidiCommIn::~MidiCommIn()
 {
-   DeleteCriticalSection(&m_buffer_mutex);
-
    midi_check(midiInStop(m_input_device));
    midi_check(midiInReset(m_input_device));
    midi_check(midiInClose(m_input_device));
+
+   DeleteCriticalSection(&m_buffer_mutex);
 }
 
 // This is only called by the callback function.  The reason this

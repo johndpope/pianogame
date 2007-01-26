@@ -13,6 +13,14 @@ typedef unsigned int NoteId;
 // Arbitrary value outside the usual range
 const static NoteId InvalidNoteId = 2048;
 
+enum NoteState
+{
+   AutoPlayed,
+   UserPlayable,
+   UserHit,
+   UserMissed
+};
+
 template <class T>
 struct GenericNote
 {
@@ -32,6 +40,8 @@ struct GenericNote
    T end;
    NoteId note_id;
    size_t track_id;
+
+   NoteState state;
 };
 
 // Note keeps the internal pulses found in the MIDI file which are
