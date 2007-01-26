@@ -94,7 +94,7 @@ int PlayingState::CalcKeyboardHeight() const
    height -= Layout::ScreenMarginY;
 
    // Allow another couple lines of text below the HR
-   height -= Layout::ButtonFontSize * 4;
+   height -= Layout::ButtonFontSize * 5;
 
    return height;
 }
@@ -295,6 +295,19 @@ void PlayingState::Draw(HDC hdc) const
    m_keyboard->Draw(hdc, Layout::ScreenMarginX, GetStateHeight() - CalcKeyboardHeight(), m_notes,
       m_show_duration, m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
+   // Draw a song progress bar along the top of the screen
+   HBRUSH pb_brush = CreateSolidBrush(RGB(0x50,0x50,0x50));
+
+   const int pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
+   const int pb_x = Layout::ScreenMarginX;
+   const int pb_y = GetStateHeight() - CalcKeyboardHeight() - 20;
+
+   RECT pb = { pb_x, pb_y, pb_x + pb_width, pb_y + 16 };
+   FillRect(hdc, &pb, pb_brush);
+
+   DeleteObject(pb_brush);
+
+
    Layout::DrawTitle(hdc, m_state.song_title);
    Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
 
@@ -319,7 +332,7 @@ void PlayingState::Draw(HDC hdc) const
    stats1 << Text(L"Time: ", Gray) << current_time << L" / " << total_time << percent_complete << newline;
    stats1 << Text(L"Speed: ", Gray) << m_playback_speed << L"%" << newline;
 
-   wstring multiplier_text = WSTRING( L"  x" << fixed << setprecision(1) << CalculateScoreMultiplier());
+   wstring multiplier_text = WSTRING( L"   x" << fixed << setprecision(1) << CalculateScoreMultiplier());
 
    TextWriter stats2(Layout::ScreenMarginX + 220, small_text_y, hdc, false, Layout::TitleFontSize);
    stats2 << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
