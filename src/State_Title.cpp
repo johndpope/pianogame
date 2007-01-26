@@ -361,8 +361,7 @@ void TitleState::Draw(HDC hdc) const
       << Text(L"down", Highlight) << Text(L" arrow keys change your view. ", Gray)
       << Text(L"Left", Highlight) << Text(L" and ", Gray) << Text(L"right", Highlight)
       << Text(L" change the song's speed.", Gray) << newline
-      << Text(L"Space", Highlight) << Text(L" pauses.  ", Gray) << Text(L"Enter", Highlight)
-      << Text(L" will restart the song.  ", Gray)
+      << Text(L"Space", Highlight) << Text(L" pauses.  ", Gray)
       << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline;
 
 }
