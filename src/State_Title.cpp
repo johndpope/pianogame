@@ -84,7 +84,7 @@ void TitleState::Init()
       // completely acceptable.
    }
 
-   int output_device_id = 0;
+   int output_device_id = -1;
    if (last_output_device == OutputKeySpecialDisabled) output_device_id = -1;
 
    if (m_state.midi_out)
