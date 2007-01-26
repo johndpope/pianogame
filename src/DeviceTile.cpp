@@ -4,6 +4,7 @@
 
 #include "DeviceTile.h"
 #include "Image.h"
+#include "TextWriter.h"
 
 #include "libmidi\Midi.h"
 #include "libmidi\MidiComm.h"

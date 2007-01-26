@@ -3,12 +3,11 @@
 // See license.txt for license information
 
 #include <windows.h>
-#include "registry.h"
 
 #include <set>
 #include <string>
-#include <strsafe.h>
 #include "string_util.h"
+#include "file_selector.h"
 
 #include "PianoHeroError.h"
 #include "KeyboardDisplay.h"
@@ -30,6 +29,8 @@ static const int WindowHeight = GetSystemMetrics(SM_CYSCREEN);
 GameStateManager state_manager(WindowWidth, WindowHeight);
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+HWND g_hwnd;
 
 int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
@@ -98,6 +99,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
          WS_POPUP, 0, 0, WindowWidth, WindowHeight, 0, 0, instance, 0);
 
+      g_hwnd = hwnd;
+
       Midi *midi = 0;
 
       // Attempt to open the midi file given on the command line first
@@ -121,47 +124,20 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       // simply was no command line filename, use a "file open" dialog.
       if (command_line == L"")
       {
-         // Grab the filename of the last song we played from the
-         // registry and pre-load that filename in the open dialog
-         const static int BufferSize = 512;
-         wchar_t filename[BufferSize] = L"";
-         wchar_t filetitle[BufferSize] = L"";
-
-         wstring last_filename;
-         Registry reg(Registry::CurrentUser, L"Piano Hero");
-         reg.Read(L"Last File", &last_filename, L"");
-
-         if (StringCbCopyW(filename, BufferSize, last_filename.c_str()) == STRSAFE_E_INSUFFICIENT_BUFFER)
-         {
-            filename[0] = L'\0';
-         }
-
-         OPENFILENAME ofn;
-         ZeroMemory(&ofn, sizeof(OPENFILENAME));
-         ofn.lStructSize =    sizeof(OPENFILENAME);
-         ofn.hwndOwner =      hwnd;
-         ofn.lpstrTitle =     L"Piano Hero: Choose a song to play";
-         ofn.lpstrFilter =    L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
-         ofn.lpstrFile =      filename;
-         ofn.nMaxFile =       BufferSize;
-         ofn.lpstrFileTitle = filetitle;
-         ofn.nMaxFileTitle =  BufferSize;
-         ofn.lpstrDefExt =    L"mid";
-         ofn.Flags =          OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-
          while (!midi)
          {
-            if (GetOpenFileName(&ofn))
-            {
-               command_line = WSTRING(ofn.lpstrFile);
+            std::wstring file_title;
+            RequestMidiFilename(&command_line, &file_title);
 
+            if (command_line != L"")
+            {
                try
                {
                   midi = new Midi(Midi::ReadFromFile(command_line));
                }
                catch (const MidiError &e)
                {
-                  wstring wrapped_description = WSTRING(L"Problem while loading file: " << filetitle << L"\n") + e.GetErrorDescription();
+                  wstring wrapped_description = WSTRING(L"Problem while loading file: " << file_title << L"\n") + e.GetErrorDescription();
                   MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
 
                   midi = 0;
@@ -176,8 +152,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
       // Save this filename for next time so we can
       // seek the "Open" dialog to the right folder.
-      Registry reg(Registry::CurrentUser, L"Piano Hero");
-      reg.Write(L"Last File", command_line);
+      SetLastMidiFilename(command_line);
 
       MidiCommOut::SetReasonableSynthesizerVolume();
 
@@ -186,35 +161,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
    
       Image::SetGlobalModuleInstance(instance);
 
-      // Trim down the filename for display purposes
-      wstring song_title = command_line;
-      wstring song_lower = StringLower(song_title);
-
-      // Strip off known file extensions
-      set<wstring> extensions;
-      extensions.insert(L".mid");
-      extensions.insert(L".midi");
-      for (set<wstring>::const_iterator i = extensions.begin(); i != extensions.end(); ++i)
-      {
-         wstring extension = StringLower(*i);
-         wstring::size_type len = extension.length();
-
-         wstring song_end = song_lower.substr(max(0, song_lower.length() - len), song_lower.length());
-         if (song_end == extension) song_title = song_title.substr(0, song_title.length() - len);
-         song_lower = StringLower(song_title);
-      }
-
-      // Strip off path
-      for (wstring::size_type i = song_title.length(); i != 0; --i)
-      {
-         if (song_title[i-1] == L'\\')
-         {
-            song_title = song_title.substr(i, song_title.length());
-            break;
-         }
-      }
-
-      SharedState state(song_title);
+      SharedState state;
+      state.song_title = TrimFilename(command_line);
       state.midi = midi;
 
       state_manager.SetInitialState(new TitleState(state));
@@ -236,8 +184,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
             state_manager.Update();
          }
       }
-
-      delete midi;
 
       MidiCommOut::RestoreSynthesizerVolume();
 

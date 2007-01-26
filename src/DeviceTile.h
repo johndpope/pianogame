@@ -6,7 +6,6 @@
 #define __DEVICE_TILE_H
 
 #include "GameState.h"
-#include "TextWriter.h"
 #include "MenuLayout.h"
 #include "TrackTile.h"
 #include <vector>
