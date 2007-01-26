@@ -30,6 +30,7 @@ GameStateManager state_manager(WindowWidth, WindowHeight);
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+// TODO: Make this better
 HWND g_hwnd;
 
 int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)

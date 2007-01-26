@@ -17,7 +17,8 @@
 // 0.4.7 Level progress bar across top of play screen
 // 0.4.8 In-game new file dialog
 // 0.4.9 Don't bother with score/stats if no midi input or no "You Play" tracks
+// 0.5.0 Song Finish Screen with score, rating, and statistics
 
-static const std::wstring PianoHeroVersionString = L"0.4.9";
+static const std::wstring PianoHeroVersionString = L"0.5.0";
 
 #endif
