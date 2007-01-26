@@ -321,6 +321,8 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
       const long long adjusted_start = max(max(current_time,                 i->start) - current_time, 0);
       const long long adjusted_end   = max(min(current_time + show_duration, i->end)   - current_time, 0);
 
+      if (adjusted_end < adjusted_start) continue;
+
       const double scaling_factor = static_cast<double>(y_offset) / static_cast<double>(show_duration);
 
       // Convert our times to pixel coordinates

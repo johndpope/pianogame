@@ -68,7 +68,7 @@ void PlayingState::Init()
 
    // This many microseconds of the song will
    // be shown on the screen at once
-   const static unsigned long long DefaultShowDurationMicroseconds = 5000000;
+   const static unsigned long long DefaultShowDurationMicroseconds = 4000000;
    m_show_duration = DefaultShowDurationMicroseconds;
 
    m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - 2*Layout::ScreenMarginX, CalcKeyboardHeight());

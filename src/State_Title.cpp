@@ -99,8 +99,8 @@ void TitleState::Init()
       m_state.midi_in->Reset();
    }
 
-   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileOutput, output_device_id);
-   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 520, DeviceTileInput,  input_device_id);
+   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 320, DeviceTileOutput, output_device_id);
+   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileInput,  input_device_id);
 }
 
 void TitleState::Update()
@@ -275,7 +275,7 @@ void TitleState::Draw(HDC hdc) const
 
    m_input_tile.Draw(hdc);
 
-   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY(), hdc, false, Layout::SmallFontSize);
+   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, hdc, false, Layout::TitleFontSize);
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
@@ -292,13 +292,6 @@ void TitleState::Draw(HDC hdc) const
       << Text(L" change the song's speed.", Gray) << newline
       << Text(L"Space", Highlight) << Text(L" pauses.  ", Gray) << Text(L"Enter", Highlight)
       << Text(L" will restart the song.  ", Gray)
-      << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline
-
-      << newline << newline
-
-      << Text(L"State Of The Code", Title) << newline
-      << Text(L"MIDI input isn't there yet.  For now, just set a track or two to ", Gray)
-      << Text(L"You Play", Highlight) << Text(L" and follow along", Gray) << newline
-      << Text(L"on your own piano.", Gray) << newline;
+      << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline;
 
 }
