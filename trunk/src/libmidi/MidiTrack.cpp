@@ -144,9 +144,10 @@ void MidiTrack::DiscoverInstrument()
    m_instrument_id = 0;
    bool instrument_found = false;
 
-   // This is actually 10 in the MIDI standard.  However, MIDI channels
-   // are 1-based facing the user.  They're stored 0-based.
-   const static int PercussionChannel = 9;
+   // These are actually 10 and 16 in the MIDI standard.  However, MIDI
+   // channels are 1-based facing the user.  They're stored 0-based.
+   const static int PercussionChannel1 = 9;
+   const static int PercussionChannel2 = 15;
 
    // Check to see if any/all of the notes
    // in this track use Channel 10.
@@ -158,8 +159,8 @@ void MidiTrack::DiscoverInstrument()
       const MidiEvent &ev = m_events[i];
       if (ev.Type() != MidiEventType_NoteOn) continue;
 
-      if (ev.Channel() == PercussionChannel) any_note_uses_percussion = true;
-      if (ev.Channel() != PercussionChannel) any_note_does_not_use_percussion = true;
+      if (ev.Channel() == PercussionChannel1 || ev.Channel() == PercussionChannel2) any_note_uses_percussion = true;
+      if (ev.Channel() != PercussionChannel1 && ev.Channel() != PercussionChannel2) any_note_does_not_use_percussion = true;
    }
 
    if (any_note_uses_percussion && !any_note_does_not_use_percussion)
