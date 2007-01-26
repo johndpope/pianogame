@@ -311,6 +311,8 @@ void PlayingState::Draw(HDC hdc) const
    Layout::DrawTitle(hdc, m_state.song_title);
    Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
 
+   // Some old time formatting code
+   /*
    double non_zero_playback_speed = ( (m_playback_speed == 0) ? 0.1 : (m_playback_speed/100.0) );
    unsigned long long tot_seconds = static_cast<unsigned long long>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
    unsigned long long cur_seconds = static_cast<unsigned long long>((m_state.midi->GetSongPositionInMicroseconds() / 100000.0) / non_zero_playback_speed);
@@ -326,16 +328,17 @@ void PlayingState::Draw(HDC hdc) const
    unsigned int cur_ten = static_cast<unsigned int>( cur_seconds%10      );
    const wstring current_time = WSTRING(cur_min << L":" << setfill(L'0') << setw(2) << cur_sec << L"." << cur_ten);
    const wstring percent_complete = WSTRING(L" (" << completion << L"%)");
+   */
 
-   int small_text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
-   TextWriter stats1(Layout::ScreenMarginX, small_text_y, hdc, false, Layout::SmallFontSize);
-   stats1 << Text(L"Time: ", Gray) << current_time << L" / " << total_time << percent_complete << newline;
-   stats1 << Text(L"Speed: ", Gray) << m_playback_speed << L"%" << newline;
+   int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
 
-   wstring multiplier_text = WSTRING( L"   x" << fixed << setprecision(1) << CalculateScoreMultiplier());
+   wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier());
+   wstring speed_text = WSTRING(m_playback_speed << "%");
 
-   TextWriter stats2(Layout::ScreenMarginX + 220, small_text_y, hdc, false, Layout::TitleFontSize);
-   stats2 << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
-      << Text(multiplier_text, CheatYellow) << newline;
+   TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::TitleFontSize);
+   score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
+      << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
+      << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
+      << newline;
 }
 
