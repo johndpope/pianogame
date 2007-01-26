@@ -307,28 +307,25 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
 
    for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
    {
-      TrackMode mode = track_properties[i->track_id].mode;
+      const TrackMode mode = track_properties[i->track_id].mode;
       if (mode == ModeNotPlayed) continue;
       if (mode == ModePlayedButHidden) continue;
 
-      TrackColor color = track_properties[i->track_id].color;
-      const NoteBrush &brush_set = brushes[color];
+      const TrackColor color = track_properties[i->track_id].color;
+      const NoteBrush &brush_set = (i->state == UserMissed ? brushes[FlatGray] : brushes[color]);
 
       // This list is sorted by note start time.  The moment we encounter
       // a note scrolled off the window, we're done drawing
       if (i->start > current_time + show_duration) break;
 
-      unsigned long long adjusted_start = max(current_time, i->start) - current_time;
-      unsigned long long adjusted_end = min(current_time + show_duration, i->end) - current_time;
+      const long long adjusted_start = max(max(current_time,                 i->start) - current_time, 0);
+      const long long adjusted_end   = max(min(current_time + show_duration, i->end)   - current_time, 0);
 
-      bool hitting_bottom = (adjusted_start + current_time != i->start);
-      bool hitting_top    = (adjusted_end   + current_time != i->end);
-
-      double scaling_factor = static_cast<double>(y_offset) / static_cast<double>(show_duration);
+      const double scaling_factor = static_cast<double>(y_offset) / static_cast<double>(show_duration);
 
       // Convert our times to pixel coordinates
-      int y_end = y - static_cast<int>(adjusted_start * scaling_factor) + y_offset;
-      int y_start = y - static_cast<int>(adjusted_end * scaling_factor) + y_offset;
+      const int y_end   = y - static_cast<int>(adjusted_start * scaling_factor) + y_offset;
+      const int y_start = y - static_cast<int>(adjusted_end   * scaling_factor) + y_offset;
 
       // Shiny music domain knowledge
       const static unsigned int NotesPerOctave = 12;
@@ -368,13 +365,14 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
       // Force a note to be at least 1 pixel tall at all times
       // except when scrolling off underneath the keyboard and
       // coming in from the top of the screen.
+      const bool hitting_bottom = (adjusted_start + current_time != i->start);
+      const bool hitting_top    = (adjusted_end   + current_time != i->end);
       if (!hitting_bottom && !hitting_top)
       {
-         while (outline_rect.bottom - outline_rect.top < 3) outline_rect.bottom++;
+         while ( (outline_rect.bottom - outline_rect.top) < 3) outline_rect.bottom++;
       }
 
-      RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
-
+      const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
       FillRect(hdc, &outline_rect, brush_set.outline);
 
       HBRUSH note_brush = brush_set.white;

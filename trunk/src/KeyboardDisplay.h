@@ -28,6 +28,8 @@ struct TrackProperties;
 class KeyboardDisplay
 {
 public:
+   const static unsigned long long NoteWindowLength = 300000;
+
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
    void Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes,
