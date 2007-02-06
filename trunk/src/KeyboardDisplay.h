@@ -15,6 +15,8 @@
 
 enum KeyboardSize
 {
+   KeyboardSize37,
+   KeyboardSize49,
    KeyboardSize61,
    KeyboardSize76,
    KeyboardSize88

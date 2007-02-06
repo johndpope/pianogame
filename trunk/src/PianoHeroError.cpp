@@ -11,7 +11,7 @@ std::wstring PianoHeroError::GetErrorDescription() const
 {
    switch (m_error)
    {
-   case Error_BadPianoType:                return L"Bad piano type specified. (Piano code isn't 61, 76, or 88 key.)";
+   case Error_BadPianoType:                return L"Bad piano type specified.";
    case Error_BadGameState:                return L"Internal Error: Piano Hero entered bad game state!";
 
    default:                                return WSTRING(L"Unknown PianoHeroError Code (" << m_error << L").");
