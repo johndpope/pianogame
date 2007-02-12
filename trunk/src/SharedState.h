@@ -16,11 +16,15 @@ class MidiCommIn;
 struct SongStatistics
 {
    SongStatistics() : total_note_count(0), notes_user_could_have_played(0),
-      notes_user_actually_played(0), longest_combo(0), score(0) { }
+      notes_user_actually_played(0), stray_notes(0), total_notes_user_pressed(0),
+      longest_combo(0), score(0) { }
 
    int total_note_count;
    int notes_user_could_have_played;
    int notes_user_actually_played;
+
+   int stray_notes;
+   int total_notes_user_pressed;
 
    int longest_combo;
    double score;

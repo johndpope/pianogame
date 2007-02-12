@@ -7,18 +7,7 @@
 
 #include <string>
 
-// 0.4.0 Initial Release
-// 0.4.1 Klavarskribo staff notation (thanks to Troy Ramos for the suggestion!)
-// 0.4.2 Input DeviceTile with preview (early version by Luis Anton)
-// 0.4.3 MIDI Input with note matching and scoring (early version by Luis Anton)
-// 0.4.4 Note miss effect
-// 0.4.5 Note hit effect
-// 0.4.6 Set reasonable synthesizer volume, restore on exit
-// 0.4.7 Level progress bar across top of play screen
-// 0.4.8 In-game new file dialog
-// 0.4.9 Don't bother with score/stats if no midi input or no "You Play" tracks
-// 0.5.0 Song Finish Screen with score, rating, and statistics
-
+// See readme.txt for a list of what has changed between versions
 static const std::wstring PianoHeroVersionString = L"0.5.0";
 
 #endif

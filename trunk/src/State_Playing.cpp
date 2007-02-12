@@ -207,7 +207,14 @@ void PlayingState::Listen()
          }
       }
 
-      if (!any_found) m_keyboard->SetKeyActive(note_name, true, FlatGray);
+      m_state.stats.total_notes_user_pressed++;
+
+      if (!any_found)
+      {
+         m_state.stats.stray_notes++;
+
+         m_keyboard->SetKeyActive(note_name, true, FlatGray);
+      }
    }
 }
 
