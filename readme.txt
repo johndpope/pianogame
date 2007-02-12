@@ -16,6 +16,11 @@ See http://tinyxml.sourceforge.net/ for more information.
 
 Changes
 
+Releaes 0.5.1
+- Disabled MIDI input while game is paused
+- Added "Stray Notes" metric to stats screen
+
+
 Release 0.5.0
 - Klavarskribo staff notation (thanks to Troy Ramos for the suggestion!)
 - MIDI input instrument selection (early version by Luis Anton)
@@ -25,6 +30,7 @@ Release 0.5.0
 - Level progress bar along top of game play screen
 - In-game new file dialog
 - Song finish screen with score, rating, and statistics
+
 
 Release 0.4.0
 - Initial Release
