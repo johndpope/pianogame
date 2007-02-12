@@ -164,6 +164,9 @@ void PlayingState::Listen()
       unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
       MidiEvent ev = m_state.midi_in->Read();
 
+      // Just eat input if we're paused
+      if (m_paused) continue;
+
       // We're only interested in NoteOn and NoteOff
       if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff) continue;
       string note_name = MidiEvent::NoteName(ev.NoteNumber());
@@ -232,7 +235,7 @@ void PlayingState::Update()
 
    unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
-   // Check to see notes that Delete notes that are finished playing
+   // Delete notes that are finished playing (and are no longer available to hit)
    TranslatedNoteSet::iterator i = m_notes.begin();
    while (i != m_notes.end())
    {
