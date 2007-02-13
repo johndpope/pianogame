@@ -34,6 +34,7 @@ void PlayingState::SetupNoteState()
 void PlayingState::ResetSong()
 {
    if (m_state.midi_out) m_state.midi_out->Reset();
+   if (m_state.midi_in) m_state.midi_in->Reset();
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
@@ -194,10 +195,12 @@ void PlayingState::Listen()
             m_keyboard->SetKeyActive(note_name, true, m_state.track_properties[i->track_id].color);
 
             // Adjust our statistics
-            const static double NoteValue = 10.0;
+            const static double NoteValue = 100.0;
             m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
 
             m_state.stats.notes_user_could_have_played++;
+            m_state.stats.speed_integral += m_playback_speed;
+
             m_state.stats.notes_user_actually_played++;
             m_current_combo++;
             m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
@@ -265,6 +268,7 @@ void PlayingState::Update()
             m_current_combo = 0;
 
             m_state.stats.notes_user_could_have_played++;
+            m_state.stats.speed_integral += m_playback_speed;
          }
 
          m_notes.erase(note);
