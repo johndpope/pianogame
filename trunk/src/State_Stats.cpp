@@ -86,6 +86,9 @@ void StatsState::Draw(HDC hdc) const
    int stray_percent = 0;
    if (s.total_notes_user_pressed > 0) stray_percent = static_cast<int>((100.0 * s.stray_notes) / s.total_notes_user_pressed);
 
+   int average_speed = 0;
+   if (s.notes_user_could_have_played > 0) average_speed = s.speed_integral / s.notes_user_could_have_played;
+
    TextWriter score(left, InstructionsY, hdc, false, Layout::TitleFontSize);
    score << Text(L"Song Statistics", Title) << newline
       << newline 
@@ -94,6 +97,7 @@ void StatsState::Draw(HDC hdc) const
       << newline
       << newline
       << Text(L"Score: ", Gray) << WSTRING(static_cast<int>(s.score)) << newline
+      << Text(L"Average Speed: ", Gray) << WSTRING(average_speed << L" %") << newline
       << newline
       << Text(L"Good Notes: ", Gray) << WSTRING(s.notes_user_actually_played) << Text(L" / ", Gray) << WSTRING(s.notes_user_could_have_played) << Text(WSTRING(L"  (" << static_cast<int>(hit_percent) << L" %" << L")"), Dk_Gray) << newline
       << Text(L"Stray Notes: ", Gray) << WSTRING(s.stray_notes) << Text(WSTRING(L"  (" << stray_percent << L" %" << L")"), Dk_Gray) << newline
