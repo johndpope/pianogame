@@ -27,6 +27,8 @@ Releaes 0.5.1
 - BUG: Made MidiCommOut::Reset() actually reset everything by fully closing and
        reopening the device.  midiOutReset() apparently only turns off the keys
        and pedals on each track.  It *doesn't* reset patches or volume.
+- CHG: ReasonableSynthVolume object replaces MidiCommOut::SetReasonableSynthVol
+       and now works for all mixers in the system instead of only the first.
 
 
 Release 0.5.0
