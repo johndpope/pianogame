@@ -12,7 +12,7 @@
 #include "PianoHeroError.h"
 #include "KeyboardDisplay.h"
 #include "libmidi/Midi.h"
-#include "libmidi/MidiComm.h"
+#include "libmidi/SynthVolume.h"
 
 #include "SharedState.h"
 #include "GameState.h"
@@ -155,7 +155,9 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       // seek the "Open" dialog to the right folder.
       SetLastMidiFilename(command_line);
 
-      MidiCommOut::SetReasonableSynthesizerVolume();
+      // This does what is necessary in construction and
+      // resets what it does during its destruction
+      ReasonableSynthVolume volume_correct;
 
       ShowWindow (hwnd, iCmdShow);
       UpdateWindow (hwnd);
@@ -185,8 +187,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
             state_manager.Update();
          }
       }
-
-      MidiCommOut::RestoreSynthesizerVolume();
 
       return int(msg.wParam);
    }

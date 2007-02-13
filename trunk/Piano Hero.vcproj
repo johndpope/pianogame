@@ -386,6 +386,14 @@
 					RelativePath=".\src\libmidi\Note.h"
 					>
 				</File>
+				<File
+					RelativePath=".\src\libmidi\SynthVolume.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\libmidi\SynthVolume.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
