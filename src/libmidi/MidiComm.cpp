@@ -195,6 +195,8 @@ void MidiCommOut::Write(const MidiEvent &out)
 void MidiCommOut::Reset()
 {
    midi_check(midiOutReset(m_output_device));
+   midi_check(midiOutClose(m_output_device));
+   midi_check(midiOutOpen(&m_output_device, m_description.id, 0, 0, CALLBACK_NULL));
 }
 
 

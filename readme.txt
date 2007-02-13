@@ -20,9 +20,13 @@ See http://www.gamemusicthemes.com/ for more high quality piano MIDI.
 Changes
 
 Releaes 0.5.1
+- NEW: "Stray Notes" metric on stats screen
+- NEW: "Average Speed" metric on stats screen
+- NEW: Box around MIDI input test on title screen
 - BUG: Disabled MIDI input while game is paused
-- NEW: Added "Stray Notes" metric to stats screen
-- NEW: Added box-outline around MIDI input test on title screen
+- BUG: Made MidiCommOut::Reset() actually reset everything by fully closing and
+       reopening the device.  midiOutReset() apparently only turns off the keys
+       and pedals on each track.  It *doesn't* reset patches or volume.
 
 
 Release 0.5.0
