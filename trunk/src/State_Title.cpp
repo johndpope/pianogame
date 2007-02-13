@@ -346,6 +346,19 @@ void TitleState::Draw(HDC hdc) const
    m_input_tile.Draw(hdc);
    m_file_tile.Draw(hdc);
 
+   if (m_input_tile.IsPreviewOn())
+   {
+      HBRUSH old_brush = static_cast<HBRUSH>(SelectObject(hdc, static_cast<HGDIOBJ>(GetStockObject(HOLLOW_BRUSH))));
+      HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, static_cast<HGDIOBJ>(GetStockObject(WHITE_PEN))));
+
+      const int x = m_input_tile.GetX() + DeviceTileWidth + 12;
+      const int y = m_input_tile.GetY() + 38;
+      Rectangle(hdc, x, y, x + 60, y + 40);
+
+      SelectObject(hdc, static_cast<HGDIOBJ>(old_pen));
+      SelectObject(hdc, static_cast<HGDIOBJ>(old_brush));
+   }
+
    TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, hdc, false, Layout::TitleFontSize);
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
