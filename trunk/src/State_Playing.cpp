@@ -180,44 +180,64 @@ void PlayingState::Listen()
       }
 
       bool any_found = false;
+
+      TranslatedNoteSet::iterator closest_match = m_notes.end();
       for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i)
       {
          const unsigned long long window_start = i->start - (KeyboardDisplay::NoteWindowLength / 2);
          const unsigned long long window_end = i->start + (KeyboardDisplay::NoteWindowLength / 2);
 
+         // As soon as we start processing notes that couldn't possibly
+         // have been played yet, we're done.
          if (window_start > cur_time) break;
 
          if (i->state != UserPlayable) continue;
 
          if (window_end > cur_time && i->note_id == ev.NoteNumber())
          {
-            any_found = true;
-            m_keyboard->SetKeyActive(note_name, true, m_state.track_properties[i->track_id].color);
+            if (closest_match == m_notes.end())
+            {
+               closest_match = i;
+               continue;
+            }
 
-            // Adjust our statistics
-            const static double NoteValue = 100.0;
-            m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
+            unsigned long long this_distance = cur_time - i->start;
+            if (i->start > cur_time) this_distance = i->start - cur_time;
 
-            m_state.stats.notes_user_could_have_played++;
-            m_state.stats.speed_integral += m_playback_speed;
+            unsigned long long known_best = cur_time - closest_match->start;
+            if (closest_match->start > cur_time) known_best = closest_match->start - cur_time;
 
-            m_state.stats.notes_user_actually_played++;
-            m_current_combo++;
-            m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
-
-            i->state = UserHit;
-            break;
+            if (this_distance < known_best) closest_match = i;
          }
       }
 
-      m_state.stats.total_notes_user_pressed++;
+      TrackColor note_color = FlatGray;
 
-      if (!any_found)
+      if (closest_match != m_notes.end())
+      {
+         any_found = true;
+         note_color = m_state.track_properties[closest_match->track_id].color;
+
+         // Adjust our statistics
+         const static double NoteValue = 100.0;
+         m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
+
+         m_state.stats.notes_user_could_have_played++;
+         m_state.stats.speed_integral += m_playback_speed;
+
+         m_state.stats.notes_user_actually_played++;
+         m_current_combo++;
+         m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
+
+         closest_match->state = UserHit;
+      }
+      else
       {
          m_state.stats.stray_notes++;
-
-         m_keyboard->SetKeyActive(note_name, true, FlatGray);
       }
+
+      m_state.stats.total_notes_user_pressed++;
+      m_keyboard->SetKeyActive(note_name, true, note_color);
    }
 }
 

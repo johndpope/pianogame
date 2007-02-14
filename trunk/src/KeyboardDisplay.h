@@ -30,7 +30,7 @@ struct TrackProperties;
 class KeyboardDisplay
 {
 public:
-   const static unsigned long long NoteWindowLength = 300000;
+   const static unsigned long long NoteWindowLength = 330000;
 
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
