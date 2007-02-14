@@ -29,6 +29,7 @@ Releaes 0.5.1
        and pedals on each track.  It *doesn't* reset patches or volume.
 - CHG: ReasonableSynthVolume object replaces MidiCommOut::SetReasonableSynthVol
        and now works for all mixers in the system instead of only the first.
+- CHG: Match input to closest note opportunity window center.
 
 
 Release 0.5.0
