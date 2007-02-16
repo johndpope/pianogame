@@ -16,6 +16,7 @@ class MidiEvent;
 
 typedef std::vector<MidiEvent> MidiEventList;
 typedef std::vector<unsigned long> MidiEventPulsesList;
+typedef std::vector<microseconds_t> MidiEventMicrosecondList;
 
 class MidiTrack
 {
@@ -25,9 +26,13 @@ public:
 
    MidiEventList &Events() { return m_events; }
    MidiEventPulsesList &EventPulses() { return m_event_pulses; }
+   MidiEventMicrosecondList &EventUsecs() { return m_event_usecs; }
 
    const MidiEventList &Events() const { return m_events; }
    const MidiEventPulsesList &EventPulses() const { return m_event_pulses; }
+   const MidiEventMicrosecondList &EventUsecs() const { return m_event_usecs; }
+
+   void SetEventUsecs(const MidiEventMicrosecondList &event_usecs) { m_event_usecs = event_usecs; }
 
    const std::wstring InstrumentName() const { return InstrumentNames[m_instrument_id]; }
    bool IsPercussion() const { return m_instrument_id == InstrumentIdPercussion; }
@@ -41,7 +46,7 @@ public:
    bool hasNotes() const { return (m_note_set.size() > 0); }
 
    void Reset();
-   MidiEventList Update(unsigned long delta_pulses);
+   MidiEventList Update(microseconds_t delta_microseconds);
 
    unsigned int AggregateEventsRemain() const { return static_cast<unsigned int>(m_events.size() - (m_last_event + 1)); }
    unsigned int AggregateEventCount() const { return static_cast<unsigned int>(m_events.size()); }
@@ -57,13 +62,13 @@ private:
 
    MidiEventList m_events;
    MidiEventPulsesList m_event_pulses;
+   MidiEventMicrosecondList m_event_usecs;
 
    NoteSet m_note_set;
 
    int m_instrument_id;
 
-   unsigned long m_running_pulses;
-   unsigned long m_last_event_pulses;
+   microseconds_t m_running_microseconds;
    long m_last_event;
 
    unsigned int m_notes_remaining;

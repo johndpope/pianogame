@@ -5,6 +5,6 @@
 #ifndef __MIDI_TYPES_H
 #define __MIDI_TYPES_H
 
-typedef unsigned long long microseconds_t;
+typedef long long microseconds_t;
 
 #endif

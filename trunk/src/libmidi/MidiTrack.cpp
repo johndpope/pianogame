@@ -206,28 +206,23 @@ void MidiTrack::SetTrackId(size_t track_id)
 
 void MidiTrack::Reset()
 {
-   m_running_pulses = 0;
+   m_running_microseconds = 0;
    m_last_event = -1;
-   m_last_event_pulses = 0;
 
    m_notes_remaining = static_cast<unsigned int>(m_note_set.size());
 }
 
-MidiEventList MidiTrack::Update(unsigned long delta_pulses)
+MidiEventList MidiTrack::Update(microseconds_t delta_microseconds)
 {
-   m_running_pulses += delta_pulses;
+   m_running_microseconds += delta_microseconds;
 
    MidiEventList evs;
-
    for (size_t i = m_last_event + 1; i < m_events.size(); ++i)
    {
-      const unsigned long event_delta = m_events[i].GetDeltaPulses();
-
-      if (m_last_event_pulses + event_delta <= m_running_pulses)
+      if (m_event_usecs[i] <= m_running_microseconds)
       {
          evs.push_back(m_events[i]);
          m_last_event = static_cast<long>(i);
-         m_last_event_pulses += event_delta;
 
          if (m_events[i].Type() == MidiEventType_NoteOn &&
             m_events[i].NoteVelocity() > 0) m_notes_remaining--;

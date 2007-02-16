@@ -221,8 +221,8 @@ void TitleState::Update()
 
          if (m_output_tile.IsPreviewOn())
          {
-            const microseconds_t PreviewLeadIn  = 0;
-            const microseconds_t PreviewLeadOut = 0;
+            const microseconds_t PreviewLeadIn  = 250000;
+            const microseconds_t PreviewLeadOut = 250000;
             m_state.midi->Reset(PreviewLeadIn, PreviewLeadOut);
 
             PlayDevicePreview(0);
@@ -310,10 +310,9 @@ void TitleState::Update()
 void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 {
    if (!m_output_tile.IsPreviewOn()) return;
+   if (!m_state.midi_out) return;
 
    MidiEventListWithTrackId evs = m_state.midi->Update(delta_microseconds);
-
-   if (!m_state.midi_out) return;
 
    for (MidiEventListWithTrackId::const_iterator i = evs.begin(); i != evs.end(); ++i)
    {
