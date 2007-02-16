@@ -12,9 +12,9 @@
 #include "registry.h"
 #include "file_selector.h"
 
-#include "libmidi\Midi.h"
-#include "libmidi\MidiUtil.h"
-#include "libmidi\MidiComm.h"
+#include "libmidi/Midi.h"
+#include "libmidi/MidiUtil.h"
+#include "libmidi/MidiComm.h"
 
 using namespace std;
 
@@ -213,7 +213,7 @@ void TitleState::Update()
 
    if (m_state.midi_out)
    {
-      PlayDevicePreview(static_cast<unsigned long long>(GetDeltaMilliseconds()) * 1000);
+      PlayDevicePreview(static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000);
 
       if (m_output_tile.HitPreviewButton())
       {
@@ -221,8 +221,8 @@ void TitleState::Update()
 
          if (m_output_tile.IsPreviewOn())
          {
-            const unsigned long long PreviewLeadIn  = 0;
-            const unsigned long long PreviewLeadOut = 0;
+            const microseconds_t PreviewLeadIn  = 0;
+            const microseconds_t PreviewLeadOut = 0;
             m_state.midi->Reset(PreviewLeadIn, PreviewLeadOut);
 
             PlayDevicePreview(0);
@@ -307,7 +307,7 @@ void TitleState::Update()
    }
 }
 
-void TitleState::PlayDevicePreview(unsigned long long delta_microseconds)
+void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 {
    if (!m_output_tile.IsPreviewOn()) return;
 

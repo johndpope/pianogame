@@ -10,6 +10,7 @@
 
 #include "Note.h"
 #include "MidiTrack.h"
+#include "MidiTypes.h"
 
 class MidiError;
 class MidiEvent;
@@ -35,9 +36,9 @@ public:
 
    const TranslatedNoteSet &Notes() const { return m_translated_notes; }
 
-   MidiEventListWithTrackId Update(unsigned long long delta_microseconds);
+   MidiEventListWithTrackId Update(microseconds_t delta_microseconds);
 
-   void Reset(unsigned long long lead_in_microseconds, unsigned long long lead_out_microseconds);
+   void Reset(microseconds_t lead_in_microseconds, microseconds_t lead_out_microseconds);
 
    // This is O(n) where n is the number of tempo changes (across all tracks) in
    // the song up to the specified time.  Tempo changes are usually a small number.
@@ -46,11 +47,11 @@ public:
    // This includes lead-in.  (It can also double for calculating base song length
    // only because just before the CalculateSongLength() call, the lead-in is reset
    // to 0.  In that way, this is kind of a double-duty function.
-   unsigned long long GetEventPulseInMicroseconds(unsigned long event_pulses) const;
+   microseconds_t GetEventPulseInMicroseconds(unsigned long event_pulses) const;
 
-   unsigned long long GetFirstNoteMicroseconds() const { return GetEventPulseInMicroseconds(m_first_note_pulse); }
-   unsigned long long GetSongPositionInMicroseconds() const { return m_microsecond_song_position; }
-   unsigned long long GetSongLengthInMicroseconds() const;
+   microseconds_t GetFirstNoteMicroseconds() const { return GetEventPulseInMicroseconds(m_first_note_pulse); }
+   microseconds_t GetSongPositionInMicroseconds() const { return m_microsecond_song_position; }
+   microseconds_t GetSongLengthInMicroseconds() const;
 
    // Use this to find out when a song is over vs. AggregateEventsRemain() because
    // this takes into account song lead-in and lead-out time.  AggregateEventsRemain()
@@ -65,8 +66,8 @@ public:
 
 private:
    const static unsigned long DefaultBPM = 120;
-   const static unsigned long long OneMinuteInMicroseconds = 60000000;
-   const static unsigned long long DefaultUSTempo = OneMinuteInMicroseconds / DefaultBPM;
+   const static microseconds_t OneMinuteInMicroseconds = 60000000;
+   const static microseconds_t DefaultUSTempo = OneMinuteInMicroseconds / DefaultBPM;
 
    Midi(): m_first_note_pulse(0), m_initialized(false), m_ever_translated(false) { Reset(0, 0); }
 
@@ -78,18 +79,18 @@ private:
    void CalculateFirstNotePulse();
    void TranslateNotes(const NoteSet &notes);
 
-   unsigned long long ConvertPulsesToMicroseconds(unsigned long pulses, unsigned long long tempo) const;
+   microseconds_t ConvertPulsesToMicroseconds(unsigned long pulses, microseconds_t tempo) const;
 
    TranslatedNoteSet m_translated_notes;
 
    // Position includes lead-in/lead-out.
-   unsigned long long m_microsecond_song_position;
-   unsigned long long m_microsecond_base_song_length;
+   microseconds_t m_microsecond_song_position;
+   microseconds_t m_microsecond_base_song_length;
 
-   unsigned long long m_microsecond_lead_in;
-   unsigned long long m_microsecond_lead_out;
+   microseconds_t m_microsecond_lead_in;
+   microseconds_t m_microsecond_lead_out;
 
-   unsigned long long m_us_tempo;
+   microseconds_t m_us_tempo;
    double m_update_pulse_remainder;
 
    double m_playback_speed;

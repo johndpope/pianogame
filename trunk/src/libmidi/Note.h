@@ -6,6 +6,7 @@
 #define __MIDI_NOTE_H
 
 #include <set>
+#include "MidiTypes.h"
 
 // Range of all 128 MIDI notes possible
 typedef unsigned int NoteId;
@@ -49,7 +50,7 @@ struct GenericNote
 // the exact (translated) microsecond that notes start and stop on
 // based on a given playback speed, after dereferencing tempo changes.
 typedef GenericNote<unsigned long> Note;
-typedef GenericNote<unsigned long long> TranslatedNote;
+typedef GenericNote<microseconds_t> TranslatedNote;
 
 typedef std::set<Note, Note> NoteSet;
 typedef std::set<TranslatedNote, TranslatedNote> TranslatedNoteSet;

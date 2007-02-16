@@ -173,7 +173,7 @@ void TrackSelectionState::Update()
    // start.
    if (!m_first_update_after_seek)
    {
-      PlayTrackPreview(static_cast<unsigned long long>(GetDeltaMilliseconds()) * 1000);
+      PlayTrackPreview(static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000);
    }
    m_first_update_after_seek = false;
 
@@ -203,8 +203,8 @@ void TrackSelectionState::Update()
                m_track_tiles[j].TurnOffPreview();
             }
 
-            const unsigned long long PreviewLeadIn  = 250000;
-            const unsigned long long PreviewLeadOut = 250000;
+            const microseconds_t PreviewLeadIn  = 250000;
+            const microseconds_t PreviewLeadOut = 250000;
 
             m_preview_on = true;
             m_preview_track_id = t.GetTrackId();
@@ -213,7 +213,7 @@ void TrackSelectionState::Update()
 
             // Find the first note in this track so we can skip right to the good part.
             unsigned long first_note_pulse = m_state.midi->Tracks()[m_preview_track_id].Notes().begin()->start;
-            unsigned long long additional_time = m_state.midi->GetEventPulseInMicroseconds(first_note_pulse);
+            microseconds_t additional_time = m_state.midi->GetEventPulseInMicroseconds(first_note_pulse);
             additional_time -= PreviewLeadIn;
 
             PlayTrackPreview(additional_time);
@@ -227,7 +227,7 @@ void TrackSelectionState::Update()
    }
 }
 
-void TrackSelectionState::PlayTrackPreview(unsigned long long delta_microseconds)
+void TrackSelectionState::PlayTrackPreview(microseconds_t delta_microseconds)
 {
    if (!m_preview_on) return;
 

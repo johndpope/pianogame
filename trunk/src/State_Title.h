@@ -9,6 +9,7 @@
 #include "GameState.h"
 #include "MenuLayout.h"
 #include "TrackProperties.h"
+#include "libmidi/MidiTypes.h"
 #include "DeviceTile.h"
 #include "StringTile.h"
 #include <vector>
@@ -32,7 +33,7 @@ protected:
    virtual void Draw(HDC hdc) const;
 
 private:
-   void PlayDevicePreview(unsigned long long delta_microseconds);
+   void PlayDevicePreview(microseconds_t delta_microseconds);
 
    ButtonState m_continue_button;
    ButtonState m_back_button;

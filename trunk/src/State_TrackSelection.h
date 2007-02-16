@@ -8,6 +8,7 @@
 #include "SharedState.h"
 #include "GameState.h"
 #include "TrackTile.h"
+#include "libmidi/MidiTypes.h"
 #include <vector>
 
 class Midi;
@@ -24,7 +25,7 @@ protected:
    virtual void Draw(HDC hdc) const;
 
 private:
-   void PlayTrackPreview(unsigned long long additional_time);
+   void PlayTrackPreview(microseconds_t additional_time);
    std::vector<TrackProperties> BuildTrackProperties() const;
 
    int m_page_count;
