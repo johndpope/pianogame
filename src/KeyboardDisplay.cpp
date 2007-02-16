@@ -27,7 +27,7 @@ KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHei
 
 
 void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes,
-                           unsigned long long show_duration, unsigned long long current_time,
+                           microseconds_t show_duration, microseconds_t current_time,
                            const std::vector<TrackProperties> &track_properties)
 {
    // Source: Measured from Yamaha P-70
@@ -306,7 +306,7 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
 
 void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int black_width, int black_offset,
                                  int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
-                                 unsigned long long show_duration, unsigned long long current_time,
+                                 microseconds_t show_duration, microseconds_t current_time,
                                  const std::vector<TrackProperties> &track_properties) const
 {
    // Create brushes for each of our possible note colors

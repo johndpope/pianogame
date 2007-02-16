@@ -11,7 +11,8 @@
 #include <windows.h>
 
 #include "Image.h"
-#include "libmidi\Note.h"
+#include "libmidi/Note.h"
+#include "libmidi/MidiTypes.h"
 
 enum KeyboardSize
 {
@@ -30,12 +31,12 @@ struct TrackProperties;
 class KeyboardDisplay
 {
 public:
-   const static unsigned long long NoteWindowLength = 330000;
+   const static microseconds_t NoteWindowLength = 330000;
 
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
    void Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes,
-      unsigned long long show_duration, unsigned long long current_time,
+      microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties);
 
    void SetKeyActive(const std::string &key_name, bool active, TrackColor color);
@@ -58,7 +59,7 @@ private:
 
    void DrawNotes(HDC hdc, int white_width, int key_space, int black_width, int black_offset,
       int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
-      unsigned long long show_duration, unsigned long long current_time,
+      microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties) const;
 
    // Retrieves which white-key a piano with the given key count

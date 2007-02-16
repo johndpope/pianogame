@@ -38,8 +38,8 @@ void PlayingState::ResetSong()
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
-   const static unsigned long long LeadIn = 5000000;
-   const static unsigned long long LeadOut = 1000000;
+   const static microseconds_t LeadIn = 5000000;
+   const static microseconds_t LeadOut = 1000000;
 
    if (!m_state.midi) return;
 
@@ -48,7 +48,7 @@ void PlayingState::ResetSong()
    m_notes = m_state.midi->Notes();
    SetupNoteState();
 
-   unsigned long long additional_time = m_state.midi->GetFirstNoteMicroseconds();
+   microseconds_t additional_time = m_state.midi->GetFirstNoteMicroseconds();
    additional_time -= LeadIn;
    Play(additional_time);
 
@@ -79,7 +79,7 @@ void PlayingState::Init()
 
    // This many microseconds of the song will
    // be shown on the screen at once
-   const static unsigned long long DefaultShowDurationMicroseconds = 4000000;
+   const static microseconds_t DefaultShowDurationMicroseconds = 4000000;
    m_show_duration = DefaultShowDurationMicroseconds;
 
    m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - 2*Layout::ScreenMarginX, CalcKeyboardHeight());
@@ -110,7 +110,7 @@ int PlayingState::CalcKeyboardHeight() const
    return height;
 }
 
-void PlayingState::Play(unsigned long long delta_microseconds)
+void PlayingState::Play(microseconds_t delta_microseconds)
 {
    MidiEventListWithTrackId evs = m_state.midi->Update(delta_microseconds);
 
@@ -162,7 +162,7 @@ void PlayingState::Listen()
 
    while (m_state.midi_in->KeepReading())
    {
-      unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
+      microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
       MidiEvent ev = m_state.midi_in->Read();
 
       // Just eat input if we're paused
@@ -184,8 +184,8 @@ void PlayingState::Listen()
       TranslatedNoteSet::iterator closest_match = m_notes.end();
       for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i)
       {
-         const unsigned long long window_start = i->start - (KeyboardDisplay::NoteWindowLength / 2);
-         const unsigned long long window_end = i->start + (KeyboardDisplay::NoteWindowLength / 2);
+         const microseconds_t window_start = i->start - (KeyboardDisplay::NoteWindowLength / 2);
+         const microseconds_t window_end = i->start + (KeyboardDisplay::NoteWindowLength / 2);
 
          // As soon as we start processing notes that couldn't possibly
          // have been played yet, we're done.
@@ -201,10 +201,10 @@ void PlayingState::Listen()
                continue;
             }
 
-            unsigned long long this_distance = cur_time - i->start;
+            microseconds_t this_distance = cur_time - i->start;
             if (i->start > cur_time) this_distance = i->start - cur_time;
 
-            unsigned long long known_best = cur_time - closest_match->start;
+            microseconds_t known_best = cur_time - closest_match->start;
             if (closest_match->start > cur_time) known_best = closest_match->start - cur_time;
 
             if (this_distance < known_best) closest_match = i;
@@ -243,8 +243,8 @@ void PlayingState::Listen()
 
 void PlayingState::Update()
 {
-   const unsigned long long current_microseconds = GetStateMilliseconds() * 1000;
-   unsigned long long delta_microseconds = static_cast<unsigned long long>(GetDeltaMilliseconds()) * 1000;
+   const microseconds_t current_microseconds = GetStateMilliseconds() * 1000;
+   microseconds_t delta_microseconds = static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000;
 
    // The 100 term is really paired with the playback speed, but this
    // formation is less likely to produce overflow errors.
@@ -263,7 +263,7 @@ void PlayingState::Update()
    m_first_update = false;
 
 
-   unsigned long long cur_time = m_state.midi->GetSongPositionInMicroseconds();
+   microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
    // Delete notes that are finished playing (and are no longer available to hit)
    TranslatedNoteSet::iterator i = m_notes.begin();
@@ -271,7 +271,7 @@ void PlayingState::Update()
    {
       TranslatedNoteSet::iterator note = i++;
 
-      const unsigned long long window_end = note->start + (KeyboardDisplay::NoteWindowLength / 2);
+      const microseconds_t window_end = note->start + (KeyboardDisplay::NoteWindowLength / 2);
 
       if (m_state.midi_in && note->state == UserPlayable && window_end <= cur_time)
       {
@@ -369,8 +369,8 @@ void PlayingState::Draw(HDC hdc) const
    // Some old time formatting code
    /*
    double non_zero_playback_speed = ( (m_playback_speed == 0) ? 0.1 : (m_playback_speed/100.0) );
-   unsigned long long tot_seconds = static_cast<unsigned long long>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
-   unsigned long long cur_seconds = static_cast<unsigned long long>((m_state.midi->GetSongPositionInMicroseconds() / 100000.0) / non_zero_playback_speed);
+   microseconds_t tot_seconds = static_cast<microseconds_t>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
+   microseconds_t cur_seconds = static_cast<microseconds_t>((m_state.midi->GetSongPositionInMicroseconds() / 100000.0) / non_zero_playback_speed);
    int completion  = static_cast<int>(m_state.midi->GetSongPercentageComplete() * 100.0);
 
    unsigned int tot_min = static_cast<unsigned int>((tot_seconds/10) / 60);

@@ -240,7 +240,7 @@ void Midi::CalculateSongLength()
       if (event_count == 0) continue;
 
       unsigned long event_pulses = i->EventPulses().back();
-      unsigned long long event_microseconds = GetEventPulseInMicroseconds(event_pulses);
+      microseconds_t event_microseconds = GetEventPulseInMicroseconds(event_pulses);
 
       if (event_microseconds > m_microsecond_base_song_length) m_microsecond_base_song_length = event_microseconds;
    }
@@ -278,7 +278,7 @@ void Midi::CalculateFirstNotePulse()
 
 }
 
-unsigned long long Midi::ConvertPulsesToMicroseconds(unsigned long pulses, unsigned long long tempo) const
+microseconds_t Midi::ConvertPulsesToMicroseconds(unsigned long pulses, microseconds_t tempo) const
 {
    // Here's what we have to work with:
    //   pulses is given
@@ -287,21 +287,21 @@ unsigned long long Midi::ConvertPulsesToMicroseconds(unsigned long pulses, unsig
    const double quarter_notes = static_cast<double>(pulses) / static_cast<double>(m_pulses_per_quarter_note);
    const double microseconds = quarter_notes * static_cast<double>(tempo);
 
-   return static_cast<unsigned long long>(microseconds);
+   return static_cast<microseconds_t>(microseconds);
 }
 
-unsigned long long Midi::GetEventPulseInMicroseconds(unsigned long event_pulses) const
+microseconds_t Midi::GetEventPulseInMicroseconds(unsigned long event_pulses) const
 {
    if (!m_initialized) return 0;
 
    if (m_tracks.size() == 0) return 0;
    const MidiTrack &tempo_track = m_tracks.back();
 
-   unsigned long long running_result = m_microsecond_lead_in;
+   microseconds_t running_result = m_microsecond_lead_in;
 
    bool hit = false;
    unsigned long last_tempo_event_pulses = 0;
-   unsigned long long running_tempo = DefaultUSTempo;
+   microseconds_t running_tempo = DefaultUSTempo;
    for (size_t i = 0; i < tempo_track.Events().size(); ++i)
    {
       unsigned long tempo_event_pulses = tempo_track.EventPulses()[i];
@@ -340,7 +340,7 @@ unsigned long long Midi::GetEventPulseInMicroseconds(unsigned long event_pulses)
    return running_result;
 }
 
-void Midi::Reset(unsigned long long lead_in_microseconds, unsigned long long lead_out_microseconds)
+void Midi::Reset(microseconds_t lead_in_microseconds, microseconds_t lead_out_microseconds)
 {
    bool should_translate = !m_ever_translated ||
       (lead_in_microseconds != m_microsecond_lead_in || lead_out_microseconds != m_microsecond_lead_out);
@@ -388,7 +388,7 @@ void Midi::TranslateNotes(const NoteSet &notes)
    }
 }
 
-MidiEventListWithTrackId Midi::Update(unsigned long long delta_microseconds)
+MidiEventListWithTrackId Midi::Update(microseconds_t delta_microseconds)
 {
    MidiEventListWithTrackId aggregated_events;
    if (!m_initialized) return aggregated_events;
@@ -396,7 +396,7 @@ MidiEventListWithTrackId Midi::Update(unsigned long long delta_microseconds)
    // Tempo changes in the middle of long updates can cause
    // skew.  Recursively call Update in tiny amounts to keep
    // the tempo more accurate throughout.
-   const static unsigned long long LongestUpdate = 500000;
+   const static microseconds_t LongestUpdate = 500000;
    if (delta_microseconds > LongestUpdate)
    {
       aggregated_events = Update(delta_microseconds - LongestUpdate);
@@ -415,7 +415,7 @@ MidiEventListWithTrackId Midi::Update(unsigned long long delta_microseconds)
       // We may just be exiting the lead-in phase
       if (m_microsecond_song_position < m_microsecond_lead_in)
       {
-         unsigned long long original_delta = delta_microseconds;
+         microseconds_t original_delta = delta_microseconds;
 
          // We only want to update the tracks with what's left after lead-in
          delta_microseconds = (m_microsecond_song_position + original_delta) - m_microsecond_lead_in;
@@ -465,7 +465,7 @@ MidiEventListWithTrackId Midi::Update(unsigned long long delta_microseconds)
    return aggregated_events;
 }
 
-unsigned long long Midi::GetSongLengthInMicroseconds() const
+microseconds_t Midi::GetSongLengthInMicroseconds() const
 {
    if (!m_initialized) return 0;
 

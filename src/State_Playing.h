@@ -34,7 +34,7 @@ private:
    void SetupNoteState();
 
    void ResetSong();
-   void Play(unsigned long long delta_microseconds);
+   void Play(microseconds_t delta_microseconds);
    void Listen();
 
    double CalculateScoreMultiplier() const;
@@ -43,7 +43,7 @@ private:
    int m_playback_speed;
 
    KeyboardDisplay *m_keyboard;
-   unsigned long long m_show_duration;
+   microseconds_t m_show_duration;
    TranslatedNoteSet m_notes;
 
    bool m_any_you_play_tracks;

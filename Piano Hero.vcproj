@@ -375,6 +375,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\libmidi\MidiTypes.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\libmidi\MidiUtil.cpp"
 					>
 				</File>
