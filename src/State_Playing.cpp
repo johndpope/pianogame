@@ -48,10 +48,6 @@ void PlayingState::ResetSong()
    m_notes = m_state.midi->Notes();
    SetupNoteState();
 
-   microseconds_t additional_time = m_state.midi->GetFirstNoteMicroseconds();
-   additional_time -= LeadIn;
-   Play(additional_time);
-
    m_state.stats = SongStatistics();
    m_state.stats.total_note_count = static_cast<int>(m_notes.size());
 
@@ -333,7 +329,7 @@ void PlayingState::Update()
       return;
    }
 
-   if (m_state.midi->GetSongPercentageComplete() >= 1.0)
+   if (m_state.midi->IsSongOver())
    {
       if (m_state.midi_out) m_state.midi_out->Reset();
       if (m_state.midi_in) m_state.midi_in->Reset();
