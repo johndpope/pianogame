@@ -62,12 +62,13 @@ void PlayingState::Init()
 {
    if (!m_state.midi) throw GameStateError("PlayingState: Init was passed a null MIDI!");
 
+   m_look_ahead_you_play_note_count = 0;
    for (size_t i = 0; i < m_state.track_properties.size(); ++i)
    {
       if (m_state.track_properties[i].mode == ModeYouPlay)
       {
+         m_look_ahead_you_play_note_count += m_state.midi->Tracks()[i].Notes().size();
          m_any_you_play_tracks = true;
-         break;
       }
    }
 
@@ -75,7 +76,7 @@ void PlayingState::Init()
 
    // This many microseconds of the song will
    // be shown on the screen at once
-   const static microseconds_t DefaultShowDurationMicroseconds = 4000000;
+   const static microseconds_t DefaultShowDurationMicroseconds = 3500000;
    m_show_duration = DefaultShowDurationMicroseconds;
 
    m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - 2*Layout::ScreenMarginX, CalcKeyboardHeight());
@@ -101,7 +102,7 @@ int PlayingState::CalcKeyboardHeight() const
    height -= Layout::ScreenMarginY;
 
    // Allow another couple lines of text below the HR
-   height -= Layout::ButtonFontSize * 5;
+   height -= Layout::ButtonFontSize * 8;
 
    return height;
 }
@@ -347,26 +348,61 @@ void PlayingState::Draw(HDC hdc) const
       m_show_duration, m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
    // Draw a song progress bar along the top of the screen
-   HBRUSH pb_brush = CreateSolidBrush(RGB(0x50,0x50,0x50));
+   HBRUSH time_pb_brush = CreateSolidBrush(RGB(0x50,0x50,0x50));
+   HBRUSH note_hit_pb_brush = CreateSolidBrush(RGB(0xFC,0xAF,0x3E));
+   HBRUSH note_miss_pb_brush = CreateSolidBrush(RGB(0xCE,0x5C,0x00));
 
-   const int pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
+   const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
    const int pb_x = Layout::ScreenMarginX;
    const int pb_y = GetStateHeight() - CalcKeyboardHeight() - 20;
 
-   RECT pb = { pb_x, pb_y, pb_x + pb_width, pb_y + 16 };
-   FillRect(hdc, &pb, pb_brush);
+   RECT time_pb = { pb_x, pb_y, pb_x + time_pb_width, pb_y + 16 };
+   FillRect(hdc, &time_pb, time_pb_brush);
 
-   DeleteObject(pb_brush);
+   if (m_look_ahead_you_play_note_count > 0)
+   {
+      const double note_count = 1.0 * m_look_ahead_you_play_note_count;
+
+      const int note_miss_pb_width = static_cast<int>(m_state.stats.notes_user_could_have_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
+      const int note_hit_pb_width = static_cast<int>(m_state.stats.notes_user_actually_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
+
+      RECT note_miss_pb = { pb_x, pb_y - 20, pb_x + note_miss_pb_width, pb_y + 16 - 20 };
+      RECT note_hit_pb = { pb_x, pb_y - 20, pb_x + note_hit_pb_width, pb_y + 16 - 20 };
+
+      FillRect(hdc, &note_miss_pb, note_miss_pb_brush);
+      FillRect(hdc, &note_hit_pb, note_hit_pb_brush);
+   }
+
+
+   DeleteObject(time_pb_brush);
+   DeleteObject(note_hit_pb_brush);
+   DeleteObject(note_miss_pb_brush);
 
 
    Layout::DrawTitle(hdc, m_state.song_title);
    Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
 
-   // Some old time formatting code
-   /*
+   int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
+
+   wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier() << L" multiplier");
+   wstring speed_text = WSTRING(m_playback_speed << "% speed");
+
+   TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::ScoreFontSize);
+   score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
+
+   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, hdc, false, Layout::TitleFontSize);
+   multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
+      << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
+      << newline;
+
+
+
    double non_zero_playback_speed = ( (m_playback_speed == 0) ? 0.1 : (m_playback_speed/100.0) );
    microseconds_t tot_seconds = static_cast<microseconds_t>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
    microseconds_t cur_seconds = static_cast<microseconds_t>((m_state.midi->GetSongPositionInMicroseconds() / 100000.0) / non_zero_playback_speed);
+   if (cur_seconds < 0) cur_seconds = 0;
+   if (cur_seconds > tot_seconds) cur_seconds = tot_seconds;
+
    int completion  = static_cast<int>(m_state.midi->GetSongPercentageComplete() * 100.0);
 
    unsigned int tot_min = static_cast<unsigned int>((tot_seconds/10) / 60);
@@ -379,20 +415,23 @@ void PlayingState::Draw(HDC hdc) const
    unsigned int cur_ten = static_cast<unsigned int>( cur_seconds%10      );
    const wstring current_time = WSTRING(cur_min << L":" << setfill(L'0') << setw(2) << cur_sec << L"." << cur_ten);
    const wstring percent_complete = WSTRING(L" (" << completion << L"%)");
-   */
 
-   if (m_state.midi_in && m_any_you_play_tracks)
+   text_y += 28 + Layout::SmallFontSize;
+
+   TextWriter time_text(Layout::ScreenMarginX, text_y, hdc, false, Layout::SmallFontSize);
+   time_text << Text(L"Time: ", Gray) << current_time << Text(L" / ", Gray) << total_time << Text(percent_complete, Gray);
+
+   // Show the combo
+   if (m_current_combo > 5)
    {
-      int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
+      int combo_font_size = 20;
+      combo_font_size += (m_current_combo / 10);
 
-      wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier());
-      wstring speed_text = WSTRING(m_playback_speed << "%");
+      int combo_x = GetStateWidth() / 2;
+      int combo_y = GetStateHeight() - CalcKeyboardHeight() + 30 - (combo_font_size/2);
 
-      TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::TitleFontSize);
-      score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score)
-         << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
-         << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
-         << newline;
+      TextWriter combo_text(combo_x, combo_y, hdc, true, combo_font_size);
+      combo_text << WSTRING(m_current_combo << L" Combo!");
    }
 }
 
