@@ -83,10 +83,10 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
    m_cached_background.draw(x, y);
    m_cached_background.endDrawing();
 
+   DrawNotes(hdc, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
+
    DrawWhiteKeys(hdc, true, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
    DrawBlackKeys(hdc, false, white_key_count, white_width, white_height, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
-
-   DrawNotes(hdc, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
 }
 
 int KeyboardDisplay::GetStartingOctave() const
@@ -414,7 +414,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
          while ( (outline_rect.bottom - outline_rect.top) < 3) outline_rect.bottom++;
       }
 
-      const RECT note_rect = { outline_rect.left + 1, outline_rect.top, outline_rect.right - 1, outline_rect.bottom };
+      const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
       FillRect(hdc, &outline_rect, brush_set.outline);
 
       HBRUSH note_brush = (i->state == UserHit ? brush_set.hit : brush_set.white);
