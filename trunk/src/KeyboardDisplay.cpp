@@ -68,10 +68,10 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
 
       HDC bg = m_cached_background.beginDrawingOn();
 
+      DrawGuides(bg, white_key_count, white_width, white_space, x_offset, 0, y_offset);
+
       DrawWhiteKeys(bg, false, white_key_count, white_width, white_height, white_space, x_offset, y_offset);
       DrawBlackKeys(bg, false, white_key_count, white_width, white_height, black_width, black_height, white_space, x_offset, y_offset, black_offset);
-
-      DrawGuides(bg, white_key_count, white_width, white_space, x_offset, 0, y_offset);
 
       m_cached_background.endDrawingOn();
 
@@ -261,17 +261,11 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
    RECT fill_rect = { x_offset, y, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard };
    FillRect(hdc, &fill_rect, fill_brush);
 
+   HPEN thick_guide = CreatePen(PS_SOLID, 2, RGB(0x48, 0x48, 0x48));
+   HPEN thin_guide = CreatePen(PS_SOLID, 1, RGB(0x50, 0x50, 0x50));
+   HPEN center_guide = CreatePen(PS_SOLID, 1, RGB(0x70, 0x70, 0x70));
 
-   HPEN guide_pen = CreatePen(PS_SOLID, 1, RGB(0x50, 0x50, 0x50));
-   HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, guide_pen));
-
-   // Draw horizontal-lines
-   MoveToEx(hdc, x_offset,                  y, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y);
-   MoveToEx(hdc, x_offset,                  y + y_offset, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y + y_offset);
-   MoveToEx(hdc, x_offset,                  y + y_offset - PixelsOffKeyboard - 1, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard - 1);
+   HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, thick_guide));
 
    int octave_start_x = x_offset;
    char current_white = GetStartingNote() - 1;
@@ -280,17 +274,35 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
    {
       const int key_x = i * (key_width + key_space) + x_offset - 1;
 
+      MoveToEx(hdc, key_x, y, 0);
+
+      bool draw_guide = true;
       switch (current_white)
       {
-      case 'A':
       case 'C':
-      case 'D':
+         if (current_octave == 5) SelectObject(hdc, center_guide);
+         else SelectObject(hdc, thin_guide);
+         break;
+
       case 'F':
+         SelectObject(hdc, thick_guide);
+         break;
+
+      case 'D':
       case 'G':
-         {
-            MoveToEx(hdc, key_x, y, 0);
-            LineTo  (hdc, key_x, y + y_offset - PixelsOffKeyboard);
-         }
+      case 'A':
+         // These lines should get drawn, so
+         // we put in case statements for them.
+         break;
+
+      default:
+         draw_guide = false;
+         break;
+      }
+
+      if (draw_guide)
+      {
+         LineTo (hdc, key_x, y + y_offset - PixelsOffKeyboard);
       }
 
       current_white++;
@@ -298,10 +310,22 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
       if (current_white == 'C') current_octave++;
    }
 
+   SelectObject(hdc, thick_guide);
+
+   // Draw horizontal-lines
+   MoveToEx(hdc, x_offset,                  y, 0);
+   LineTo  (hdc, x_offset + keyboard_width, y);
+   MoveToEx(hdc, x_offset,                  y + y_offset, 0);
+   LineTo  (hdc, x_offset + keyboard_width, y + y_offset);
+   MoveToEx(hdc, x_offset,                  y + y_offset - PixelsOffKeyboard, 0);
+   LineTo  (hdc, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard);
+
    DeleteObject(fill_brush);
 
    SelectObject(hdc, old_pen);
-   DeleteObject(guide_pen);
+   DeleteObject(thin_guide);
+   DeleteObject(thick_guide);
+   DeleteObject(center_guide);
 }
 
 void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int black_width, int black_offset,
@@ -390,7 +414,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
          while ( (outline_rect.bottom - outline_rect.top) < 3) outline_rect.bottom++;
       }
 
-      const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
+      const RECT note_rect = { outline_rect.left + 1, outline_rect.top, outline_rect.right - 1, outline_rect.bottom };
       FillRect(hdc, &outline_rect, brush_set.outline);
 
       HBRUSH note_brush = (i->state == UserHit ? brush_set.hit : brush_set.white);
