@@ -35,6 +35,7 @@ Releaes 0.5.1
 - CHG: Swapped blue and yellow in the track color order, making blue the new
        "first" color.
 - CHG: Improved Klavarskribo staff notation.
+- NEW: Combo counter and much improved stats display during play
 
 
 Release 0.5.0

@@ -47,6 +47,7 @@ private:
    TranslatedNoteSet m_notes;
 
    bool m_any_you_play_tracks;
+   size_t m_look_ahead_you_play_note_count;
 
    bool m_first_update;
 

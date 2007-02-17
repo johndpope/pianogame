@@ -47,6 +47,7 @@ namespace Layout
    const static int ScreenMarginY = 70;
 
    const static int TitleFontSize = 20;
+   const static int ScoreFontSize = 26;
    const static int ButtonFontSize = 14;
    const static int SmallFontSize = 12;
 
