@@ -30,6 +30,11 @@ Releaes 0.5.1
 - CHG: ReasonableSynthVolume object replaces MidiCommOut::SetReasonableSynthVol
        and now works for all mixers in the system instead of only the first.
 - CHG: Match input to closest note opportunity window center.
+- BUG: Reworked MIDI engine to correct a sync/lag issue in songs that started
+       with a considerable delay before the first note.
+- CHG: Swapped blue and yellow in the track color order, making blue the new
+       "first" color.
+- CHG: Improved Klavarskribo staff notation.
 
 
 Release 0.5.0
