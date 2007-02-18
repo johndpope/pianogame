@@ -100,12 +100,12 @@ void TitleState::Init()
       m_state.midi_in->Reset();
    }
 
-   m_file_tile = StringTile((GetStateWidth() - StringTileWidth) / 2, 320);
+   m_file_tile = StringTile((GetStateWidth() - StringTileWidth) / 2, 370);
    m_file_tile.SetTitle(L"Song:");
    m_file_tile.SetString(m_state.song_title);
 
-   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 420, DeviceTileOutput, output_device_id);
-   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 520, DeviceTileInput,  input_device_id);
+   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id);
+   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id);
 
 }
 
@@ -362,7 +362,7 @@ void TitleState::Draw(HDC hdc) const
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
-   const static int InstructionsY = 234;
+   const static int InstructionsY = 224;
    TextWriter instructions(left, InstructionsY, hdc, false, Layout::SmallFontSize);
 
    const static COLORREF Title = RGB(114, 159, 207);
@@ -374,6 +374,12 @@ void TitleState::Draw(HDC hdc) const
       << Text(L"Left", Highlight) << Text(L" and ", Gray) << Text(L"right", Highlight)
       << Text(L" change the song's speed.", Gray) << newline
       << Text(L"Space", Highlight) << Text(L" pauses.  ", Gray)
-      << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline;
+      << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline
+      << newline
+      << newline
+      << Text(L"Piano Hero's video game music samples are provided by ", Gray)
+      << Text(L"Game Music Themes", Highlight) << Text(L".", Gray) << newline
+      << Text(L"Visit ", Gray) << Text(L"http://www.gamemusicthemes.com/", Title)
+      << Text(L" for high quality piano MIDI and sheet music.", Gray);
 
 }
