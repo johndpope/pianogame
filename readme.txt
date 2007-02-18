@@ -12,8 +12,12 @@ The following people have also contributed to the project:
 Piano Hero uses the TinyXml XML parser.
 See http://tinyxml.sourceforge.net/ for more information.
 
-Piano Hero's sample video game music tracks are provided by Game Music Themes.
-See http://www.gamemusicthemes.com/ for more high quality piano MIDI.
+--------------------------------------------------------------------------------
+
+Piano Hero's video game music samples are provided by Game Music Themes.
+Visit http://www.gamemusicthemes.com/ for high quality piano MIDI and sheets.
+
+TODO: Song titles and composer/arranger here!
 
 --------------------------------------------------------------------------------
 
@@ -32,6 +36,8 @@ CHG: Swapped blue and yellow in the track color order, making blue the new
      "first" color.
 CHG: ReasonableSynthVolume object replaces MidiCommOut::SetReasonableSynthVol
      and now works for all mixers in the system instead of only the first.
+CHG: Darkened the border for a few different colors to increase the contrast
+     between sharp/flat notes in a series.
 FIX: Disabled MIDI input while game is paused to prevent cheating.
 FIX: Made MidiCommOut::Reset() actually reset everything by fully closing and
      reopening the device.  midiOutReset() apparently only turns off the keys
