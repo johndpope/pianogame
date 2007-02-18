@@ -81,10 +81,10 @@ const static COLORREF TrackColorNoteBlack[TrackColorCount] = {
 };
 
 const static COLORREF TrackColorNoteBorder[TrackColorCount] = {
-   RGB( 32,  74, 135),
-   RGB( 78, 154,   6),
-   RGB(206,  92,   0),
-   RGB(196, 160,   0),
+   RGB( 32,  64, 115),
+   RGB( 58, 114,   6),
+   RGB(166,  72,   0),
+   RGB(145, 120,   0),
    RGB( 92,  53, 102),
    RGB(164,   0,   0),
 
@@ -94,7 +94,7 @@ const static COLORREF TrackColorNoteBorder[TrackColorCount] = {
 
 struct TrackProperties
 {
-   TrackProperties() : mode(ModeNotPlayed), color(TangoButter) { }
+   TrackProperties() : mode(ModeNotPlayed), color(TangoSkyBlue) { }
 
    TrackMode mode;
    TrackColor color;
