@@ -46,6 +46,9 @@ FIX: Reworked MIDI engine to correct a sync/lag issue in songs that started
      with a considerable delay before the first note.
 FIX: Notes don't draw on top of keys anymore.
 FIX: MIDI track default color order is now consistent for all files.
+FIX: Two tracks with identical notes would cause the "second" track's note to
+     not appear.  This normally would not matter, as they overlap completely,
+     but when hiding the first track, the second note would not show.
 
 
 Release 0.5.0
