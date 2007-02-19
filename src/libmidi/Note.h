@@ -34,6 +34,11 @@ struct GenericNote
       if (lhs.end > rhs.end) return false;
 
       if (lhs.note_id < rhs.note_id) return true;
+      if (lhs.note_id > rhs.note_id) return false;
+
+      if (lhs.track_id < rhs.track_id) return true;
+      if (lhs.track_id > rhs.track_id) return false;
+
       return false;
    }
 
