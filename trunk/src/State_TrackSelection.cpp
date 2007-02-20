@@ -164,6 +164,10 @@ void TrackSelectionState::Update()
       if (m_current_page < 0) m_current_page += m_page_count;
    }
 
+   m_tooltip = L"";
+
+   if (m_back_button.hovering) m_tooltip = L"Click to return to the title screen.";
+   if (m_continue_button.hovering) m_tooltip = L"Click to begin playing with these settings.";
 
    // Our delta milliseconds on the first frame after we seek down to the
    // first note is extra long because the seek takes a while.  By skipping
@@ -187,6 +191,25 @@ void TrackSelectionState::Update()
       mouse.y -= t.GetY();
 
       t.Update(mouse, m_state.midi);
+
+      if (t.ButtonLeft().hovering || t.ButtonRight().hovering)
+      {
+         switch (t.GetMode())
+         {
+         case ModeNotPlayed: m_tooltip = L"Track won't be played or shown during the game."; break;
+         case ModePlayedAutomatically: m_tooltip = L"Track will be played automatically by the game."; break;
+         case ModePlayedButHidden: m_tooltip = L"Track will be played automatically by the game, but also hidden from view."; break;
+         case ModeYouPlay: m_tooltip = L"'You Play' means you want to play this track yourself."; break;
+         }
+      }
+
+      if (t.ButtonPreview().hovering)
+      {
+         if (t.IsPreviewOn()) m_tooltip = L"Turn track preview off.";
+         else m_tooltip = L"Preview how this track sounds.";
+      }
+
+      if (t.ButtonColor().hovering) m_tooltip = L"Pick a color for this track's notes.";
 
       if (t.HitPreviewButton())
       {
@@ -231,6 +254,10 @@ void TrackSelectionState::Update()
          }
       }
    }
+
+   
+
+
 }
 
 void TrackSelectionState::PlayTrackPreview(microseconds_t delta_microseconds)
@@ -260,11 +287,13 @@ void TrackSelectionState::Draw(HDC hdc) const
 
    // Write our page count on the screen
    const static int TypicalPaginationTextWidth = 280;
-   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::ScreenMarginY
-      + Layout::ScreenMarginX + Layout::SmallFontSize, hdc, false, Layout::ButtonFontSize);
+   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, hdc, false, Layout::ButtonFontSize);
    
    pagination << Text(L"Page ", Gray) << (m_current_page+1) << Text(L" of ", Gray) << m_page_count <<
       Text(L" (arrow keys change page)", Gray);
+
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, hdc, true, Layout::ButtonFontSize);
+   tooltip << m_tooltip;
 
    // Draw each track tile on the current page
    size_t start = m_current_page * m_tiles_per_page;

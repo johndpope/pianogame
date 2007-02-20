@@ -28,6 +28,8 @@ public:
    void SetString(const std::wstring &s) { m_string = s; }
    void SetTitle(const std::wstring &s) { m_title = s; }
 
+   const ButtonState WholeTile() const { return whole_tile; }
+
 private:
    int m_x;
    int m_y;

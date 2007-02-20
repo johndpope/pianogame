@@ -39,6 +39,10 @@ void StatsState::Update()
       ChangeState(new PlayingState(m_state));
       return;
    }
+
+   m_tooltip = L"";
+   if (m_back_button.hovering) m_tooltip = L"Return to the track selection screen.";
+   if (m_continue_button.hovering) m_tooltip = L"Try this song again with the same settings.";
 }
 
 void StatsState::Draw(HDC hdc) const
@@ -105,4 +109,6 @@ void StatsState::Draw(HDC hdc) const
       << Text(L"Longest Combo: ", Gray) << WSTRING(s.longest_combo) << newline
       << newline;
 
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, hdc, true, Layout::ButtonFontSize);
+   tooltip << m_tooltip;
 }

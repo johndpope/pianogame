@@ -41,6 +41,7 @@ private:
    SharedState m_state;
 
    std::string m_last_input_note_name;
+   std::wstring m_tooltip;
 
    DeviceTile m_output_tile;
    DeviceTile m_input_tile;

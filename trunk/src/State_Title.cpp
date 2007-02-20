@@ -305,6 +305,30 @@ void TitleState::Update()
       ChangeState(new TrackSelectionState(m_state));
       return;
    }
+
+   m_tooltip = L"";
+
+   if (m_back_button.hovering) m_tooltip = L"Click to exit Piano Hero.";
+   if (m_continue_button.hovering) m_tooltip = L"Click to continue on to the track selection screen.";
+
+   if (m_file_tile.WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
+
+   if (m_input_tile.ButtonLeft().hovering) m_tooltip = L"Cycle through available input devices.";
+   if (m_input_tile.ButtonRight().hovering) m_tooltip = L"Cycle through available input devices.";
+   if (m_input_tile.ButtonPreview().hovering)
+   {
+      if (m_input_tile.IsPreviewOn()) m_tooltip = L"Turn off test MIDI input for this device.";
+      else m_tooltip = L"Click to test your MIDI input device by playing notes.";
+   }
+
+   if (m_output_tile.ButtonLeft().hovering) m_tooltip = L"Cycle through available output devices.";
+   if (m_output_tile.ButtonRight().hovering) m_tooltip = L"Cycle through available output devices.";
+   if (m_output_tile.ButtonPreview().hovering)
+   {
+      if (m_output_tile.IsPreviewOn()) m_tooltip = L"Turn off output test for this device.";
+      else m_tooltip = L"Click to test MIDI output on this device.";
+   }
+
 }
 
 void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
@@ -381,5 +405,8 @@ void TitleState::Draw(HDC hdc) const
       << Text(L"Game Music Themes", Highlight) << Text(L".", Gray) << newline
       << Text(L"Visit ", Gray) << Text(L"http://www.gamemusicthemes.com/", Title)
       << Text(L" for high quality piano MIDI and sheet music.", Gray);
+
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, hdc, true, Layout::ButtonFontSize);
+   tooltip << m_tooltip;
 
 }
