@@ -17,7 +17,35 @@ See http://tinyxml.sourceforge.net/ for more information.
 Piano Hero's video game music samples are provided by Game Music Themes.
 Visit http://www.gamemusicthemes.com/ for high quality piano MIDI and sheets.
 
-TODO: Song titles and composer/arranger here!
+Bubble Bobble - Main Theme
+  Composed by David Whittaker / Arranged by Gori Fater
+
+Dragon Warrior - Town Theme
+  Composed by Koichi Sugiyama / Arranged by Russell Copeland
+
+Sonic the Hedgehog - Green Hill Zone
+  Composed by Masato Nakamura / Arranged by Gori Fater
+
+Super Mario Bros. - Overworld Theme
+  Composed by Koji Kondo / Arranged by BLUESCD
+
+Super Mario Bros. - Underwater Theme
+  Composed by Koji Kondo / Arranged by BLUESCD
+
+Tetris - Theme A
+  Arranged by Gori Fater
+
+The Sims - Buying Theme 1
+  Arranged by Gori Fater
+
+The Legend of Zelda: A Link to the Past - Overworld
+  Composed by Koji Kondo / Arranged by w3sp
+
+The Legend of Zelda: Ocarina of Time - Lost Woods
+  Composed by Koji Kondo / Arranged by BLUESCD
+
+The Legend of Zelda: Ocarina of Time - Zelda's Lullaby
+  Composed by Koji Kondo / Arranged by BLUESCD
 
 --------------------------------------------------------------------------------
 
@@ -25,6 +53,8 @@ Changes
 
 Release 0.5.1
 -------------
+NEW: Tooltips on all menu controls and settings.
+NEW: 10 Sample songs from Game Music Themes.
 NEW: "Stray Notes" metric on stats screen
 NEW: "Average Speed" metric on stats screen
 NEW: Box around MIDI input test on title screen
@@ -38,6 +68,8 @@ CHG: ReasonableSynthVolume object replaces MidiCommOut::SetReasonableSynthVol
      and now works for all mixers in the system instead of only the first.
 CHG: Darkened the border for a few different colors to increase the contrast
      between sharp/flat notes in a series.
+CHG: Default to new "Piano Hero Music" folder at startup.  (User configurable
+     in the future.)
 FIX: Disabled MIDI input while game is paused to prevent cheating.
 FIX: Made MidiCommOut::Reset() actually reset everything by fully closing and
      reopening the device.  midiOutReset() apparently only turns off the keys
