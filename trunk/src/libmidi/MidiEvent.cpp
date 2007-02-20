@@ -236,6 +236,13 @@ void MidiEvent::SetChannel(unsigned char channel)
    m_status = m_status | channel;
 }
 
+void MidiEvent::SetVelocity(int velocity)
+{
+   if (Type() != MidiEventType_NoteOn) return;
+
+   m_data2 = static_cast<unsigned char>(velocity);
+}
+
 bool MidiEvent::HasText() const
 {
    if (Type() != MidiEventType_Meta) return false;

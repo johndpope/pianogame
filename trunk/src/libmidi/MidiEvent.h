@@ -60,6 +60,8 @@ public:
    // Off event).  Returns -1 for other event types.
    int NoteVelocity() const;
 
+   void SetVelocity(int velocity);
+
    // Returns which type of meta event this is (or
    // MetaEvent_Unknown if type() is not EventType_Meta).
    MidiMetaEventType MetaType() const;
