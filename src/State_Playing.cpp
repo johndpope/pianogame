@@ -130,6 +130,15 @@ void PlayingState::Play(microseconds_t delta_microseconds)
       case ModePlayedAutomatically: draw = true;   play = true;   break;
       }
 
+      // Even in "You Play" tracks, we have to play the non-note
+      // events as per usual.
+      if (m_state.track_properties[track_id].mode
+         && ev.Type() != MidiEventType_NoteOn
+         && ev.Type() != MidiEventType_NoteOff)
+      {
+         play = true;
+      }
+
       if (draw && (ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff))
       {
          int vel = ev.NoteVelocity();
@@ -169,9 +178,26 @@ void PlayingState::Listen()
       if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff) continue;
       string note_name = MidiEvent::NoteName(ev.NoteNumber());
 
-      // If this was a key-release, we don't have to do much
+      // On key release we have to look for existing "active" notes and turn them off.
       if (ev.Type() == MidiEventType_NoteOff || ev.NoteVelocity() == 0)
       {
+         // NOTE: This assumes mono-channel input.  If they're piping an entire MIDI file
+         //       (or even the *same* MIDI file) through another source, we could get the
+         //       same NoteId on different channels -- and this code would start behaving
+         //       incorrectly.
+         for (ActiveNoteSet::iterator i = m_active_notes.begin(); i != m_active_notes.end(); ++i)
+         {
+            if (ev.NoteNumber() != i->note_id) continue;
+
+            // Play it on the correct channel to turn the note we started
+            // previously, off.
+            ev.SetChannel(i->channel);
+            if (m_state.midi_out) m_state.midi_out->Write(ev);
+
+            m_active_notes.erase(i);
+            break;
+         }
+
          m_keyboard->SetKeyActive(note_name, false, FlatGray);
          continue;
       }
@@ -214,6 +240,19 @@ void PlayingState::Listen()
       {
          any_found = true;
          note_color = m_state.track_properties[closest_match->track_id].color;
+
+         // "Open" this note so we can catch the close later and turn off
+         // the note.
+         ActiveNote n;
+         n.channel = closest_match->channel;
+         n.note_id = closest_match->note_id;
+         n.velocity = closest_match->velocity;
+         m_active_notes.insert(n);
+
+         // Play it
+         ev.SetChannel(n.channel);
+         ev.SetVelocity(n.velocity);
+         if (m_state.midi_out) m_state.midi_out->Write(ev);
 
          // Adjust our statistics
          const static double NoteValue = 100.0;

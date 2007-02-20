@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "SharedState.h"
 #include "GameState.h"
@@ -16,6 +17,25 @@ struct TrackProperties;
 class Midi;
 class MidiCommOut;
 class MidiCommIn;
+
+struct ActiveNote
+{
+   bool operator()(const ActiveNote &lhs, const ActiveNote &rhs)
+   {
+      if (lhs.note_id < rhs.note_id) return true;
+      if (lhs.note_id > rhs.note_id) return false;
+
+      if (lhs.channel < rhs.channel) return true;
+      if (lhs.channel > rhs.channel) return false;
+
+      return false;
+   }
+
+   NoteId note_id;
+   unsigned char channel;
+   int velocity;
+};
+typedef std::set<ActiveNote, ActiveNote> ActiveNoteSet;
 
 class PlayingState : public GameState
 {
@@ -48,6 +68,8 @@ private:
 
    bool m_any_you_play_tracks;
    size_t m_look_ahead_you_play_note_count;
+
+   ActiveNoteSet m_active_notes;
 
    bool m_first_update;
 

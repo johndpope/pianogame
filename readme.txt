@@ -53,6 +53,7 @@ Changes
 
 Release 0.5.1
 -------------
+NEW: Your notes are played (in the correct instrument for the track)
 NEW: Tooltips on all menu controls and settings.
 NEW: 10 Sample songs from Game Music Themes.
 NEW: "Stray Notes" metric on stats screen

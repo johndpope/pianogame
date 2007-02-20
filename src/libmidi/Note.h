@@ -47,6 +47,11 @@ struct GenericNote
    NoteId note_id;
    size_t track_id;
 
+   // We have to drag a little extra info around so we can
+   // play the user's input correctly
+   unsigned char channel;
+   int velocity;
+
    NoteState state;
 };
 

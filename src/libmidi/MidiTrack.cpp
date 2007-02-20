@@ -75,6 +75,13 @@ MidiTrack MidiTrack::ReadFromStream(std::istream &stream)
    return t;
 }
 
+struct NoteInfo
+{
+   int velocity;
+   unsigned char channel;
+   unsigned long pulses;
+};
+
 void MidiTrack::BuildNoteSet()
 {
    m_note_set.clear();
@@ -87,7 +94,7 @@ void MidiTrack::BuildNoteSet()
    // begin a new one.
    //
    // A note_on with velocity 0 is a note_off
-   std::map<NoteId, unsigned long> m_active_notes;
+   std::map<NoteId, NoteInfo> m_active_notes;
 
    for (size_t i = 0; i < m_events.size(); ++i)
    {
@@ -98,16 +105,18 @@ void MidiTrack::BuildNoteSet()
       NoteId id = ev.NoteNumber();
 
       // Check for an active note
-      std::map<NoteId, unsigned long>::iterator find_ret = m_active_notes.find(id);
+      std::map<NoteId, NoteInfo>::iterator find_ret = m_active_notes.find(id);
       bool active_event = (find_ret !=  m_active_notes.end());
 
       // Close off the last event if there was one
       if (active_event)
       {
          Note n;
-         n.start = find_ret->second;
+         n.start = find_ret->second.pulses;
          n.end = m_event_pulses[i];
          n.note_id = id;
+         n.channel = find_ret->second.channel;
+         n.velocity = find_ret->second.velocity;
 
          // NOTE: This must be set at the next level up.  The track
          // itself has no idea what its index is.
@@ -122,7 +131,12 @@ void MidiTrack::BuildNoteSet()
       if (!on) continue;
 
       // Add a new active event
-      m_active_notes[id] = m_event_pulses[i];
+      NoteInfo info;
+      info.channel = ev.Channel();
+      info.velocity = ev.NoteVelocity();
+      info.pulses = m_event_pulses[i];
+
+      m_active_notes[id] = info;
    }
 
    // NOTE: No reason to report this error. It's non-critical

@@ -358,6 +358,8 @@ void Midi::TranslateNotes(const NoteSet &notes, unsigned short pulses_per_quarte
       
       trans.note_id = i->note_id;
       trans.track_id = i->track_id;
+      trans.channel = i->channel;
+      trans.velocity = i->velocity;
       trans.start = GetEventPulseInMicroseconds(i->start, pulses_per_quarter_note);
       trans.end = GetEventPulseInMicroseconds(i->end, pulses_per_quarter_note);
 
