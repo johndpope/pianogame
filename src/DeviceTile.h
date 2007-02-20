@@ -40,6 +40,11 @@ public:
 
    int GetDeviceId() const { return m_device_id; }
 
+   const ButtonState WholeTile() const { return whole_tile; }
+   const ButtonState ButtonPreview() const { return button_preview; }
+   const ButtonState ButtonLeft() const { return button_mode_left; }
+   const ButtonState ButtonRight() const { return button_mode_right; }
+
 private:
    int m_x;
    int m_y;

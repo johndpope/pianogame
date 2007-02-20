@@ -25,6 +25,8 @@ private:
    ButtonState m_continue_button;
    ButtonState m_back_button;
 
+   std::wstring m_tooltip;
+
    SharedState m_state;
 };
 

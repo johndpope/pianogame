@@ -39,6 +39,8 @@ private:
    ButtonState m_continue_button;
    ButtonState m_back_button;
 
+   std::wstring m_tooltip;
+
    std::vector<TrackTile> m_track_tiles;
 
    SharedState m_state;
