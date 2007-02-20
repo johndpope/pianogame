@@ -11,6 +11,8 @@ using namespace std;
 
 extern HWND g_hwnd;
 
+static bool first_time_directory_set = true;
+
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
    // Grab the filename of the last song we played from the
@@ -23,23 +25,35 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    wchar_t filename[BufferSize] = L"";
    wchar_t filetitle[BufferSize] = L"";
 
+   // NOTE: Disable this for now.  We're using the "default" music directory
+   /*
    if (StringCbCopyW(filename, BufferSize, last_filename.c_str()) == STRSAFE_E_INSUFFICIENT_BUFFER)
    {
       filename[0] = L'\0';
    }
+   */
+
+   wstring default_dir;
+   reg.Read(L"Default Music Directory", &default_dir, L"");
+   if (!SetCurrentDirectory(default_dir.c_str())) exit(1);
 
    OPENFILENAME ofn;
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
-   ofn.lStructSize =    sizeof(OPENFILENAME);
-   ofn.hwndOwner =      g_hwnd;
-   ofn.lpstrTitle =     L"Piano Hero: Choose a song to play";
-   ofn.lpstrFilter =    L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
-   ofn.lpstrFile =      filename;
-   ofn.nMaxFile =       BufferSize;
-   ofn.lpstrFileTitle = filetitle;
-   ofn.nMaxFileTitle =  BufferSize;
-   ofn.lpstrDefExt =    L"mid";
-   ofn.Flags =          OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+   ofn.lStructSize =     sizeof(OPENFILENAME);
+   ofn.hwndOwner =       g_hwnd;
+   ofn.lpstrTitle =      L"Piano Hero: Choose a song to play";
+   ofn.lpstrFilter =     L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
+   ofn.lpstrFile =       filename;
+   ofn.nMaxFile =        BufferSize;
+   ofn.lpstrFileTitle =  filetitle;
+   ofn.nMaxFileTitle =   BufferSize;
+   ofn.lpstrDefExt =     L"mid";
+   ofn.Flags =           OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+   if (first_time_directory_set)
+   {
+      ofn.lpstrInitialDir = default_dir.c_str();
+      first_time_directory_set = false;
+   }
 
    if (GetOpenFileName(&ofn))
    {

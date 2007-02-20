@@ -38,12 +38,13 @@ SectionIn RO
   File "license.txt"
 
   CreateDirectory "$DOCUMENTS\Piano Hero Music"
+  WriteRegStr HKCU "SOFTWARE\Piano Hero" "Default Music Directory" "$DOCUMENTS\Piano Hero Music"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\PianoHero "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero" "DisplayName" "Piano Hero ${VERSION} (remove only)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero" "DisplayName" "Piano Hero (remove only)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteUninstaller "uninstall.exe"
 SectionEnd
@@ -68,7 +69,7 @@ SectionEnd
 
 Section "Start Menu Shortcuts" ShortcutMenu
   CreateDirectory "$SMPROGRAMS\Piano Hero"
-  CreateShortCut "$SMPROGRAMS\Piano Hero\Play Piano Hero ${VERSION}.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
+  CreateShortCut "$SMPROGRAMS\Piano Hero\Play Piano Hero.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
   CreateShortCut "$SMPROGRAMS\Piano Hero\View Readme.lnk" "$INSTDIR\readme.txt"
   CreateShortCut "$SMPROGRAMS\Piano Hero\View License.lnk" "$INSTDIR\license.txt"
   CreateShortCut "$SMPROGRAMS\Piano Hero\Visit the Piano Hero Website.lnk" "http://www.halitestudios.com/pianohero.aspx"
@@ -78,7 +79,7 @@ SectionEnd
 
 
 Section /o "Desktop Icon" DesktopIcon
-  CreateShortCut "$DESKTOP\Play Piano Hero ${VERSION}.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
+  CreateShortCut "$DESKTOP\Play Piano Hero.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
 SectionEnd
 
 
@@ -120,7 +121,7 @@ Section "Uninstall"
   RMDir "$SMPROGRAMS\Piano Hero"
 
   ; remove Desktop shortcut
-  Delete "$DESKTOP\Play Piano Hero ${VERSION}.lnk"
+  Delete "$DESKTOP\Play Piano Hero.lnk"
 SectionEnd
 
 
