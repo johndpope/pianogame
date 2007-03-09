@@ -188,7 +188,7 @@ void TitleState::Update()
 
    // Check to see if we need to switch to a newly selected output device
    int output_id = m_output_tile.GetDeviceId();
-   if (!m_state.midi_out || output_id != m_state.midi_out->GetDeviceDescription().id)
+   if (!m_state.midi_out || output_id != static_cast<int>(m_state.midi_out->GetDeviceDescription().id))
    {
       if (m_state.midi_out) m_state.midi_out->Reset();
 
@@ -232,7 +232,7 @@ void TitleState::Update()
 
 
    int input_id = m_input_tile.GetDeviceId();
-   if (!m_state.midi_in || input_id != m_state.midi_in->GetDeviceDescription().id)
+   if (!m_state.midi_in || input_id != static_cast<int>(m_state.midi_in->GetDeviceDescription().id))
    {
       if (m_state.midi_in) m_state.midi_in->Reset();
       m_last_input_note_name = "";

@@ -51,7 +51,7 @@ private:
    void DrawWhiteKeys(HDC hdc, bool active_only, int key_count, int key_width, int key_height, 
       int key_space, int x_offset, int y_offset) const;
 
-   void DrawBlackKeys(HDC hdc, bool active_only,int white_key_count, int white_width, int white_height,
+   void DrawBlackKeys(HDC hdc, bool active_only,int white_key_count, int white_width,
       int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const;
 
    void DrawGuides(HDC hdc, int key_count, int key_width, int key_space,

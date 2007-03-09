@@ -19,7 +19,7 @@ void midi_check(MMRESULT ret)
    switch (ret)
    {
    case MIDIERR_NODEVICE:     throw MidiError_MM_NoDevice;
-   case MMSYSERR_ALLOCATED:   throw MidiError_MM_AlreadyAlocated;
+   case MMSYSERR_ALLOCATED:   throw MidiError_MM_AlreadyAllocated;
    case MMSYSERR_BADDEVICEID: throw MidiError_MM_BadDeviceID;
    case MMSYSERR_INVALPARAM:  throw MidiError_MM_InvalidParameter;
    case MMSYSERR_NODRIVER:    throw MidiError_MM_NoDriver;
@@ -28,7 +28,7 @@ void midi_check(MMRESULT ret)
    }
 }
 
-void CALLBACK MidiInputCallback(HMIDIIN handle_in, UINT msg, DWORD_PTR instance, DWORD p1, DWORD p2)
+void CALLBACK MidiInputCallback(HMIDIIN, UINT msg, DWORD_PTR instance, DWORD p1, DWORD p2)
 {
    reinterpret_cast<MidiCommIn*>(instance)->InputCallback(msg, p1, p2);
 }
@@ -79,7 +79,7 @@ MidiCommIn::~MidiCommIn()
 // This is only called by the callback function.  The reason this
 // is public (and the callback isn't a static member) is to keep the
 // HMIDIIN definition out of this classes header.
-void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long p2)
+void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long)
 {
    switch (msg)
    {

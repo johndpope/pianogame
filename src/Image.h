@@ -36,6 +36,9 @@ public:
 
    const ImageErrorCode m_error;
    const std::wstring m_additional;
+
+private:
+   ImageError operator=(const ImageError&);
 };
 
 

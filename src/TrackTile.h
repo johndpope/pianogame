@@ -32,7 +32,7 @@ class TrackTile
 public:
    TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode mode);
 
-   void Update(const MouseInfo &translated_mouse, Midi *midi);
+   void Update(const MouseInfo &translated_mouse);
    void Draw(HDC hdc, const Midi *midi) const;
 
    int GetX() { return m_x; }

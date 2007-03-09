@@ -190,7 +190,7 @@ void TrackSelectionState::Update()
       mouse.x -= t.GetX();
       mouse.y -= t.GetY();
 
-      t.Update(mouse, m_state.midi);
+      t.Update(mouse);
 
       if (t.ButtonLeft().hovering || t.ButtonRight().hovering)
       {

@@ -50,7 +50,7 @@ enum MidiErrorCode
 
    // MMSYSTEM Errors for MIDI I/O
    MidiError_MM_NoDevice,
-   MidiError_MM_AlreadyAlocated,
+   MidiError_MM_AlreadyAllocated,
    MidiError_MM_BadDeviceID,
    MidiError_MM_InvalidParameter,
    MidiError_MM_NoDriver,
@@ -72,6 +72,9 @@ public:
    std::wstring GetErrorDescription() const;
 
    const MidiErrorCode m_error;
+
+private:
+   MidiError operator =(const MidiError&);
 };
 
 enum MidiEventType
