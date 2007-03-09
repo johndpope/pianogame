@@ -53,6 +53,7 @@ Changes
 
 Release 0.6.0
 -------------
+NEW: Right-click association option in installer
 FIX: Don't exit automatically if "Piano Hero MIDI" folder doesn't exist.
 
 
