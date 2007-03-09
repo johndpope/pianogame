@@ -146,7 +146,9 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
             }
             else
             {
-               exit(0);
+               // They pressed cancel, so they must not want to run
+               // the app anymore.
+               return 0;
             }
          }
       }

@@ -51,6 +51,11 @@ The Legend of Zelda: Ocarina of Time - Zelda's Lullaby
 
 Changes
 
+Release 0.6.0
+-------------
+FIX: Don't exit automatically if "Piano Hero MIDI" folder doesn't exist.
+
+
 Release 0.5.1
 -------------
 NEW: Your notes are played (in the correct instrument for the track)
