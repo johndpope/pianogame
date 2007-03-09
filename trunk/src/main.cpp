@@ -33,34 +33,37 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 // TODO: Make this better
 HWND g_hwnd;
 
-int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
+int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
 {
    const static wstring application_name = L"PianoHero";
    const static wstring friendly_app_name = WSTRING(L"Piano Hero " << PianoHeroVersionString);
+
+   const static wstring error_header1 = L"Piano Hero detected a";
+   const static wstring error_header2 = L" problem and must close:\n\n";
+   const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+
+   WNDCLASS wndclass;
+   wndclass.style         = CS_HREDRAW | CS_VREDRAW;
+   wndclass.lpfnWndProc   = WndProc;
+   wndclass.cbClsExtra    = 0;
+   wndclass.cbWndExtra    = 0;
+   wndclass.hInstance     = instance;
+   wndclass.hIcon         = LoadIcon(instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+   wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW);
+   wndclass.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+   wndclass.lpszMenuName  = NULL;
+   wndclass.lpszClassName = application_name.c_str();
+
+   if (!RegisterClass (&wndclass))
+   {
+      MessageBox(NULL, L"There was a problem registering the Window class!", application_name.c_str(), MB_ICONERROR);
+      return 0;
+   }
 
 #ifndef _DEBUG
    try
 #endif
    {
-      WNDCLASS wndclass;
-      wndclass.style         = CS_HREDRAW | CS_VREDRAW;
-      wndclass.lpfnWndProc   = WndProc;
-      wndclass.cbClsExtra    = 0;
-      wndclass.cbWndExtra    = 0;
-      wndclass.hInstance     = instance;
-      wndclass.hIcon         = LoadIcon(instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-      wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW);
-      wndclass.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-      wndclass.lpszMenuName  = NULL;
-      wndclass.lpszClassName = application_name.c_str();
-
-      if (!RegisterClass (&wndclass))
-      {
-         MessageBox(NULL, L"There was a problem registering the Window class!", application_name.c_str(), MB_ICONERROR);
-         return 0;
-      }
-      
-      
       wstring command_line;
 
       // CommandLineToArgvW is only available in Windows XP or later.  So,
@@ -173,6 +176,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
       state_manager.SetInitialState(new TitleState(state));
 
       MSG msg;
+      ZeroMemory(&msg, sizeof(MSG));
+
       bool running = true;
       while (running)
       {
@@ -195,54 +200,34 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 #ifndef _DEBUG
    catch (const PianoHeroError &e)
    {
-      wstring wrapped_description = WSTRING(L"Detected a problem:\n") + e.GetErrorDescription();
-      MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
-
-      return 1;
+      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
+      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
    }
    catch (const MidiError &e)
    {
-      wstring wrapped_description = WSTRING(L"Detected a MIDI problem:\n") + e.GetErrorDescription();
-      MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
-
-      return 1;
+      wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
+      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
    }
    catch (const ImageError &e)
    {
-      wstring wrapped_description = WSTRING(L"Detected an image problem:\n") + e.GetErrorDescription();
-      MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
-
-      return 1;
+      wstring wrapped_description = WSTRING(error_header1 << L"n image" << error_header2 << e.GetErrorDescription() << error_footer);
+      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
    }
+   catch (const std::exception &e)
+   {
+      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.what() << error_footer);
+      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+   }
+   catch (...)
+   {
+      wstring wrapped_description = WSTRING(L"Piano Hero detected an unknown problem and must close!" << error_footer);
+      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+   }
+
+   return 1;
+
 #endif
 }
-
-void UpdatePlaying()
-{
-   // NOTE: This is what midi input looks like...
-
-   /*
-   // Read in MIDI
-   while (midi_in.KeepReading())
-   {
-   MidiEvent ev = midi_in.Read();
-   if (ev.Type() == MidiEventType_SysEx) continue;
-
-   if (ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff)
-   {
-   int vel = ev.NoteVelocity();
-   wstring name = MidiEvent::NoteName(ev.NoteNumber());
-   last_note = WSTRING(name << L", " << vel);
-
-   keyboard.SetKeyActive(name, (vel > 0) );
-
-   midi_out.Write(ev);
-   }
-   }
-   */
-}
-
-
 
 // Windows message callback function
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

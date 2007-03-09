@@ -87,8 +87,6 @@ Image::Image(int width, int height, COLORREF initial_fill)
 
 void Image::ThrowWithLastError(ImageErrorCode code)
 {
-   DWORD last_error = GetLastError();
-
    LPWSTR raw_message = 0;
    FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
       0, GetLastError(), 0, (LPWSTR) &raw_message, 0, 0);

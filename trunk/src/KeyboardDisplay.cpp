@@ -35,7 +35,6 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
    const static double BlackWidthHeightRatio = 7.9166666;
    const static double WhiteBlackWidthRatio = 0.5454545;
 
-   const char starting_note = GetStartingNote();
    const int white_key_count = GetWhiteKeyCount();
 
    // Calculate the largest white key size we can, and then
@@ -71,7 +70,7 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
       DrawGuides(bg, white_key_count, white_width, white_space, x_offset, 0, y_offset);
 
       DrawWhiteKeys(bg, false, white_key_count, white_width, white_height, white_space, x_offset, y_offset);
-      DrawBlackKeys(bg, false, white_key_count, white_width, white_height, black_width, black_height, white_space, x_offset, y_offset, black_offset);
+      DrawBlackKeys(bg, false, white_key_count, white_width, black_width, black_height, white_space, x_offset, y_offset, black_offset);
 
       m_cached_background.endDrawingOn();
 
@@ -86,7 +85,7 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
    DrawNotes(hdc, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
 
    DrawWhiteKeys(hdc, true, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
-   DrawBlackKeys(hdc, false, white_key_count, white_width, white_height, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
+   DrawBlackKeys(hdc, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
 }
 
 int KeyboardDisplay::GetStartingOctave() const
@@ -192,7 +191,7 @@ void KeyboardDisplay::DrawWhiteKeys(HDC hdc, bool active_only, int key_count, in
 
 }
 
-void KeyboardDisplay::DrawBlackKeys(HDC hdc, bool active_only, int white_key_count, int white_width, int white_height,
+void KeyboardDisplay::DrawBlackKeys(HDC hdc, bool active_only, int white_key_count, int white_width,
    int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const
 {
    HBRUSH black_brush = CreateSolidBrush(RGB(0x20, 0x20, 0x20));
@@ -267,7 +266,6 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
 
    HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, thick_guide));
 
-   int octave_start_x = x_offset;
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
    for (int i = 0; i < key_count+1; ++i)

@@ -26,7 +26,7 @@ public:
    TextWriter& next_line();
 
    // Allow manipulators
-   TextWriter& operator<<(TextWriter& (*_Pfn)(TextWriter&))
+   TextWriter& operator<<(TextWriter& (__cdecl *_Pfn)(TextWriter&))
    {   
       (*_Pfn)(*(TextWriter *)this);
       return (*this);

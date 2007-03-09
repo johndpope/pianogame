@@ -386,7 +386,7 @@ MidiEventListWithTrackId Midi::Update(microseconds_t delta_microseconds)
    const size_t track_count = m_tracks.size();
    for (size_t i = 0; i < track_count; ++i)
    {
-      MidiEventList &track_events = m_tracks[i].Update(delta_microseconds);
+      MidiEventList track_events = m_tracks[i].Update(delta_microseconds);
 
       const size_t event_count = track_events.size();
       for (size_t j = 0; j < event_count; ++j)

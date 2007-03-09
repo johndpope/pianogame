@@ -18,6 +18,8 @@ public:
 
 private:
    const std::string m_error;
+
+   GameStateError operator=(const GameStateError&);
 };
 
 class GameStateManager;

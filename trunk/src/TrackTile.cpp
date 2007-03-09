@@ -20,7 +20,7 @@ TrackTile::TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode 
    button_preview    = ButtonState(264, 68, GraphicWidth, GraphicHeight);
 }
 
-void TrackTile::Update(const MouseInfo &translated_mouse, Midi *midi)
+void TrackTile::Update(const MouseInfo &translated_mouse)
 {
    // Update the mouse state of each button
    whole_tile.Update(translated_mouse);

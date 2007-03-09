@@ -21,6 +21,9 @@ public:
    std::wstring GetErrorDescription() const;
 
    const PianoHeroErrorCode m_error;
+
+private:
+   PianoHeroError operator=(const PianoHeroError&);
 };
 
 #endif

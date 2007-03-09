@@ -279,7 +279,6 @@ void PlayingState::Listen()
 
 void PlayingState::Update()
 {
-   const microseconds_t current_microseconds = GetStateMilliseconds() * 1000;
    microseconds_t delta_microseconds = static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000;
 
    // The 100 term is really paired with the playback speed, but this
