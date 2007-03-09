@@ -35,7 +35,12 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
    wstring default_dir;
    reg.Read(L"Default Music Directory", &default_dir, L"");
-   if (!SetCurrentDirectory(default_dir.c_str())) exit(1);
+   if (!SetCurrentDirectory(default_dir.c_str()))
+   {
+      // TODO: Log something some day, but take no other action.
+      //
+      // This is alright.
+   }
 
    OPENFILENAME ofn;
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
