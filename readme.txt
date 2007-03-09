@@ -8,9 +8,7 @@ Piano Hero is written by Nicholas Piegdon.
 The following people have also contributed to the project:
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
-
-Piano Hero uses the TinyXml XML parser.
-See http://tinyxml.sourceforge.net/ for more information.
+- Dave Ray for his STRING/WSTRING macro
 
 --------------------------------------------------------------------------------
 
