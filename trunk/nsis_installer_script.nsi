@@ -78,6 +78,12 @@ SectionEnd
 
 
 
+Section "Right-click Association" Association
+  WriteRegStr HKCR "MIDFile\shell\Play in Piano Hero\command" "" "$\"$INSTDIR\Piano Hero.exe$\" $\"%1$\""
+SectionEnd
+
+
+
 Section /o "Desktop Icon" DesktopIcon
   CreateShortCut "$DESKTOP\Play Piano Hero.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
 SectionEnd
@@ -122,6 +128,10 @@ Section "Uninstall"
 
   ; remove Desktop shortcut
   Delete "$DESKTOP\Play Piano Hero.lnk"
+
+  ; remove File Association
+  DeleteRegKey HKCR "MIDFile\shell\Play in Piano Hero"
+
 SectionEnd
 
 
@@ -130,11 +140,13 @@ SectionEnd
 LangString DESC_PianoHero ${LANG_ENGLISH} "Install the Piano Hero application files (required)."
 LangString DESC_MusicSamples ${LANG_ENGLISH} "Install 10 sample video game MIDI songs from Game Music Themes."
 LangString DESC_ShortcutMenu ${LANG_ENGLISH} "Create a Piano Hero Start Menu group on the 'All Programs' section of your Start Menu."
+LangString DESC_Association ${LANG_ENGLISH} "Add a right-click 'Play in Piano Hero' file association to MIDI files."
 LangString DESC_DesktopIcon ${LANG_ENGLISH} "Create a Piano Hero icon on your Windows Desktop."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${PianoHero} $(DESC_PianoHero)
   !insertmacro MUI_DESCRIPTION_TEXT ${MusicSamples} $(DESC_MusicSamples)
   !insertmacro MUI_DESCRIPTION_TEXT ${ShortcutMenu} $(DESC_ShortcutMenu)
+  !insertmacro MUI_DESCRIPTION_TEXT ${Association} $(DESC_Association)
   !insertmacro MUI_DESCRIPTION_TEXT ${DesktopIcon} $(DESC_DesktopIcon)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
