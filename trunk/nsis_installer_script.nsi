@@ -37,9 +37,6 @@ SectionIn RO
   File "readme.txt"
   File "license.txt"
 
-  CreateDirectory "$DOCUMENTS\Piano Hero Music"
-  WriteRegStr HKCU "SOFTWARE\Piano Hero" "Default Music Directory" "$DOCUMENTS\Piano Hero Music"
-
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\PianoHero "Install_Dir" "$INSTDIR"
 
@@ -52,6 +49,8 @@ SectionEnd
 
 
 Section "Sample Music" MusicSamples
+  CreateDirectory "$DOCUMENTS\Piano Hero Music"
+  WriteRegStr HKCU "SOFTWARE\Piano Hero" "Default Music Directory" "$DOCUMENTS\Piano Hero Music"
   SetOutPath "$DOCUMENTS\Piano Hero Music"
   File "music\Bubble Bobble - Main Theme.mid"
   File "music\Dragon Warrior - Town Theme.mid"
@@ -120,7 +119,9 @@ Section "Uninstall"
   Delete "$DOCUMENTS\Piano Hero Music\Zelda A Link to the Past - Overworld Theme.mid"
   Delete "$DOCUMENTS\Piano Hero Music\Zelda Ocarina of Time - Lost Woods.mid"
   Delete "$DOCUMENTS\Piano Hero Music\Zelda Ocarina of Time - Zelda's Lullaby.mid"
-  RMDir  "$DOCUMENTS\Piano Hero Music" ; this won't delete the directory if the user has added anything
+
+  ; this won't delete the directory if the user has added anything
+  RMDir  "$DOCUMENTS\Piano Hero Music"
 
   ; remove Start Menu shortcuts
   Delete "$SMPROGRAMS\Piano Hero\*.*"
