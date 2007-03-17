@@ -3,6 +3,7 @@
 // See license.txt for license information
 
 #include "GameState.h"
+#include "Renderer.h"
 
 void GameState::ChangeState(GameState *new_state)
 {
@@ -41,13 +42,6 @@ void GameState::SetManager(GameStateManager *manager)
    m_manager = manager;
    Init();
 }
-
-
-
-
-
-
-
 
 void GameStateManager::KeyPress(GameKey key)
 {
@@ -180,7 +174,8 @@ void GameStateManager::Draw(HDC hdc)
    HGDIOBJ previous_object = SelectObject(backbuffer_hdc, backbuffer);
    SetBkMode(backbuffer_hdc, TRANSPARENT);
 
-   m_current_state->Draw(backbuffer_hdc);
+   Renderer r(backbuffer_hdc);
+   m_current_state->Draw(r);
 
    // Copy the backbuffer to the screen
    BitBlt(hdc, 0, 0, GetStateWidth(), GetStateHeight(), backbuffer_hdc, 0, 0, SRCCOPY);

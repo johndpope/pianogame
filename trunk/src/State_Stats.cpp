@@ -5,6 +5,7 @@
 #include "State_Stats.h"
 #include "State_TrackSelection.h"
 #include "State_Playing.h"
+#include "Renderer.h"
 
 #include <iomanip>
 
@@ -45,14 +46,14 @@ void StatsState::Update()
    if (m_continue_button.hovering) m_tooltip = L"Try this song again with the same settings.";
 }
 
-void StatsState::Draw(HDC hdc) const
+void StatsState::Draw(Renderer &renderer) const
 {
-   Layout::DrawTitle(hdc, m_state.song_title);
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawTitle(renderer.GetHdc(), m_state.song_title);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(hdc, m_continue_button, L"Retry Song", 28);
-   Layout::DrawButton(hdc, m_back_button, L"Track Selection", 13);
+   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Retry Song", 28);
+   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Track Selection", 13);
 
    const static COLORREF Title = RGB(114, 159, 207);
    const static COLORREF Highlight = RGB(138, 226, 52);
@@ -84,7 +85,7 @@ void StatsState::Draw(HDC hdc) const
    int left = GetStateWidth() / 2 - (300 / 2);
    const static int InstructionsY = 234;
    
-   TextWriter grade_text(left + 110, InstructionsY + 43, hdc, false, 72);
+   TextWriter grade_text(left + 110, InstructionsY + 43, renderer.GetHdc(), false, 72);
    grade_text << grade;
    
    int stray_percent = 0;
@@ -93,7 +94,7 @@ void StatsState::Draw(HDC hdc) const
    int average_speed = 0;
    if (s.notes_user_could_have_played > 0) average_speed = s.speed_integral / s.notes_user_could_have_played;
 
-   TextWriter score(left, InstructionsY, hdc, false, Layout::TitleFontSize);
+   TextWriter score(left, InstructionsY, renderer.GetHdc(), false, Layout::TitleFontSize);
    score << Text(L"Song Statistics", Title) << newline
       << newline 
       << newline 
@@ -109,6 +110,6 @@ void StatsState::Draw(HDC hdc) const
       << Text(L"Longest Combo: ", Gray) << WSTRING(s.longest_combo) << newline
       << newline;
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, hdc, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer.GetHdc(), true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 }

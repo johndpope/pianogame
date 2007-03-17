@@ -8,7 +8,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <windows.h>
 
 #include "Image.h"
 #include "libmidi/Note.h"
@@ -27,6 +26,7 @@ enum TrackColor;
 
 typedef std::map<std::string, TrackColor> KeyNames;
 struct TrackProperties;
+class Renderer;
 
 class KeyboardDisplay
 {
@@ -35,7 +35,7 @@ public:
 
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
-   void Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes,
+   void Draw(Renderer &renderer, int x, int y, const TranslatedNoteSet &notes,
       microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties);
 
@@ -48,16 +48,16 @@ private:
    bool m_background_initialized;
    Image m_cached_background;
 
-   void DrawWhiteKeys(HDC hdc, bool active_only, int key_count, int key_width, int key_height, 
+   void DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height, 
       int key_space, int x_offset, int y_offset) const;
 
-   void DrawBlackKeys(HDC hdc, bool active_only,int white_key_count, int white_width,
+   void DrawBlackKeys(Renderer &renderer, bool active_only,int white_key_count, int white_width,
       int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const;
 
-   void DrawGuides(HDC hdc, int key_count, int key_width, int key_space,
+   void DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,
       int x_offset, int y, int y_offset) const;
 
-   void DrawNotes(HDC hdc, int white_width, int key_space, int black_width, int black_offset,
+   void DrawNotes(Renderer &renderer, int white_width, int key_space, int black_width, int black_offset,
       int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
       microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties) const;

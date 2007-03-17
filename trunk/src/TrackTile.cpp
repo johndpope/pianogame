@@ -81,25 +81,25 @@ void TrackTile::Draw(HDC hdc, const Midi *midi) const
    const MidiTrack &track = midi->Tracks()[m_track_id];
 
    bool gray_out_buttons = false;
-   COLORREF light  = TrackColorNoteWhite[m_color];
-   COLORREF medium = TrackColorNoteBlack[m_color];
-   COLORREF dark   = TrackColorNoteBorder[m_color];
+   Color light  = TrackColorNoteWhite[m_color];
+   Color medium = TrackColorNoteBlack[m_color];
+   Color dark   = TrackColorNoteBorder[m_color];
 
    if (m_mode == ModePlayedButHidden || m_mode == ModeNotPlayed)
    {
       gray_out_buttons = true;
-      light  = RGB(0xB0,0xB0,0xB0);
-      medium = RGB(0x70,0x70,0x70);
-      dark   = RGB(0x50,0x50,0x50);
+      light  = ToColor(0xB0,0xB0,0xB0);
+      medium = ToColor(0x70,0x70,0x70);
+      dark   = ToColor(0x50,0x50,0x50);
    }
 
-   COLORREF color_tile = dark;
-   COLORREF color_tile_hovered = medium;
-   Image tile(TrackTileWidth, TrackTileHeight, whole_tile.hovering ? color_tile_hovered : color_tile );
+   Color color_tile = dark;
+   Color color_tile_hovered = medium;
+   Image tile(TrackTileWidth, TrackTileHeight, ToRGB(whole_tile.hovering ? color_tile_hovered : color_tile) );
    HDC tile_hdc = tile.beginDrawingOn();
 
    // Draw horizontal rule between info and mode
-   HPEN pen = CreatePen(PS_SOLID, 1, light);
+   HPEN pen = CreatePen(PS_SOLID, 1, ToRGB(light));
    HPEN old_pen = static_cast<HPEN>(SelectObject(tile_hdc, pen));
    MoveToEx(tile_hdc, 10, 60, 0);
    LineTo(tile_hdc, TrackTileWidth - 10, 60);

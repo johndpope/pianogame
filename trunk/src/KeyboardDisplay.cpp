@@ -6,17 +6,9 @@
 #include "TrackProperties.h"
 #include "PianoHeroError.h"
 #include "string_util.h"
+#include "Renderer.h"
 
 using namespace std;
-
-struct NoteBrush
-{
-   HBRUSH white;
-   HBRUSH black;
-   HBRUSH hit;
-   HBRUSH outline;
-};
-
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
    : m_size(size), m_width(pixelWidth), m_height(pixelHeight),
@@ -26,7 +18,7 @@ KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHei
 
 
 
-void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes,
+void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNoteSet &notes,
                            microseconds_t show_duration, microseconds_t current_time,
                            const std::vector<TrackProperties> &track_properties)
 {
@@ -66,11 +58,12 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
       m_active_keys = KeyNames();
 
       HDC bg = m_cached_background.beginDrawingOn();
+      Renderer brenderer(bg);
 
-      DrawGuides(bg, white_key_count, white_width, white_space, x_offset, 0, y_offset);
+      DrawGuides(brenderer, white_key_count, white_width, white_space, x_offset, 0, y_offset);
 
-      DrawWhiteKeys(bg, false, white_key_count, white_width, white_height, white_space, x_offset, y_offset);
-      DrawBlackKeys(bg, false, white_key_count, white_width, black_width, black_height, white_space, x_offset, y_offset, black_offset);
+      DrawWhiteKeys(brenderer, false, white_key_count, white_width, white_height, white_space, x_offset, y_offset);
+      DrawBlackKeys(brenderer, false, white_key_count, white_width, black_width, black_height, white_space, x_offset, y_offset, black_offset);
 
       m_cached_background.endDrawingOn();
 
@@ -78,14 +71,14 @@ void KeyboardDisplay::Draw(HDC hdc, int x, int y, const TranslatedNoteSet &notes
       m_background_initialized = true;
    }
 
-   m_cached_background.beginDrawing(hdc);
+   m_cached_background.beginDrawing(renderer.GetHdc());
    m_cached_background.draw(x, y);
    m_cached_background.endDrawing();
 
-   DrawNotes(hdc, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
+   DrawNotes(renderer, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
 
-   DrawWhiteKeys(hdc, true, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
-   DrawBlackKeys(hdc, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
+   DrawWhiteKeys(renderer, true, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
+   DrawBlackKeys(renderer, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
 }
 
 int KeyboardDisplay::GetStartingOctave() const
@@ -149,59 +142,42 @@ int KeyboardDisplay::GetWhiteKeyCount() const
 }
 
 
-void KeyboardDisplay::DrawWhiteKeys(HDC hdc, bool active_only, int key_count, int key_width, int key_height,
+void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height,
    int key_space, int x_offset, int y_offset) const
 {
-   HBRUSH white_brush = WHITE_BRUSH;
-
-   HBRUSH color_brushes[TrackColorCount];
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      color_brushes[i] = CreateSolidBrush(TrackColorNoteWhite[i]);
-   }
+   Color white = ToColor(255, 255, 255);
 
    char current_white = GetStartingNote();
    int current_octave = GetStartingOctave() + 1;
    for (int i = 0; i < key_count; ++i)
    {
-      const int key_x = i * (key_width + key_space) + x_offset;
-
-      RECT white_rect = { key_x, y_offset, key_x + key_width, y_offset + key_height };
-
       // Check to see if this is one of the active notes
       const string note_name = STRING(current_white << current_octave);
 
       KeyNames::const_iterator find_result = m_active_keys.find(note_name);
       bool active = (find_result != m_active_keys.end());
 
-      HBRUSH brush = white_brush;
-      if (active) brush = color_brushes[find_result->second];
+      Color c = white;
+      if (active) c = TrackColorNoteWhite[find_result->second];
 
-      if ((active_only && active) || !active_only) FillRect(hdc, &white_rect, brush);
+      if ((active_only && active) || !active_only)
+      {
+         renderer.SetColor(c);
+
+         const int key_x = i * (key_width + key_space) + x_offset;
+         renderer.DrawQuad(key_x, y_offset, key_width, key_height);
+      }
 
       current_white++;
       if (current_white == 'H') current_white = 'A';
       if (current_white == 'C') current_octave++;
    }
-
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      DeleteObject(color_brushes[i]);
-   }
-
 }
 
-void KeyboardDisplay::DrawBlackKeys(HDC hdc, bool active_only, int white_key_count, int white_width,
+void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, bool active_only, int white_key_count, int white_width,
    int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const
 {
-   HBRUSH black_brush = CreateSolidBrush(RGB(0x20, 0x20, 0x20));
-
-   // Create brushes for each of our possible note colors
-   HBRUSH color_brushes[TrackColorCount];
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      color_brushes[i] = CreateSolidBrush(TrackColorNoteBlack[i]);
-   }
+   Color black = ToColor(0x20, 0x20, 0x20);
 
    char current_white = GetStartingNote();
    int current_octave = GetStartingOctave() + 1;
@@ -218,20 +194,22 @@ void KeyboardDisplay::DrawBlackKeys(HDC hdc, bool active_only, int white_key_cou
       case 'F':
       case 'G':
          {
-            const int start_x = i * (white_width + key_space) + x_offset + black_offset;
-
-            RECT black_rect = { start_x, y_offset, start_x + black_width, y_offset + black_height };
-
             // Check to see if this is one of the active notes
             const string note_name = STRING(current_white << '#' << current_octave);
 
             KeyNames::const_iterator find_result = m_active_keys.find(note_name);
             bool active = (find_result != m_active_keys.end());
 
-            HBRUSH brush = black_brush;
-            if (active) brush = color_brushes[find_result->second];
+            Color c = black;
+            if (active) c = TrackColorNoteBlack[find_result->second];
 
-            if (!active_only || (active_only && active)) FillRect(hdc, &black_rect, brush);
+            if (!active_only || (active_only && active))
+            {
+               renderer.SetColor(c);
+
+               const int start_x = i * (white_width + key_space) + x_offset + black_offset;
+               renderer.DrawQuad(start_x, y_offset, black_width, black_height);
+            }
          }
       }
 
@@ -239,32 +217,23 @@ void KeyboardDisplay::DrawBlackKeys(HDC hdc, bool active_only, int white_key_cou
       if (current_white == 'H') current_white = 'A';
       if (current_white == 'C') current_octave++;
    }
-
-   DeleteObject(black_brush);
-
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      DeleteObject(color_brushes[i]);
-   }
 }
 
-void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_space,
+void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,
                                  int x_offset, int y, int y_offset) const
 {
    const static int PixelsOffKeyboard = 2;
    int keyboard_width = key_width*key_count + key_space*(key_count-1);
 
    // Fill the background of the note-falling area
-   HBRUSH fill_brush = CreateSolidBrush(RGB(0x60, 0x60, 0x60));
-
-   RECT fill_rect = { x_offset, y, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard };
-   FillRect(hdc, &fill_rect, fill_brush);
+   renderer.SetColor(0x60, 0x60, 0x60);
+   renderer.DrawQuad(x_offset, y, keyboard_width, y_offset - PixelsOffKeyboard);
 
    HPEN thick_guide = CreatePen(PS_SOLID, 2, RGB(0x48, 0x48, 0x48));
    HPEN thin_guide = CreatePen(PS_SOLID, 1, RGB(0x50, 0x50, 0x50));
    HPEN center_guide = CreatePen(PS_SOLID, 1, RGB(0x70, 0x70, 0x70));
 
-   HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, thick_guide));
+   HPEN old_pen = static_cast<HPEN>(SelectObject(renderer.GetHdc(), thick_guide));
 
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
@@ -272,18 +241,18 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
    {
       const int key_x = i * (key_width + key_space) + x_offset - 1;
 
-      MoveToEx(hdc, key_x, y, 0);
+      MoveToEx(renderer.GetHdc(), key_x, y, 0);
 
       bool draw_guide = true;
       switch (current_white)
       {
       case 'C':
-         if (current_octave == 5) SelectObject(hdc, center_guide);
-         else SelectObject(hdc, thin_guide);
+         if (current_octave == 5) SelectObject(renderer.GetHdc(), center_guide);
+         else SelectObject(renderer.GetHdc(), thin_guide);
          break;
 
       case 'F':
-         SelectObject(hdc, thick_guide);
+         SelectObject(renderer.GetHdc(), thick_guide);
          break;
 
       case 'D':
@@ -300,7 +269,7 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
 
       if (draw_guide)
       {
-         LineTo (hdc, key_x, y + y_offset - PixelsOffKeyboard);
+         LineTo (renderer.GetHdc(), key_x, y + y_offset - PixelsOffKeyboard);
       }
 
       current_white++;
@@ -308,39 +277,27 @@ void KeyboardDisplay::DrawGuides(HDC hdc, int key_count, int key_width, int key_
       if (current_white == 'C') current_octave++;
    }
 
-   SelectObject(hdc, thick_guide);
+   SelectObject(renderer.GetHdc(), thick_guide);
 
    // Draw horizontal-lines
-   MoveToEx(hdc, x_offset,                  y, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y);
-   MoveToEx(hdc, x_offset,                  y + y_offset, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y + y_offset);
-   MoveToEx(hdc, x_offset,                  y + y_offset - PixelsOffKeyboard, 0);
-   LineTo  (hdc, x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard);
+   MoveToEx(renderer.GetHdc(), x_offset,                  y, 0);
+   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y);
+   MoveToEx(renderer.GetHdc(), x_offset,                  y + y_offset, 0);
+   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y + y_offset);
+   MoveToEx(renderer.GetHdc(), x_offset,                  y + y_offset - PixelsOffKeyboard, 0);
+   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard);
 
-   DeleteObject(fill_brush);
-
-   SelectObject(hdc, old_pen);
+   SelectObject(renderer.GetHdc(), old_pen);
    DeleteObject(thin_guide);
    DeleteObject(thick_guide);
    DeleteObject(center_guide);
 }
 
-void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int black_width, int black_offset,
+void KeyboardDisplay::DrawNotes(Renderer &renderer, int white_width, int key_space, int black_width, int black_offset,
                                  int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
                                  microseconds_t show_duration, microseconds_t current_time,
                                  const std::vector<TrackProperties> &track_properties) const
 {
-   // Create brushes for each of our possible note colors
-   NoteBrush brushes[TrackColorCount];
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      brushes[i].white   = CreateSolidBrush(TrackColorNoteWhite[i]);
-      brushes[i].black   = CreateSolidBrush(TrackColorNoteBlack[i]);
-      brushes[i].hit     = CreateSolidBrush(TrackColorNoteHit[i]);
-      brushes[i].outline = CreateSolidBrush(TrackColorNoteBorder[i]);
-   }
-
    for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
    {
       const TrackMode mode = track_properties[i->track_id].mode;
@@ -348,7 +305,7 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
       if (mode == ModePlayedButHidden) continue;
 
       const TrackColor color = track_properties[i->track_id].color;
-      const NoteBrush &brush_set = (i->state == UserMissed ? brushes[MissedNote] : brushes[color]);
+      const int &brush_id = (i->state == UserMissed ? MissedNote : color);
 
       // This list is sorted by note start time.  The moment we encounter
       // a note scrolled off the window, we're done drawing
@@ -412,20 +369,15 @@ void KeyboardDisplay::DrawNotes(HDC hdc, int white_width, int key_space, int bla
          while ( (outline_rect.bottom - outline_rect.top) < 3) outline_rect.bottom++;
       }
 
+      renderer.SetColor(TrackColorNoteBorder[brush_id]);
+      renderer.DrawQuad(outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left, outline_rect.bottom - outline_rect.top);
+
+      Color c = (i->state == UserHit ? TrackColorNoteHit[brush_id] : TrackColorNoteWhite[brush_id]);
+      if (is_black) c = (i->state == UserHit ? TrackColorNoteHit[brush_id] : TrackColorNoteBlack[brush_id]);
+      renderer.SetColor(c);
+
       const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
-      FillRect(hdc, &outline_rect, brush_set.outline);
-
-      HBRUSH note_brush = (i->state == UserHit ? brush_set.hit : brush_set.white);
-      if (is_black) note_brush = (i->state == UserHit ? brush_set.hit : brush_set.black);
-      FillRect(hdc, &note_rect, note_brush);
-   }
-
-   for (int i = 0; i < TrackColorCount; ++i)
-   {
-      DeleteObject(brushes[i].white);
-      DeleteObject(brushes[i].black);
-      DeleteObject(brushes[i].hit);
-      DeleteObject(brushes[i].outline);
+      renderer.DrawQuad(note_rect.left, note_rect.top, note_rect.right - note_rect.left, note_rect.bottom - note_rect.top);
    }
 }
 

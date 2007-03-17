@@ -30,7 +30,7 @@ public:
 protected:
    virtual void Init();
    virtual void Update();
-   virtual void Draw(HDC hdc) const;
+   virtual void Draw(Renderer &renderer) const;
 
 private:
    void PlayDevicePreview(microseconds_t delta_microseconds);

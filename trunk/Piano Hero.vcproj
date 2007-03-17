@@ -315,6 +315,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\Renderer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\Renderer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\SharedState.h"
 					>
 				</File>

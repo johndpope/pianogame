@@ -11,6 +11,7 @@
 #include "Image.h"
 #include "registry.h"
 #include "file_selector.h"
+#include "Renderer.h"
 
 #include "libmidi/Midi.h"
 #include "libmidi/MidiUtil.h"
@@ -344,7 +345,7 @@ void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
    }
 }
 
-void TitleState::Draw(HDC hdc) const
+void TitleState::Draw(Renderer &renderer) const
 {
    Image graphics(Image::GetGlobalModuleInstance(), L"BITMAP_LOGO");
    graphics.EnableTransparency();
@@ -352,42 +353,42 @@ void TitleState::Draw(HDC hdc) const
    int left = GetStateWidth() / 2 - graphics.getWidth() / 2;
 
    const static int TitleY = 100;
-   graphics.beginDrawing(hdc);
+   graphics.beginDrawing(renderer.GetHdc());
    graphics.draw(left, TitleY);
    graphics.endDrawing();
 
    TextWriter version(left + graphics.getWidth() - 80,
-      TitleY + graphics.getHeight(), hdc, false, Layout::SmallFontSize);
+      TitleY + graphics.getHeight(), renderer.GetHdc(), false, Layout::SmallFontSize);
    version << Text(L"version ", Gray) << Text(PianoHeroVersionString, Gray);
 
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(hdc, m_continue_button, L"Choose Tracks", 15);
-   Layout::DrawButton(hdc, m_back_button, L"Exit", 55);
+   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Choose Tracks", 15);
+   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Exit", 55);
 
-   m_output_tile.Draw(hdc);
-   m_input_tile.Draw(hdc);
-   m_file_tile.Draw(hdc);
+   m_output_tile.Draw(renderer.GetHdc());
+   m_input_tile.Draw(renderer.GetHdc());
+   m_file_tile.Draw(renderer.GetHdc());
 
    if (m_input_tile.IsPreviewOn())
    {
-      HBRUSH old_brush = static_cast<HBRUSH>(SelectObject(hdc, static_cast<HGDIOBJ>(GetStockObject(HOLLOW_BRUSH))));
-      HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, static_cast<HGDIOBJ>(GetStockObject(WHITE_PEN))));
+      HBRUSH old_brush = static_cast<HBRUSH>(SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(GetStockObject(HOLLOW_BRUSH))));
+      HPEN old_pen = static_cast<HPEN>(SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(GetStockObject(WHITE_PEN))));
 
       const int x = m_input_tile.GetX() + DeviceTileWidth + 12;
       const int y = m_input_tile.GetY() + 38;
-      Rectangle(hdc, x, y, x + 60, y + 40);
+      Rectangle(renderer.GetHdc(), x, y, x + 60, y + 40);
 
-      SelectObject(hdc, static_cast<HGDIOBJ>(old_pen));
-      SelectObject(hdc, static_cast<HGDIOBJ>(old_brush));
+      SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(old_pen));
+      SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(old_brush));
    }
 
-   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, hdc, false, Layout::TitleFontSize);
+   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, renderer.GetHdc(), false, Layout::TitleFontSize);
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
    const static int InstructionsY = 224;
-   TextWriter instructions(left, InstructionsY, hdc, false, Layout::SmallFontSize);
+   TextWriter instructions(left, InstructionsY, renderer.GetHdc(), false, Layout::SmallFontSize);
 
    const static COLORREF Title = RGB(114, 159, 207);
    const static COLORREF Highlight = RGB(138, 226, 52);
@@ -406,7 +407,7 @@ void TitleState::Draw(HDC hdc) const
       << Text(L"Visit ", Gray) << Text(L"http://www.gamemusicthemes.com/", Title)
       << Text(L" for high quality piano MIDI and sheet music.", Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, hdc, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer.GetHdc(), true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 
 }
