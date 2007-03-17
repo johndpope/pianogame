@@ -7,6 +7,7 @@
 #include "State_Title.h"
 #include "State_Playing.h"
 #include "MenuLayout.h"
+#include "Renderer.h"
 
 #include "libmidi\Midi.h"
 #include "libmidi\MidiUtil.h"
@@ -275,24 +276,24 @@ void TrackSelectionState::PlayTrackPreview(microseconds_t delta_microseconds)
    }
 }
 
-void TrackSelectionState::Draw(HDC hdc) const
+void TrackSelectionState::Draw(Renderer &renderer) const
 {
-   Layout::DrawTitle(hdc, L"Choose Tracks To Play");
+   Layout::DrawTitle(renderer.GetHdc(), L"Choose Tracks To Play");
 
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(hdc, m_continue_button, L"Play Song", 33);
-   Layout::DrawButton(hdc, m_back_button, L"Back to Title", 23);
+   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Play Song", 33);
+   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Back to Title", 23);
 
    // Write our page count on the screen
    const static int TypicalPaginationTextWidth = 280;
-   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, hdc, false, Layout::ButtonFontSize);
+   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, renderer.GetHdc(), false, Layout::ButtonFontSize);
    
    pagination << Text(L"Page ", Gray) << (m_current_page+1) << Text(L" of ", Gray) << m_page_count <<
       Text(L" (arrow keys change page)", Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, hdc, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, renderer.GetHdc(), true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 
    // Draw each track tile on the current page
@@ -300,6 +301,6 @@ void TrackSelectionState::Draw(HDC hdc) const
    size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
-      m_track_tiles[i].Draw(hdc, m_state.midi);
+      m_track_tiles[i].Draw(renderer.GetHdc(), m_state.midi);
    }
 }

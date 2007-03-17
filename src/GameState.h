@@ -10,6 +10,8 @@
 #include <exception>
 #include <string>
 
+class Renderer;
+
 class GameStateError : public std::exception
 {
 public:
@@ -82,7 +84,7 @@ protected:
 
    // Called each frame.  Drawing bounds are [0,
    // GetStateWidth()) and [0, GetStateHeight())
-   virtual void Draw(HDC hdc) const = 0;
+   virtual void Draw(Renderer &renderer) const = 0;
 
    // How long has this state been running
    unsigned long GetStateMilliseconds() const { return m_state_milliseconds; }

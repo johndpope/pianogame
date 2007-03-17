@@ -5,6 +5,7 @@
 #include "State_Playing.h"
 #include "State_TrackSelection.h"
 #include "State_Stats.h"
+#include "Renderer.h"
 #include "version.h"
 
 #include <string>
@@ -380,22 +381,18 @@ void PlayingState::Update()
    }
 }
 
-void PlayingState::Draw(HDC hdc) const
+void PlayingState::Draw(Renderer &renderer) const
 {
-   m_keyboard->Draw(hdc, Layout::ScreenMarginX, GetStateHeight() - CalcKeyboardHeight(), m_notes,
+   m_keyboard->Draw(renderer, Layout::ScreenMarginX, GetStateHeight() - CalcKeyboardHeight(), m_notes,
       m_show_duration, m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
    // Draw a song progress bar along the top of the screen
-   HBRUSH time_pb_brush = CreateSolidBrush(RGB(0x50,0x50,0x50));
-   HBRUSH note_hit_pb_brush = CreateSolidBrush(RGB(0xFC,0xAF,0x3E));
-   HBRUSH note_miss_pb_brush = CreateSolidBrush(RGB(0xCE,0x5C,0x00));
-
    const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
    const int pb_x = Layout::ScreenMarginX;
    const int pb_y = GetStateHeight() - CalcKeyboardHeight() - 20;
 
-   RECT time_pb = { pb_x, pb_y, pb_x + time_pb_width, pb_y + 16 };
-   FillRect(hdc, &time_pb, time_pb_brush);
+   renderer.SetColor(0x50, 0x50, 0x50);
+   renderer.DrawQuad(pb_x, pb_y, time_pb_width, 16);
 
    if (m_look_ahead_you_play_note_count > 0)
    {
@@ -404,31 +401,25 @@ void PlayingState::Draw(HDC hdc) const
       const int note_miss_pb_width = static_cast<int>(m_state.stats.notes_user_could_have_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
       const int note_hit_pb_width = static_cast<int>(m_state.stats.notes_user_actually_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
 
-      RECT note_miss_pb = { pb_x, pb_y - 20, pb_x + note_miss_pb_width, pb_y + 16 - 20 };
-      RECT note_hit_pb = { pb_x, pb_y - 20, pb_x + note_hit_pb_width, pb_y + 16 - 20 };
+      renderer.SetColor(0xCE,0x5C,0x00);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_miss_pb_width, 16 - 20);
 
-      FillRect(hdc, &note_miss_pb, note_miss_pb_brush);
-      FillRect(hdc, &note_hit_pb, note_hit_pb_brush);
+      renderer.SetColor(0xFC,0xAF,0x3E);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16 - 20);
    }
 
-
-   DeleteObject(time_pb_brush);
-   DeleteObject(note_hit_pb_brush);
-   DeleteObject(note_miss_pb_brush);
-
-
-   Layout::DrawTitle(hdc, m_state.song_title);
-   Layout::DrawHorizontalRule(hdc, GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawTitle(renderer.GetHdc(), m_state.song_title);
+   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
 
    int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
 
    wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier() << L" multiplier");
    wstring speed_text = WSTRING(m_playback_speed << "% speed");
 
-   TextWriter score(Layout::ScreenMarginX, text_y, hdc, false, Layout::ScoreFontSize);
+   TextWriter score(Layout::ScreenMarginX, text_y, renderer.GetHdc(), false, Layout::ScoreFontSize);
    score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
 
-   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, hdc, false, Layout::TitleFontSize);
+   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, renderer.GetHdc(), false, Layout::TitleFontSize);
    multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
       << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
       << newline;
@@ -456,7 +447,7 @@ void PlayingState::Draw(HDC hdc) const
 
    text_y += 28 + Layout::SmallFontSize;
 
-   TextWriter time_text(Layout::ScreenMarginX, text_y, hdc, false, Layout::SmallFontSize);
+   TextWriter time_text(Layout::ScreenMarginX, text_y, renderer.GetHdc(), false, Layout::SmallFontSize);
    time_text << Text(L"Time: ", Gray) << current_time << Text(L" / ", Gray) << total_time << Text(percent_complete, Gray);
 
    // Show the combo
@@ -468,7 +459,7 @@ void PlayingState::Draw(HDC hdc) const
       int combo_x = GetStateWidth() / 2;
       int combo_y = GetStateHeight() - CalcKeyboardHeight() + 30 - (combo_font_size/2);
 
-      TextWriter combo_text(combo_x, combo_y, hdc, true, combo_font_size);
+      TextWriter combo_text(combo_x, combo_y, renderer.GetHdc(), true, combo_font_size);
       combo_text << WSTRING(m_current_combo << L" Combo!");
    }
 }

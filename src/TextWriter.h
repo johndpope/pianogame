@@ -11,6 +11,7 @@
 #include <windows.h>
 
 #include "string_util.h"
+#include "TrackProperties.h"
 
 // A nice ostream-like class
 class TextWriter
@@ -62,6 +63,10 @@ public:
    Text(std::wstring in_txt, COLORREF in_col) : txt(in_txt), col(in_col) { }
    Text(int in_int, COLORREF in_col) : col(in_col), txt(WSTRING(in_int)) { }
    Text(double in_double, int prec, COLORREF in_col) : col(in_col), txt(WSTRING(std::setprecision(prec) << in_double)) { }
+
+   Text(std::wstring in_txt, Color in_col) : txt(in_txt), col(ToRGB(in_col)) { }
+   Text(int in_int, Color in_col) : col(ToRGB(in_col)), txt(WSTRING(in_int)) { }
+   Text(double in_double, int prec, Color in_col) : col(ToRGB(in_col)), txt(WSTRING(std::setprecision(prec) << in_double)) { }
 
    TextWriter& operator<<(TextWriter& tw);
 
