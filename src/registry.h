@@ -6,7 +6,7 @@
 #define __REGISTRY_H
 
 #include <string>
-#include <windows.h>
+#include <Windows.h>
 
 // Registry simplifies reading/writing the Windows registry
 // (It currently does not support enumerating or deleting)

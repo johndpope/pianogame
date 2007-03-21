@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include <windows.h>
+#include <Windows.h>
 
 #include "string_util.h"
 #include "TrackProperties.h"

@@ -361,14 +361,14 @@ void TitleState::Draw(Renderer &renderer) const
       TitleY + graphics.getHeight(), renderer.GetHdc(), false, Layout::SmallFontSize);
    version << Text(L"version ", Gray) << Text(PianoHeroVersionString, Gray);
 
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Choose Tracks", 15);
-   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Exit", 55);
+   Layout::DrawButton(renderer, m_continue_button, L"Choose Tracks", 15);
+   Layout::DrawButton(renderer, m_back_button, L"Exit", 55);
 
-   m_output_tile.Draw(renderer.GetHdc());
-   m_input_tile.Draw(renderer.GetHdc());
-   m_file_tile.Draw(renderer.GetHdc());
+   m_output_tile.Draw(renderer);
+   m_input_tile.Draw(renderer);
+   m_file_tile.Draw(renderer);
 
    if (m_input_tile.IsPreviewOn())
    {

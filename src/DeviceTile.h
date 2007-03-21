@@ -11,6 +11,7 @@
 #include <vector>
 
 class MidiCommOut;
+class Renderer;
 
 const int DeviceTileWidth = 510;
 const int DeviceTileHeight = 80;
@@ -29,7 +30,7 @@ public:
    DeviceTile(int x, int y, DeviceTileType type, int device_id);
 
    void Update(const MouseInfo &translated_mouse);
-   void Draw(HDC hdc) const;
+   void Draw(Renderer &renderer) const;
 
    int GetX() const { return m_x; }
    int GetY() const { return m_y; }

@@ -5,29 +5,24 @@
 #include "MenuLayout.h"
 #include "Image.h"
 #include "TextWriter.h"
+#include "Renderer.h"
 
 namespace Layout
 {
 
-void DrawTitle(HDC hdc, const std::wstring &title)
+void DrawTitle(Renderer &renderer, const std::wstring &title)
 {
-   TextWriter title_writer(ScreenMarginX, ScreenMarginX + TitleFontSize, hdc, false, TitleFontSize);
+   TextWriter title_writer(ScreenMarginX, ScreenMarginX + TitleFontSize, renderer.GetHdc(), false, TitleFontSize);
    title_writer << title;
 }
 
-void DrawHorizontalRule(HDC hdc, int state_width, int y)
+void DrawHorizontalRule(Renderer &renderer, int state_width, int y)
 {
-   HPEN pen = CreatePen(PS_SOLID, 3, RGB(0x50,0x50,0x50));
-   HPEN old_pen = static_cast<HPEN>(SelectObject(hdc, pen));
-
-   MoveToEx(hdc, ScreenMarginX, y, 0);
-   LineTo(hdc, state_width - ScreenMarginX, y);
-
-   SelectObject(hdc, old_pen);
-   DeleteObject(pen);
+   renderer.SetColor(0x50, 0x50, 0x50);
+   renderer.DrawQuad(ScreenMarginX, y - 1, state_width - 2*ScreenMarginX, 3);
 }
 
-void DrawButton(HDC hdc, const ButtonState &button, const std::wstring &text, int text_x)
+void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstring &text, int text_x)
 {
    const static COLORREF color = RGB(0x40,0x40,0x40);
    const static COLORREF color_hover = RGB(0x60,0x60,0x60);
@@ -38,7 +33,7 @@ void DrawButton(HDC hdc, const ButtonState &button, const std::wstring &text, in
    button_text << Text(text, RGB(255, 255, 255));
    button_img.endDrawingOn();
 
-   button_img.beginDrawing(hdc);
+   button_img.beginDrawing(renderer.GetHdc());
    button_img.draw(button.x, button.y);
    button_img.endDrawing();
 }

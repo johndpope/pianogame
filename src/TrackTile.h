@@ -12,6 +12,7 @@
 #include <vector>
 
 class Midi;
+class Renderer;
 
 const int TrackTileWidth = 300;
 const int TrackTileHeight = 110;
@@ -33,7 +34,7 @@ public:
    TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode mode);
 
    void Update(const MouseInfo &translated_mouse);
-   void Draw(HDC hdc, const Midi *midi) const;
+   void Draw(Renderer &renderer, const Midi *midi) const;
 
    int GetX() { return m_x; }
    int GetY() { return m_y; }
