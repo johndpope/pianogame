@@ -24,13 +24,13 @@ void DrawHorizontalRule(Renderer &renderer, int state_width, int y)
 
 void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstring &text, int text_x)
 {
-   const static COLORREF color = RGB(0x40,0x40,0x40);
-   const static COLORREF color_hover = RGB(0x60,0x60,0x60);
+   const static Color color = ToColor(0x40,0x40,0x40);
+   const static Color color_hover = ToColor(0x60,0x60,0x60);
 
    Image button_img(ButtonWidth, ButtonHeight, button.hovering ? color_hover : color );
    Renderer button_renderer = button_img.beginDrawingOn();
    TextWriter button_text(text_x, 8, button_renderer, false, ButtonFontSize);
-   button_text << Text(text, RGB(255, 255, 255));
+   button_text << Text(text, ToColor(0xFF, 0xFF, 0xFF));
    button_img.endDrawingOn();
 
    button_img.beginDrawing(renderer);

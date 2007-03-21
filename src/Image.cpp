@@ -62,7 +62,7 @@ Image::Image(HINSTANCE module_instance, const wstring &resource_name)
    CopyOriginalToWorkingImage();
 }
 
-Image::Image(int width, int height, COLORREF initial_fill)
+Image::Image(int width, int height, Color initial_fill)
    : m_drawing(false), m_drawing_on(false), m_transparency_enabled(false), m_image(0), m_image_mask(0)
 {
    HDC screen = CreateDC(L"DISPLAY", 0, 0, 0);
@@ -71,7 +71,7 @@ Image::Image(int width, int height, COLORREF initial_fill)
    if (!m_original_image) ThrowWithLastError(Error_CannotCreateNewImage);
 
    RECT r = { 0, 0, width, height };
-   HBRUSH fill_brush = CreateSolidBrush(initial_fill);
+   HBRUSH fill_brush = CreateSolidBrush(ToCOLORREF(initial_fill));
    HDC hdc = CreateCompatibleDC(0);
 
    // Fill with the transparent color

@@ -96,7 +96,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
 
    Color color_tile = dark;
    Color color_tile_hovered = medium;
-   Image tile(TrackTileWidth, TrackTileHeight, ToRGB(whole_tile.hovering ? color_tile_hovered : color_tile) );
+   Image tile(TrackTileWidth, TrackTileHeight, whole_tile.hovering ? color_tile_hovered : color_tile );
    Renderer tile_renderer = tile.beginDrawingOn();
 
    // Draw horizontal rule between info and mode

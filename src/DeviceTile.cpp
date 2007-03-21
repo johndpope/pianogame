@@ -83,15 +83,15 @@ int DeviceTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) co
 
 void DeviceTile::Draw(Renderer &renderer) const
 {
-   COLORREF light  = RGB(0xB0,0xB0,0xB0);
-   COLORREF medium = RGB(0x70,0x70,0x70);
-   COLORREF dark   = RGB(0x50,0x50,0x50);
+   const Color light  = ToColor(0xB0,0xB0,0xB0);
+   const Color medium = ToColor(0x70,0x70,0x70);
+   const Color dark   = ToColor(0x50,0x50,0x50);
 
    Image tile(DeviceTileWidth, DeviceTileHeight, whole_tile.hovering ? medium : dark );
    Renderer tile_renderer = tile.beginDrawingOn();
 
    // Draw horizontal rule
-   tile_renderer.SetColor(0xB0, 0xB0, 0xB0);
+   tile_renderer.SetColor(light);
    tile_renderer.DrawQuad(10, 30, DeviceTileWidth - 20, 1);
 
    TextWriter title(10, 10, tile_renderer, false, 14);

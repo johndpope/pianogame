@@ -420,8 +420,8 @@ void PlayingState::Draw(Renderer &renderer) const
    score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
 
    TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, renderer, false, Layout::TitleFontSize);
-   multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
-      << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
+   multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, ToColor(138, 226, 52))
+      << Text(L"  x  ", Gray) << Text(speed_text, ToColor(114, 159, 207))
       << newline;
 
 
