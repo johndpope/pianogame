@@ -402,10 +402,10 @@ void PlayingState::Draw(Renderer &renderer) const
       const int note_hit_pb_width = static_cast<int>(m_state.stats.notes_user_actually_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
 
       renderer.SetColor(0xCE,0x5C,0x00);
-      renderer.DrawQuad(pb_x, pb_y - 20, note_miss_pb_width, 16 - 20);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_miss_pb_width, 16);
 
       renderer.SetColor(0xFC,0xAF,0x3E);
-      renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16 - 20);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16);
    }
 
    Layout::DrawTitle(renderer, m_state.song_title);
