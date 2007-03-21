@@ -108,7 +108,7 @@ void DeviceTile::Draw(Renderer &renderer) const
    // Choose the last (gray) color in the TrackTile bitmap
    int color_offset = GraphicHeight * UserSelectableColorCount;
 
-   graphics.beginDrawing(tile_hdc);
+   graphics.beginDrawing(tile_renderer);
    graphics.draw(BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
    graphics.draw(BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
 
@@ -156,7 +156,7 @@ void DeviceTile::Draw(Renderer &renderer) const
    tile.endDrawingOn();
 
    // Draw the tile to the screen
-   tile.beginDrawing(renderer.GetHdc());
+   tile.beginDrawing(renderer);
    tile.draw(m_x, m_y);
    tile.endDrawing();
 }

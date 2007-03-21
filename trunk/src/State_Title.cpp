@@ -353,7 +353,7 @@ void TitleState::Draw(Renderer &renderer) const
    int left = GetStateWidth() / 2 - graphics.getWidth() / 2;
 
    const static int TitleY = 100;
-   graphics.beginDrawing(renderer.GetHdc());
+   graphics.beginDrawing(renderer);
    graphics.draw(left, TitleY);
    graphics.endDrawing();
 

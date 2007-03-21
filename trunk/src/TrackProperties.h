@@ -5,6 +5,8 @@
 #ifndef __TRACK_PROPERTIES_H
 #define __TRACK_PROPERTIES_H
 
+#include "Renderer.h"
+
 enum TrackMode
 {
    ModePlayedAutomatically,
@@ -41,23 +43,6 @@ enum TrackColor
    FlatGray,
    MissedNote
 };
-
-struct Color
-{
-   int r, g, b;
-};
-
-static Color ToColor(int r, int g, int b)
-{
-   Color c;
-   c.r = r;
-   c.g = g;
-   c.b = b;
-
-   return c;
-}
-
-#define ToRGB(x) ( RGB((x).r, (x).g, (x).b) )
 
 const static Color TrackColorNoteWhite[TrackColorCount] = {
    { 114, 159, 207 },

@@ -8,6 +8,8 @@
 #include <Windows.h>
 #include <string>
 
+class Renderer;
+
 enum ImageErrorCode
 {
    Error_CannotLoadFile,
@@ -73,7 +75,7 @@ public:
 
    // Wrap any draw calls inside a matched pair of beginDrawing/endDrawing
    // calls.  Nesting is not allowed.
-   void beginDrawing(HDC dc) const;
+   void beginDrawing(Renderer &renderer) const;
    void endDrawing() const;
 
    // You can also draw directly on an image's surface using the following

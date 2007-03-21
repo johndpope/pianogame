@@ -41,7 +41,7 @@ void StringTile::Draw(Renderer &renderer) const
    tile.endDrawingOn();
 
    // Draw the tile to the screen
-   tile.beginDrawing(renderer.GetHdc());
+   tile.beginDrawing(renderer);
    tile.draw(m_x, m_y);
    tile.endDrawing();
 }

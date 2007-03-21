@@ -3,6 +3,7 @@
 // See license.txt for license information
 
 #include "Image.h"
+#include "Renderer.h"
 #include "string_util.h"
 
 using namespace std;
@@ -217,11 +218,11 @@ void Image::draw(int x, int y, int width, int height, int src_x, int src_y) cons
    SelectObject(m_image_dc, previous_bitmap);
 }
 
-void Image::beginDrawing(HDC dc) const
+void Image::beginDrawing(Renderer &renderer) const
 {
    if (m_drawing) throw ImageError(Error_AlreadyInDrawingMode);
 
-   m_cached_destination_dc = dc;
+   m_cached_destination_dc = renderer.GetHdc();
    m_image_dc = CreateCompatibleDC(0);
 
    m_drawing = true;
