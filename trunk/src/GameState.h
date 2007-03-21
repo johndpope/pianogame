@@ -5,7 +5,7 @@
 #ifndef __GAMESTATE_H
 #define __GAMESTATE_H
 
-#include "windows.h"
+#include <Windows.h>
 
 #include <exception>
 #include <string>
@@ -153,7 +153,7 @@ public:
    const MouseInfo &Mouse() const { return m_mouse; }
 
    void Update();
-   void Draw(HDC hdc);
+   void Draw(Renderer &renderer);
 
    void ChangeState(GameState *new_state);
 

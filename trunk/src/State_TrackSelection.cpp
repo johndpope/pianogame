@@ -278,13 +278,13 @@ void TrackSelectionState::PlayTrackPreview(microseconds_t delta_microseconds)
 
 void TrackSelectionState::Draw(Renderer &renderer) const
 {
-   Layout::DrawTitle(renderer.GetHdc(), L"Choose Tracks To Play");
+   Layout::DrawTitle(renderer, L"Choose Tracks To Play");
 
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Play Song", 33);
-   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Back to Title", 23);
+   Layout::DrawButton(renderer, m_continue_button, L"Play Song", 33);
+   Layout::DrawButton(renderer, m_back_button, L"Back to Title", 23);
 
    // Write our page count on the screen
    const static int TypicalPaginationTextWidth = 280;
@@ -301,6 +301,6 @@ void TrackSelectionState::Draw(Renderer &renderer) const
    size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
-      m_track_tiles[i].Draw(renderer.GetHdc(), m_state.midi);
+      m_track_tiles[i].Draw(renderer, m_state.midi);
    }
 }

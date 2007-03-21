@@ -9,6 +9,8 @@
 #include "MenuLayout.h"
 #include <string>
 
+class Renderer;
+
 const int StringTileWidth = 510;
 const int StringTileHeight = 80;
 
@@ -18,7 +20,7 @@ public:
    StringTile(int x, int y);
 
    void Update(const MouseInfo &translated_mouse);
-   void Draw(HDC hdc) const;
+   void Draw(Renderer &renderer) const;
 
    int GetX() const { return m_x; }
    int GetY() const { return m_y; }

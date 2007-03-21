@@ -2,7 +2,7 @@
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 
-#include <windows.h>
+#include <Windows.h>
 
 #include <set>
 #include <string>
@@ -14,6 +14,7 @@
 #include "libmidi/Midi.h"
 #include "libmidi/SynthVolume.h"
 
+#include "Renderer.h"
 #include "SharedState.h"
 #include "GameState.h"
 #include "State_Title.h"
@@ -284,7 +285,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          PAINTSTRUCT ps;
 
          HDC hdc = BeginPaint(hwnd, &ps);
-         state_manager.Draw(hdc);
+         Renderer renderer(hdc);
+         state_manager.Draw(renderer);
          EndPaint (hwnd, &ps);
 
          return 0;

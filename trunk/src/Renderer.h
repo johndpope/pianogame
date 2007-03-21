@@ -5,7 +5,7 @@
 #ifndef __RENDERER_H
 #define __RENDERER_H
 
-#include "windows.h"
+#include <Windows.h>
 
 struct Color;
 

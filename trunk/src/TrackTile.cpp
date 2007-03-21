@@ -5,6 +5,7 @@
 #include "TrackTile.h"
 #include "libmidi\Midi.h"
 #include "Image.h"
+#include "Renderer.h"
 
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
@@ -76,7 +77,7 @@ int TrackTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) con
    return (set_offset * graphic_set) + graphic_offset;
 }
 
-void TrackTile::Draw(HDC hdc, const Midi *midi) const
+void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
 {
    const MidiTrack &track = midi->Tracks()[m_track_id];
 
@@ -99,12 +100,9 @@ void TrackTile::Draw(HDC hdc, const Midi *midi) const
    HDC tile_hdc = tile.beginDrawingOn();
 
    // Draw horizontal rule between info and mode
-   HPEN pen = CreatePen(PS_SOLID, 1, ToRGB(light));
-   HPEN old_pen = static_cast<HPEN>(SelectObject(tile_hdc, pen));
-   MoveToEx(tile_hdc, 10, 60, 0);
-   LineTo(tile_hdc, TrackTileWidth - 10, 60);
-   SelectObject(tile_hdc, old_pen);
-   DeleteObject(pen);
+   Renderer tile_renderer(tile_hdc);
+   tile_renderer.SetColor(light);
+   tile_renderer.DrawQuad(10, 60, TrackTileWidth - 20, 1);
 
    // Write song info to the tile
    TextWriter title(10, 10, tile_hdc, false, 14);
@@ -138,7 +136,7 @@ void TrackTile::Draw(HDC hdc, const Midi *midi) const
    tile.endDrawingOn();
 
    // Draw the tile to the screen
-   tile.beginDrawing(hdc);
+   tile.beginDrawing(renderer.GetHdc());
    tile.draw(m_x, m_y);
    tile.endDrawing();
 }

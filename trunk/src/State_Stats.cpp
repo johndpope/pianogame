@@ -48,12 +48,12 @@ void StatsState::Update()
 
 void StatsState::Draw(Renderer &renderer) const
 {
-   Layout::DrawTitle(renderer.GetHdc(), m_state.song_title);
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
+   Layout::DrawTitle(renderer, m_state.song_title);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer.GetHdc(), m_continue_button, L"Retry Song", 28);
-   Layout::DrawButton(renderer.GetHdc(), m_back_button, L"Track Selection", 13);
+   Layout::DrawButton(renderer, m_continue_button, L"Retry Song", 28);
+   Layout::DrawButton(renderer, m_back_button, L"Track Selection", 13);
 
    const static COLORREF Title = RGB(114, 159, 207);
    const static COLORREF Highlight = RGB(138, 226, 52);

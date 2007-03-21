@@ -408,8 +408,8 @@ void PlayingState::Draw(Renderer &renderer) const
       renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16 - 20);
    }
 
-   Layout::DrawTitle(renderer.GetHdc(), m_state.song_title);
-   Layout::DrawHorizontalRule(renderer.GetHdc(), GetStateWidth(), Layout::ScreenMarginY);
+   Layout::DrawTitle(renderer, m_state.song_title);
+   Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
 
    int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
 

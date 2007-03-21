@@ -6,7 +6,8 @@
 #define __MENU_LAYOUT_H
 
 #include "GameState.h"
-#include <Windows.h>
+
+class Renderer;
 
 struct ButtonState
 {
@@ -38,9 +39,9 @@ struct ButtonState
 
 namespace Layout
 {
-   void DrawTitle(HDC hdc, const std::wstring &title);
-   void DrawHorizontalRule(HDC hdc, int state_width, int y);
-   void DrawButton(HDC hdc, const ButtonState &button, const std::wstring &text, int text_x);
+   void DrawTitle(Renderer &renderer, const std::wstring &title);
+   void DrawHorizontalRule(Renderer &renderer, int state_width, int y);
+   void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstring &text, int text_x);
 
    // Pixel margin forced at edges of screen
    const static int ScreenMarginX = 16;

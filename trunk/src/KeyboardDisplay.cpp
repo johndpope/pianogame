@@ -229,37 +229,33 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
    renderer.SetColor(0x60, 0x60, 0x60);
    renderer.DrawQuad(x_offset, y, keyboard_width, y_offset - PixelsOffKeyboard);
 
-   HPEN thick_guide = CreatePen(PS_SOLID, 2, RGB(0x48, 0x48, 0x48));
-   HPEN thin_guide = CreatePen(PS_SOLID, 1, RGB(0x50, 0x50, 0x50));
-   HPEN center_guide = CreatePen(PS_SOLID, 1, RGB(0x70, 0x70, 0x70));
-
-   HPEN old_pen = static_cast<HPEN>(SelectObject(renderer.GetHdc(), thick_guide));
+   const static Color thick(ToColor(0x48,0x48,0x48));
+   const static Color thin(ToColor(0x50,0x50,0x50));
+   const static Color center(ToColor(0x70,0x70,0x70));
 
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
-   for (int i = 0; i < key_count+1; ++i)
+   for (int i = 0; i < key_count + 1; ++i)
    {
       const int key_x = i * (key_width + key_space) + x_offset - 1;
 
-      MoveToEx(renderer.GetHdc(), key_x, y, 0);
+      int guide_thickness = 2;
+      Color guide_color = thin;
 
       bool draw_guide = true;
       switch (current_white)
       {
       case 'C':
-         if (current_octave == 5) SelectObject(renderer.GetHdc(), center_guide);
-         else SelectObject(renderer.GetHdc(), thin_guide);
+      case 'D':
+         guide_color = thin;
+         if (current_octave == 5) guide_color = center;
          break;
 
       case 'F':
-         SelectObject(renderer.GetHdc(), thick_guide);
-         break;
-
-      case 'D':
       case 'G':
       case 'A':
-         // These lines should get drawn, so
-         // we put in case statements for them.
+         guide_color = thick;
+         guide_thickness = 3;
          break;
 
       default:
@@ -269,7 +265,8 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
 
       if (draw_guide)
       {
-         LineTo (renderer.GetHdc(), key_x, y + y_offset - PixelsOffKeyboard);
+         renderer.SetColor(guide_color);
+         renderer.DrawQuad(key_x - guide_thickness/2, y, guide_thickness, y_offset - PixelsOffKeyboard);
       }
 
       current_white++;
@@ -277,20 +274,12 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
       if (current_white == 'C') current_octave++;
    }
 
-   SelectObject(renderer.GetHdc(), thick_guide);
-
    // Draw horizontal-lines
-   MoveToEx(renderer.GetHdc(), x_offset,                  y, 0);
-   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y);
-   MoveToEx(renderer.GetHdc(), x_offset,                  y + y_offset, 0);
-   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y + y_offset);
-   MoveToEx(renderer.GetHdc(), x_offset,                  y + y_offset - PixelsOffKeyboard, 0);
-   LineTo  (renderer.GetHdc(), x_offset + keyboard_width, y + y_offset - PixelsOffKeyboard);
-
-   SelectObject(renderer.GetHdc(), old_pen);
-   DeleteObject(thin_guide);
-   DeleteObject(thick_guide);
-   DeleteObject(center_guide);
+   const static int hr_thickness = 2;
+   renderer.SetColor(thick);
+   renderer.DrawQuad(x_offset, y, keyboard_width, hr_thickness);
+   renderer.DrawQuad(x_offset, y+y_offset, keyboard_width, hr_thickness);
+   renderer.DrawQuad(x_offset, y+y_offset-PixelsOffKeyboard, keyboard_width, hr_thickness);
 }
 
 void KeyboardDisplay::DrawNotes(Renderer &renderer, int white_width, int key_space, int black_width, int black_offset,

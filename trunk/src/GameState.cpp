@@ -160,7 +160,7 @@ void GameStateManager::Update()
    m_mouse.released = MouseButtons();
 }
 
-void GameStateManager::Draw(HDC hdc)
+void GameStateManager::Draw(Renderer &renderer)
 {
    if (!m_current_state) return;
 
@@ -169,8 +169,8 @@ void GameStateManager::Draw(HDC hdc)
    // would be really easy.
 
    // Create a backbuffer to eliminate flicker
-   HDC backbuffer_hdc = CreateCompatibleDC(hdc);
-   HBITMAP backbuffer = CreateCompatibleBitmap(hdc, GetStateWidth(), GetStateHeight());
+   HDC backbuffer_hdc = CreateCompatibleDC(renderer.GetHdc());
+   HBITMAP backbuffer = CreateCompatibleBitmap(renderer.GetHdc(), GetStateWidth(), GetStateHeight());
    HGDIOBJ previous_object = SelectObject(backbuffer_hdc, backbuffer);
    SetBkMode(backbuffer_hdc, TRANSPARENT);
 
@@ -178,7 +178,7 @@ void GameStateManager::Draw(HDC hdc)
    m_current_state->Draw(r);
 
    // Copy the backbuffer to the screen
-   BitBlt(hdc, 0, 0, GetStateWidth(), GetStateHeight(), backbuffer_hdc, 0, 0, SRCCOPY);
+   BitBlt(renderer.GetHdc(), 0, 0, GetStateWidth(), GetStateHeight(), backbuffer_hdc, 0, 0, SRCCOPY);
 
    // Clean up GDI
    SelectObject(backbuffer_hdc, previous_object);
