@@ -65,12 +65,14 @@ Image::Image(HINSTANCE module_instance, const wstring &resource_name)
 Image::Image(int width, int height, Color initial_fill)
    : m_drawing(false), m_drawing_on(false), m_transparency_enabled(false), m_image(0), m_image_mask(0)
 {
+   // Create a DC that works with the current display
    HDC screen = CreateDC(L"DISPLAY", 0, 0, 0);
    m_original_image = CreateCompatibleBitmap(screen, width, height);
    DeleteDC(screen);
+
    if (!m_original_image) ThrowWithLastError(Error_CannotCreateNewImage);
 
-   RECT r = { 0, 0, width, height };
+   const RECT r = { 0, 0, width, height };
    HBRUSH fill_brush = CreateSolidBrush(ToCOLORREF(initial_fill));
    HDC hdc = CreateCompatibleDC(0);
 
