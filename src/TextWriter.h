@@ -13,13 +13,15 @@
 #include "string_util.h"
 #include "TrackProperties.h"
 
+class Renderer;
+
 // A nice ostream-like class
 class TextWriter
 {
 public:
    // Centering only works for single-write lines... in other words, centered
    // lines can only be 1 color.
-   TextWriter(int in_x, int in_y, HDC in_hdc, bool in_centered = false, int in_size = 12, std::wstring fontname = L"Lucida Sans Unicode");
+   TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered = false, int in_size = 12, std::wstring fontname = L"Lucida Sans Unicode");
    ~TextWriter();
 
    // Skips at least 1 line, or the height of the last write... whichever is greater
@@ -39,7 +41,7 @@ public:
    int last_line_height;
    bool centered;
    HFONT font;
-   HDC hdc;
+   Renderer renderer;
 
    friend class Text;
 

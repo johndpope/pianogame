@@ -85,7 +85,7 @@ void StatsState::Draw(Renderer &renderer) const
    int left = GetStateWidth() / 2 - (300 / 2);
    const static int InstructionsY = 234;
    
-   TextWriter grade_text(left + 110, InstructionsY + 43, renderer.GetHdc(), false, 72);
+   TextWriter grade_text(left + 110, InstructionsY + 43, renderer, false, 72);
    grade_text << grade;
    
    int stray_percent = 0;
@@ -94,7 +94,7 @@ void StatsState::Draw(Renderer &renderer) const
    int average_speed = 0;
    if (s.notes_user_could_have_played > 0) average_speed = s.speed_integral / s.notes_user_could_have_played;
 
-   TextWriter score(left, InstructionsY, renderer.GetHdc(), false, Layout::TitleFontSize);
+   TextWriter score(left, InstructionsY, renderer, false, Layout::TitleFontSize);
    score << Text(L"Song Statistics", Title) << newline
       << newline 
       << newline 
@@ -110,6 +110,6 @@ void StatsState::Draw(Renderer &renderer) const
       << Text(L"Longest Combo: ", Gray) << WSTRING(s.longest_combo) << newline
       << newline;
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer.GetHdc(), true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 }

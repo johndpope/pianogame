@@ -42,7 +42,9 @@ public:
 
 private:
 
+   bool m_color_changed;
    Color m_c;
+
    HDC m_hdc;
    HBRUSH m_brush;
 };

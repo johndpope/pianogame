@@ -416,10 +416,10 @@ void PlayingState::Draw(Renderer &renderer) const
    wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier() << L" multiplier");
    wstring speed_text = WSTRING(m_playback_speed << "% speed");
 
-   TextWriter score(Layout::ScreenMarginX, text_y, renderer.GetHdc(), false, Layout::ScoreFontSize);
+   TextWriter score(Layout::ScreenMarginX, text_y, renderer, false, Layout::ScoreFontSize);
    score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
 
-   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, renderer.GetHdc(), false, Layout::TitleFontSize);
+   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, renderer, false, Layout::TitleFontSize);
    multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, RGB(138, 226, 52))
       << Text(L"  x  ", Gray) << Text(speed_text, RGB(114, 159, 207))
       << newline;
@@ -447,7 +447,7 @@ void PlayingState::Draw(Renderer &renderer) const
 
    text_y += 28 + Layout::SmallFontSize;
 
-   TextWriter time_text(Layout::ScreenMarginX, text_y, renderer.GetHdc(), false, Layout::SmallFontSize);
+   TextWriter time_text(Layout::ScreenMarginX, text_y, renderer, false, Layout::SmallFontSize);
    time_text << Text(L"Time: ", Gray) << current_time << Text(L" / ", Gray) << total_time << Text(percent_complete, Gray);
 
    // Show the combo
@@ -459,7 +459,7 @@ void PlayingState::Draw(Renderer &renderer) const
       int combo_x = GetStateWidth() / 2;
       int combo_y = GetStateHeight() - CalcKeyboardHeight() + 30 - (combo_font_size/2);
 
-      TextWriter combo_text(combo_x, combo_y, renderer.GetHdc(), true, combo_font_size);
+      TextWriter combo_text(combo_x, combo_y, renderer, true, combo_font_size);
       combo_text << WSTRING(m_current_combo << L" Combo!");
    }
 }

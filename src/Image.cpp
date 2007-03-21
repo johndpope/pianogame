@@ -237,7 +237,7 @@ void Image::endDrawing() const
    m_drawing = false;
 }
 
-HDC Image::beginDrawingOn()
+Renderer Image::beginDrawingOn()
 {
    if (m_drawing_on) throw ImageError(Error_AlreadyDrawingOn);
 
@@ -247,7 +247,7 @@ HDC Image::beginDrawingOn()
    SetBkMode(m_draw_on_dc, TRANSPARENT);
 
    m_drawing_on = true;
-   return m_draw_on_dc;
+   return Renderer(m_draw_on_dc);
 }
 
 void Image::endDrawingOn()

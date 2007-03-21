@@ -97,18 +97,17 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
    Color color_tile = dark;
    Color color_tile_hovered = medium;
    Image tile(TrackTileWidth, TrackTileHeight, ToRGB(whole_tile.hovering ? color_tile_hovered : color_tile) );
-   HDC tile_hdc = tile.beginDrawingOn();
+   Renderer tile_renderer = tile.beginDrawingOn();
 
    // Draw horizontal rule between info and mode
-   Renderer tile_renderer(tile_hdc);
    tile_renderer.SetColor(light);
    tile_renderer.DrawQuad(10, 60, TrackTileWidth - 20, 1);
 
    // Write song info to the tile
-   TextWriter title(10, 10, tile_hdc, false, 14);
+   TextWriter title(10, 10, tile_renderer, false, 14);
    title << Text(L"Instrument:", light);
 
-   TextWriter track_info(100, 10, tile_hdc, false, 14);
+   TextWriter track_info(100, 10, tile_renderer, false, 14);
    track_info << track.InstrumentName() << newline;
    track_info << static_cast<const unsigned int>(track.Notes().size()) << L" notes" << newline;
 
@@ -130,7 +129,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
    graphics.endDrawing();
 
    // Draw mode text
-   TextWriter mode(39, 76, tile_hdc, false, 14);
+   TextWriter mode(39, 76, tile_renderer, false, 14);
    mode << TrackModeText[m_mode];
 
    tile.endDrawingOn();

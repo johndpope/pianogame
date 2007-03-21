@@ -25,17 +25,16 @@ void StringTile::Draw(Renderer &renderer) const
    COLORREF dark   = RGB(0x50,0x50,0x50);
 
    Image tile(StringTileWidth, StringTileHeight, whole_tile.hovering ? medium : dark );
-   HDC tile_hdc = tile.beginDrawingOn();
+   Renderer tile_renderer = tile.beginDrawingOn();
 
    // Draw horizontal rule
-   Renderer tile_renderer(tile_hdc);
    tile_renderer.SetColor(0xB0, 0xB0, 0xB0);
    tile_renderer.DrawQuad(10, 30, StringTileWidth - 20, 1);
 
-   TextWriter title(10, 10, tile_hdc, false, 14);
+   TextWriter title(10, 10, tile_renderer, false, 14);
    title << Text(m_title, light);
 
-   TextWriter text(10, 46, tile_hdc, false, 14);
+   TextWriter text(10, 46, tile_renderer, false, 14);
    text << m_string;
 
    tile.endDrawingOn();
