@@ -8,7 +8,6 @@
 #include "SharedState.h"
 #include "GameState.h"
 #include "MenuLayout.h"
-#include "TrackProperties.h"
 #include "libmidi/MidiTypes.h"
 #include "DeviceTile.h"
 #include "StringTile.h"

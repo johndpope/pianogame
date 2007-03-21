@@ -3,15 +3,31 @@
 // See license.txt for license information
 
 #include "Renderer.h"
-#include "TrackProperties.h"
+
+Renderer::Renderer(HDC hdc) : m_c(ToColor(0,0,0)), m_hdc(hdc), m_brush(0)
+{
+}
 
 Renderer::~Renderer()
 {
    if (m_brush) DeleteObject(m_brush);
-   m_brush = 0;
-
-   m_hdc = 0;
 }
+
+Renderer::Renderer(const Renderer& rhs)
+{
+   m_hdc = rhs.m_hdc;
+
+   m_brush = 0;
+   m_c = rhs.m_c;
+   SetColor(m_c);
+}
+
+Renderer Renderer::operator=(const Renderer& rhs)
+{
+   if (&rhs == this) return rhs;
+   return Renderer(rhs);
+}
+
 
 void Renderer::SetColor(Color c)
 {
@@ -20,6 +36,8 @@ void Renderer::SetColor(Color c)
 
 void Renderer::SetColor(int r, int g, int b)
 {
+   m_c = ToColor(r, g, b);
+
    if (m_brush) DeleteObject(m_brush);
    m_brush = CreateSolidBrush(RGB(r,g,b));
 }

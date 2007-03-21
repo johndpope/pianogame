@@ -118,7 +118,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
    int color_offset = GraphicHeight * static_cast<int>(m_color);
    if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
 
-   graphics.beginDrawing(tile_hdc);
+   graphics.beginDrawing(tile_renderer);
    graphics.draw(BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
    graphics.draw(BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
    graphics.draw(BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
@@ -136,7 +136,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
    tile.endDrawingOn();
 
    // Draw the tile to the screen
-   tile.beginDrawing(renderer.GetHdc());
+   tile.beginDrawing(renderer);
    tile.draw(m_x, m_y);
    tile.endDrawing();
 }

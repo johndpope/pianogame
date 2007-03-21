@@ -33,7 +33,7 @@ void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstrin
    button_text << Text(text, RGB(255, 255, 255));
    button_img.endDrawingOn();
 
-   button_img.beginDrawing(renderer.GetHdc());
+   button_img.beginDrawing(renderer);
    button_img.draw(button.x, button.y);
    button_img.endDrawing();
 }

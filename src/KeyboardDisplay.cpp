@@ -71,7 +71,7 @@ void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNot
       m_background_initialized = true;
    }
 
-   m_cached_background.beginDrawing(renderer.GetHdc());
+   m_cached_background.beginDrawing(renderer);
    m_cached_background.draw(x, y);
    m_cached_background.endDrawing();
 
