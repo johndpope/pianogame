@@ -55,8 +55,8 @@ void StatsState::Draw(Renderer &renderer) const
    Layout::DrawButton(renderer, m_continue_button, L"Retry Song", 28);
    Layout::DrawButton(renderer, m_back_button, L"Track Selection", 13);
 
-   const static COLORREF Title = RGB(114, 159, 207);
-   const static COLORREF Highlight = RGB(138, 226, 52);
+   const static Color Title = ToColor(114, 159, 207);
+   const static Color Highlight = ToColor(138, 226, 52);
 
    const SongStatistics &s = m_state.stats;
 

@@ -8,7 +8,7 @@
 #include <Windows.h>
 #include <string>
 
-class Renderer;
+#include "Renderer.h"
 
 enum ImageErrorCode
 {
@@ -64,7 +64,7 @@ public:
    Image(HINSTANCE module_instance, const std::wstring &resource_name);
 
    // Create a new solid color image of the specified size
-   Image(int width, int height, COLORREF initial_fill = 0);
+   Image(int width, int height, Color initial_fill = ToColor(0,0,0));
 
    ~Image();
 

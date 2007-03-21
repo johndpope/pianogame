@@ -62,7 +62,7 @@ TextWriter& Text::operator<<(TextWriter& tw)
    const long options = DT_LEFT | DT_NOPREFIX;
 
    // Set the HDC to some of our preferences
-   COLORREF previous_color = SetTextColor(tw.renderer.GetHdc(), (COLORREF)col);
+   COLORREF previous_color = SetTextColor(tw.renderer.GetHdc(), ToCOLORREF(m_color));
    int previous_map_mode = SetMapMode(tw.renderer.GetHdc(), MM_TEXT);
 
    // Create the font we want to use, and swap it out with
@@ -71,11 +71,11 @@ TextWriter& Text::operator<<(TextWriter& tw)
 
    // Call DrawText the first time to fill in the RECT structure
    RECT drawing_rect = { tw.x, tw.y, 0, 0 };
-   DrawText(tw.renderer.GetHdc(), txt.c_str(), int(txt.length()), &drawing_rect, options | DT_CALCRECT);
+   DrawText(tw.renderer.GetHdc(), m_text.c_str(), int(m_text.length()), &drawing_rect, options | DT_CALCRECT);
 
    // Call it again to do the drawing, and get the line height
    if (tw.centered) drawing_rect.left -= (drawing_rect.right - drawing_rect.left) / 2;
-   tw.last_line_height = DrawText(tw.renderer.GetHdc(), txt.c_str(), int(txt.length()), &drawing_rect, options | DT_NOCLIP);
+   tw.last_line_height = DrawText(tw.renderer.GetHdc(), m_text.c_str(), int(m_text.length()), &drawing_rect, options | DT_NOCLIP);
 
    // Update the TextWriter, with however far we just wrote
    if (!tw.centered) tw.x += drawing_rect.right - drawing_rect.left;

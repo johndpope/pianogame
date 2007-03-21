@@ -22,7 +22,8 @@ static Color ToColor(int r, int g, int b)
    return c;
 }
 
-#define ToRGB(x) ( RGB((x).r, (x).g, (x).b) )
+// TODO: Remove
+#define ToCOLORREF(x) ( RGB((x).r, (x).g, (x).b) )
 
 class Renderer
 {

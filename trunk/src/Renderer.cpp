@@ -45,7 +45,7 @@ void Renderer::DrawQuad(int x, int y, int w, int h)
    if (!m_brush || m_color_changed)
    {
       if (m_brush) DeleteObject(m_brush);
-      m_brush = CreateSolidBrush(RGB(m_c.r,m_c.g,m_c.b));
+      m_brush = CreateSolidBrush(ToCOLORREF(m_c));
 
       m_color_changed = false;
    }

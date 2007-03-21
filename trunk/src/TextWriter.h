@@ -51,30 +51,40 @@ private:
 };
 
 // Some colors to choose from, for convenience
-enum TextColor { Black      = 0x00000000, Dk_Blue    = 0x00C40000, Dk_Green   = 0x0000C400, Dk_Cyan    = 0x00FF8000,
-                 Dk_Red     = 0x000000C4, Dk_Purple  = 0x00800080, Brown      = 0x00004080, Gray       = 0x00BBBBBB,
-                 Dk_Gray    = 0x00555555, Blue       = 0x00FF0000, Green      = 0x0000FF00, Cyan       = 0x00FFFF00,
-                 Red        = 0x000000FF, Magenta    = 0x00FF00FF, Yellow     = 0x0000FFFF, White      = 0x00FFFFFF,
-                 Orange     = 0x002080FF, Pink       = 0x00A080FF, CheatYellow= 0x0000CCFF };
+const static Color Black       = { 0x00,0x00,0x00 };
+const static Color Dk_Blue     = { 0xC4,0x00,0x00 };
+const static Color Dk_Green    = { 0x00,0xC4,0x00 };
+const static Color Dk_Cyan     = { 0xFF,0x80,0x00 };
+const static Color Dk_Red      = { 0x00,0x00,0xC4 };
+const static Color Dk_Purple   = { 0x80,0x00,0x80 };
+const static Color Brown       = { 0x00,0x40,0x80 };
+const static Color Gray        = { 0xBB,0xBB,0xBB };
+const static Color Dk_Gray     = { 0x55,0x55,0x55 };
+const static Color Blue        = { 0xFF,0x00,0x00 };
+const static Color Green       = { 0x00,0xFF,0x00 };
+const static Color Cyan        = { 0xFF,0xFF,0x00 };
+const static Color Red         = { 0x00,0x00,0xFF };
+const static Color Magenta     = { 0xFF,0x00,0xFF };
+const static Color Yellow      = { 0x00,0xFF,0xFF };
+const static Color White       = { 0xFF,0xFF,0xFF };
+const static Color Orange      = { 0x20,0x80,0xFF };
+const static Color Pink        = { 0xA0,0x80,0xFF };
+const static Color CheatYellow = { 0x00,0xCC,0xFF };
 
 
 // A class to use TextWriter, and write to the screen
 class Text
 {
 public:
-   Text(std::wstring in_txt, COLORREF in_col) : txt(in_txt), col(in_col) { }
-   Text(int in_int, COLORREF in_col) : col(in_col), txt(WSTRING(in_int)) { }
-   Text(double in_double, int prec, COLORREF in_col) : col(in_col), txt(WSTRING(std::setprecision(prec) << in_double)) { }
-
-   Text(std::wstring in_txt, Color in_col) : txt(in_txt), col(ToRGB(in_col)) { }
-   Text(int in_int, Color in_col) : col(ToRGB(in_col)), txt(WSTRING(in_int)) { }
-   Text(double in_double, int prec, Color in_col) : col(ToRGB(in_col)), txt(WSTRING(std::setprecision(prec) << in_double)) { }
+   Text(std::wstring t,     Color color) : m_color(color), m_text(t)  { }
+   Text(int i,              Color color) : m_color(color), m_text(WSTRING(i)) { }
+   Text(double d, int prec, Color color) : m_color(color), m_text(WSTRING(std::setprecision(prec) << d)) { }
 
    TextWriter& operator<<(TextWriter& tw);
 
 private:
-   std::wstring txt;
-   COLORREF col;
+   Color m_color;
+   std::wstring m_text;
 };
 
 // newline manipulator

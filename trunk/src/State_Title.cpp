@@ -392,8 +392,8 @@ void TitleState::Draw(Renderer &renderer) const
    const static int InstructionsY = 224;
    TextWriter instructions(left, InstructionsY, renderer, false, Layout::SmallFontSize);
 
-   const static COLORREF Title = RGB(114, 159, 207);
-   const static COLORREF Highlight = RGB(138, 226, 52);
+   const static Color Title = ToColor(114, 159, 207);
+   const static Color Highlight = ToColor(138, 226, 52);
 
    instructions << Text(L"During Play", Title) << newline
       << Text(L"The ", Gray) << Text(L"up", Highlight) << Text(L" and ", Gray)
