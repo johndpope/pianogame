@@ -80,7 +80,7 @@ public:
 
    // You can also draw directly on an image's surface using the following
    // matched pair of calls.  Nesting is not allowed.
-   HDC beginDrawingOn();
+   Renderer beginDrawingOn();
    void endDrawingOn();
 
    // Convenience drawing function to draw entire image

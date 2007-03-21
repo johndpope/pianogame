@@ -12,7 +12,7 @@ namespace Layout
 
 void DrawTitle(Renderer &renderer, const std::wstring &title)
 {
-   TextWriter title_writer(ScreenMarginX, ScreenMarginX + TitleFontSize, renderer.GetHdc(), false, TitleFontSize);
+   TextWriter title_writer(ScreenMarginX, ScreenMarginX + TitleFontSize, renderer, false, TitleFontSize);
    title_writer << title;
 }
 
@@ -28,8 +28,8 @@ void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstrin
    const static COLORREF color_hover = RGB(0x60,0x60,0x60);
 
    Image button_img(ButtonWidth, ButtonHeight, button.hovering ? color_hover : color );
-   HDC button_hdc = button_img.beginDrawingOn();
-   TextWriter button_text(text_x, 8, button_hdc, false, ButtonFontSize);
+   Renderer button_renderer = button_img.beginDrawingOn();
+   TextWriter button_text(text_x, 8, button_renderer, false, ButtonFontSize);
    button_text << Text(text, RGB(255, 255, 255));
    button_img.endDrawingOn();
 

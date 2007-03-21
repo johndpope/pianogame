@@ -3,9 +3,10 @@
 // See license.txt for license information
 
 #include "TextWriter.h"
+#include "Renderer.h"
 
-TextWriter::TextWriter(int in_x, int in_y, HDC in_hdc, bool in_centered, int in_size, std::wstring fontname) :
-x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered(in_centered), hdc(in_hdc)
+TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered, int in_size, std::wstring fontname) :
+x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered(in_centered), renderer(in_renderer)
 {
    // Set up the LOGFONT structure
    LOGFONT logical_font;
@@ -34,7 +35,7 @@ TextWriter::~TextWriter()
 
 int TextWriter::get_point_size()
 {
-   return MulDiv(size, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+   return MulDiv(size, GetDeviceCaps(renderer.GetHdc(), LOGPIXELSY), 72);
 }
 
 TextWriter& TextWriter::next_line()
@@ -61,28 +62,28 @@ TextWriter& Text::operator<<(TextWriter& tw)
    const long options = DT_LEFT | DT_NOPREFIX;
 
    // Set the HDC to some of our preferences
-   COLORREF previous_color = SetTextColor(tw.hdc, (COLORREF)col);
-   int previous_map_mode = SetMapMode(tw.hdc, MM_TEXT);
+   COLORREF previous_color = SetTextColor(tw.renderer.GetHdc(), (COLORREF)col);
+   int previous_map_mode = SetMapMode(tw.renderer.GetHdc(), MM_TEXT);
 
    // Create the font we want to use, and swap it out with
    // whatever is currently in there, along with our color
-   HFONT previous_font = (HFONT)SelectObject(tw.hdc, tw.font);
+   HFONT previous_font = (HFONT)SelectObject(tw.renderer.GetHdc(), tw.font);
 
    // Call DrawText the first time to fill in the RECT structure
    RECT drawing_rect = { tw.x, tw.y, 0, 0 };
-   DrawText(tw.hdc, txt.c_str(), int(txt.length()), &drawing_rect, options | DT_CALCRECT);
+   DrawText(tw.renderer.GetHdc(), txt.c_str(), int(txt.length()), &drawing_rect, options | DT_CALCRECT);
 
    // Call it again to do the drawing, and get the line height
    if (tw.centered) drawing_rect.left -= (drawing_rect.right - drawing_rect.left) / 2;
-   tw.last_line_height = DrawText(tw.hdc, txt.c_str(), int(txt.length()), &drawing_rect, options | DT_NOCLIP);
+   tw.last_line_height = DrawText(tw.renderer.GetHdc(), txt.c_str(), int(txt.length()), &drawing_rect, options | DT_NOCLIP);
 
    // Update the TextWriter, with however far we just wrote
    if (!tw.centered) tw.x += drawing_rect.right - drawing_rect.left;
 
    // Return the hdc settings to how they previously were
-   SelectObject(tw.hdc, previous_font);
-   SetTextColor(tw.hdc, previous_color);
-   SetMapMode(tw.hdc, previous_map_mode);
+   SelectObject(tw.renderer.GetHdc(), previous_font);
+   SetTextColor(tw.renderer.GetHdc(), previous_color);
+   SetMapMode(tw.renderer.GetHdc(), previous_map_mode);
 
    return tw;
 }

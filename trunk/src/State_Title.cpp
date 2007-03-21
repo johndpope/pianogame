@@ -358,7 +358,7 @@ void TitleState::Draw(Renderer &renderer) const
    graphics.endDrawing();
 
    TextWriter version(left + graphics.getWidth() - 80,
-      TitleY + graphics.getHeight(), renderer.GetHdc(), false, Layout::SmallFontSize);
+      TitleY + graphics.getHeight(), renderer, false, Layout::SmallFontSize);
    version << Text(L"version ", Gray) << Text(PianoHeroVersionString, Gray);
 
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
@@ -372,23 +372,25 @@ void TitleState::Draw(Renderer &renderer) const
 
    if (m_input_tile.IsPreviewOn())
    {
-      HBRUSH old_brush = static_cast<HBRUSH>(SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(GetStockObject(HOLLOW_BRUSH))));
-      HPEN old_pen = static_cast<HPEN>(SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(GetStockObject(WHITE_PEN))));
+      const static int PreviewWidth = 60;
+      const static int PreviewHeight = 40;
 
       const int x = m_input_tile.GetX() + DeviceTileWidth + 12;
       const int y = m_input_tile.GetY() + 38;
-      Rectangle(renderer.GetHdc(), x, y, x + 60, y + 40);
 
-      SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(old_pen));
-      SelectObject(renderer.GetHdc(), static_cast<HGDIOBJ>(old_brush));
+      renderer.SetColor(0xFF, 0xFF, 0xFF);
+      renderer.DrawQuad(x, y, PreviewWidth, PreviewHeight);
+
+      renderer.SetColor(0,0,0);
+      renderer.DrawQuad(x+1, y+1, PreviewWidth-2, PreviewHeight-2);
    }
 
-   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, renderer.GetHdc(), false, Layout::TitleFontSize);
+   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, renderer, false, Layout::TitleFontSize);
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
    const static int InstructionsY = 224;
-   TextWriter instructions(left, InstructionsY, renderer.GetHdc(), false, Layout::SmallFontSize);
+   TextWriter instructions(left, InstructionsY, renderer, false, Layout::SmallFontSize);
 
    const static COLORREF Title = RGB(114, 159, 207);
    const static COLORREF Highlight = RGB(138, 226, 52);
@@ -407,7 +409,7 @@ void TitleState::Draw(Renderer &renderer) const
       << Text(L"Visit ", Gray) << Text(L"http://www.gamemusicthemes.com/", Title)
       << Text(L" for high quality piano MIDI and sheet music.", Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer.GetHdc(), true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 
 }

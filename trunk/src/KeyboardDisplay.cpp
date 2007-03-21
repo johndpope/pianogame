@@ -57,8 +57,7 @@ void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNot
       KeyNames active_keys;
       m_active_keys = KeyNames();
 
-      HDC bg = m_cached_background.beginDrawingOn();
-      Renderer brenderer(bg);
+      Renderer brenderer = m_cached_background.beginDrawingOn();
 
       DrawGuides(brenderer, white_key_count, white_width, white_space, x_offset, 0, y_offset);
 

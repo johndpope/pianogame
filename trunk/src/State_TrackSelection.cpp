@@ -288,12 +288,12 @@ void TrackSelectionState::Draw(Renderer &renderer) const
 
    // Write our page count on the screen
    const static int TypicalPaginationTextWidth = 280;
-   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, renderer.GetHdc(), false, Layout::ButtonFontSize);
+   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, renderer, false, Layout::ButtonFontSize);
    
    pagination << Text(L"Page ", Gray) << (m_current_page+1) << Text(L" of ", Gray) << m_page_count <<
       Text(L" (arrow keys change page)", Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, renderer.GetHdc(), true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 
    // Draw each track tile on the current page

@@ -4,7 +4,7 @@
 
 #include "Renderer.h"
 
-Renderer::Renderer(HDC hdc) : m_c(ToColor(0,0,0)), m_hdc(hdc), m_brush(0)
+Renderer::Renderer(HDC hdc) : m_c(ToColor(0,0,0)), m_hdc(hdc), m_brush(0), m_color_changed(true)
 {
 }
 
@@ -17,9 +17,9 @@ Renderer::Renderer(const Renderer& rhs)
 {
    m_hdc = rhs.m_hdc;
 
+   m_color_changed = true;
    m_brush = 0;
    m_c = rhs.m_c;
-   SetColor(m_c);
 }
 
 Renderer Renderer::operator=(const Renderer& rhs)
@@ -27,7 +27,6 @@ Renderer Renderer::operator=(const Renderer& rhs)
    if (&rhs == this) return rhs;
    return Renderer(rhs);
 }
-
 
 void Renderer::SetColor(Color c)
 {
@@ -37,14 +36,19 @@ void Renderer::SetColor(Color c)
 void Renderer::SetColor(int r, int g, int b)
 {
    m_c = ToColor(r, g, b);
-
-   if (m_brush) DeleteObject(m_brush);
-   m_brush = CreateSolidBrush(RGB(r,g,b));
+   m_color_changed = true;
 }
 
 void Renderer::DrawQuad(int x, int y, int w, int h)
 {
-   if (!m_brush) return;
+   // Do lazy brush initialization
+   if (!m_brush || m_color_changed)
+   {
+      if (m_brush) DeleteObject(m_brush);
+      m_brush = CreateSolidBrush(RGB(m_c.r,m_c.g,m_c.b));
+
+      m_color_changed = false;
+   }
 
    RECT r = { x, y, x+w, y+h };
    FillRect(m_hdc, &r, m_brush);
