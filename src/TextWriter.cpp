@@ -61,7 +61,6 @@ TextWriter& Text::operator<<(TextWriter& tw)
 {
    const long options = DT_LEFT | DT_NOPREFIX;
 
-   // Set the HDC to some of our preferences
    COLORREF previous_color = SetTextColor(tw.renderer.GetHdc(), ToCOLORREF(m_color));
    int previous_map_mode = SetMapMode(tw.renderer.GetHdc(), MM_TEXT);
 
