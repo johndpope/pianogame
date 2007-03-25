@@ -4,6 +4,10 @@
 
 #include <Windows.h>
 
+#include <gl\gl.h>
+#include <gl\glu.h>
+#include <gl\glaux.h>
+
 #include <set>
 #include <string>
 #include "string_util.h"
@@ -193,8 +197,44 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
             InvalidateRect(hwnd, 0, false);
 
             state_manager.Update();
+
+
+
+/*
+
+            static double angle = 0.0;
+            angle += 0.5;
+
+            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glLoadIdentity();
+            glTranslatef (0.0f, 0.0f, -6.0f);							// Translate 6 Units Into The Screen
+            glRotatef (angle, 0.0f, 1.0f, 0.0f);						// Rotate On The Y-Axis By angle
+
+            for (rot1=0; rot1<2; rot1++)
+            {
+               glRotatef(90.0f,0.0f,1.0f,0.0f);						   // Rotate 90 Degrees On The Y-Axis
+               glRotatef(180.0f,1.0f,0.0f,0.0f);						// Rotate 180 Degress On The X-Axis
+               for (rot2=0; rot2<2; rot2++)
+               {
+                  glRotatef(180.0f,0.0f,1.0f,0.0f);					// Rotate 180 Degrees On The Y-Axis
+                  glBegin (GL_TRIANGLES);
+                  glColor3f (1.f, 0.f, 0.f);	glVertex3f( 0.0f, 1.0f, 0.0f);
+                  glColor3f (0.f, 1.f, 0.f);	glVertex3f(-1.0f,-1.0f, 1.0f);
+                  glColor3f (0.f, 0.f, 1.f);	glVertex3f( 1.0f,-1.0f, 1.0f);
+                  glEnd ();
+               }
+            }
+
+            glFlush ();
+
+            SwapBuffers (window.hDC);
+
+*/
+
          }
       }
+
+      UnregisterClass(application_name.c_str(), instance);
 
       return int(msg.wParam);
    }
@@ -246,6 +286,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          return 0;
       }
 
+   case WM_SYSCOMMAND:
+      {
+         // TODO: I'm not convinced this (NeHe code) is the appropriate behavior!
+
+         // Prevent the screensaver or monitor power-save from kicking in.
+         switch (wParam)
+         {
+         case SC_SCREENSAVE:
+         case SC_MONITORPOWER:
+            return 0;
+         }
+         break;
+      }
+
    case WM_KEYDOWN:
       {
          switch (wParam)
@@ -257,6 +311,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          case VK_SPACE:    state_manager.KeyPress(KeySpace);   break;
          case VK_RETURN:   state_manager.KeyPress(KeyEnter);   break;
          case VK_ESCAPE:   state_manager.KeyPress(KeyEscape);  break;
+         case VK_F6:       state_manager.KeyPress(KeyF6);      break;
          }
 
          return 0;

@@ -9,7 +9,7 @@ The following people have also contributed to the project:
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro
-
+- NeHe Productions for their OpenGL base code
 --------------------------------------------------------------------------------
 
 Piano Hero's video game music samples are provided by Game Music Themes.
@@ -54,6 +54,7 @@ Release 0.6.0
 NEW: Right-click association option in installer.
 CHG: Improved exception handling.
 FIX: Don't exit automatically if "Piano Hero MIDI" folder doesn't exist.
+CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
 
 
 Release 0.5.1
