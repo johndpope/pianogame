@@ -73,8 +73,6 @@ void PlayingState::Init()
       }
    }
 
-   m_playback_speed = 100;
-
    // This many microseconds of the song will
    // be shown on the screen at once
    const static microseconds_t DefaultShowDurationMicroseconds = 3500000;
@@ -257,10 +255,10 @@ void PlayingState::Listen()
 
          // Adjust our statistics
          const static double NoteValue = 100.0;
-         m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_playback_speed / 100.0);
+         m_state.stats.score += NoteValue * CalculateScoreMultiplier() * (m_state.song_speed / 100.0);
 
          m_state.stats.notes_user_could_have_played++;
-         m_state.stats.speed_integral += m_playback_speed;
+         m_state.stats.speed_integral += m_state.song_speed;
 
          m_state.stats.notes_user_actually_played++;
          m_current_combo++;
@@ -284,7 +282,7 @@ void PlayingState::Update()
 
    // The 100 term is really paired with the playback speed, but this
    // formation is less likely to produce overflow errors.
-   delta_microseconds = (delta_microseconds / 100) * m_playback_speed;
+   delta_microseconds = (delta_microseconds / 100) * m_state.song_speed;
 
    if (m_paused) delta_microseconds = 0;
 
@@ -324,7 +322,7 @@ void PlayingState::Update()
             m_current_combo = 0;
 
             m_state.stats.notes_user_could_have_played++;
-            m_state.stats.speed_integral += m_playback_speed;
+            m_state.stats.speed_integral += m_state.song_speed;
          }
 
          m_notes.erase(note);
@@ -345,14 +343,14 @@ void PlayingState::Update()
 
    if (IsKeyPressed(KeyLeft))
    {
-      m_playback_speed -= 10;
-      if (m_playback_speed < 0) m_playback_speed = 0;
+      m_state.song_speed -= 10;
+      if (m_state.song_speed < 0) m_state.song_speed = 0;
    }
 
    if (IsKeyPressed(KeyRight))
    {
-      m_playback_speed += 10;
-      if (m_playback_speed > 400) m_playback_speed = 400;
+      m_state.song_speed += 10;
+      if (m_state.song_speed > 400) m_state.song_speed = 400;
    }
 
    if (IsKeyPressed(KeySpace))
@@ -414,7 +412,7 @@ void PlayingState::Draw(Renderer &renderer) const
    int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
 
    wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier() << L" multiplier");
-   wstring speed_text = WSTRING(m_playback_speed << "% speed");
+   wstring speed_text = WSTRING(m_state.song_speed << "% speed");
 
    TextWriter score(Layout::ScreenMarginX, text_y, renderer, false, Layout::ScoreFontSize);
    score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
@@ -426,7 +424,7 @@ void PlayingState::Draw(Renderer &renderer) const
 
 
 
-   double non_zero_playback_speed = ( (m_playback_speed == 0) ? 0.1 : (m_playback_speed/100.0) );
+   double non_zero_playback_speed = ( (m_state.song_speed == 0) ? 0.1 : (m_state.song_speed/100.0) );
    microseconds_t tot_seconds = static_cast<microseconds_t>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
    microseconds_t cur_seconds = static_cast<microseconds_t>((m_state.midi->GetSongPositionInMicroseconds() / 100000.0) / non_zero_playback_speed);
    if (cur_seconds < 0) cur_seconds = 0;

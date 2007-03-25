@@ -60,7 +60,6 @@ private:
    double CalculateScoreMultiplier() const;
 
    bool m_paused;
-   int m_playback_speed;
 
    KeyboardDisplay *m_keyboard;
    microseconds_t m_show_duration;
