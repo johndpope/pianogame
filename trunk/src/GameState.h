@@ -10,6 +10,7 @@
 #include <exception>
 #include <string>
 
+#include "FrameCounter.h"
 class Renderer;
 
 class GameStateError : public std::exception
@@ -34,7 +35,9 @@ enum GameKey
    KeyDown =   0x0008,
    KeyLeft =   0x0010,
    KeyRight =  0x0020,
-   KeyEnter =  0x0040
+   KeyEnter =  0x0040,
+
+   KeyF6 =     0x0080,
 };
 
 enum MouseButton
@@ -135,8 +138,8 @@ class GameStateManager
 public:
    GameStateManager(int screen_width, int screen_height)
       : m_current_state(0), m_screen_x(screen_width), m_screen_y(screen_height),
-      m_last_milliseconds(timeGetTime()), m_next_state(0), m_key_presses(0),
-      m_inside_update(false)
+      m_last_milliseconds(timeGetTime()), m_next_state(0), m_key_presses(0), m_last_key_presses(0),
+      m_inside_update(false), m_fps(500.0), m_show_fps(false)
    { }
    
    // first_state must be dynamically allocated.
@@ -146,6 +149,7 @@ public:
 
    void KeyPress(GameKey key);
    bool IsKeyPressed(GameKey key) const;
+   bool IsKeyReleased(GameKey key) const;
 
    void MousePress(MouseButton button);
    void MouseRelease(MouseButton button);
@@ -166,10 +170,14 @@ private:
 
    unsigned long m_last_milliseconds;
    unsigned long m_key_presses;
+   unsigned long m_last_key_presses;
 
    bool m_inside_update;
 
    MouseInfo m_mouse;
+
+   FrameCounter m_fps;
+   bool m_show_fps;
 
    int m_screen_x;
    int m_screen_y;

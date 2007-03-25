@@ -5,6 +5,10 @@
 #include "GameState.h"
 #include "Renderer.h"
 
+// For FPS display
+#include "TextWriter.h"
+#include <iomanip>
+
 void GameState::ChangeState(GameState *new_state)
 {
    if (!m_manager) throw GameStateError("Cannot change state if manager not set!");
@@ -51,6 +55,11 @@ void GameStateManager::KeyPress(GameKey key)
 bool GameStateManager::IsKeyPressed(GameKey key) const
 {
    return ( (m_key_presses & static_cast<unsigned long>(key)) != 0);
+}
+
+bool GameStateManager::IsKeyReleased(GameKey key) const
+{
+   return (!IsKeyPressed(key) && ((m_last_key_presses & static_cast<unsigned long>(key)) != 0));
 }
 
 void GameStateManager::MousePress(MouseButton button)
@@ -123,6 +132,9 @@ void GameStateManager::Update()
    const unsigned long delta = now - m_last_milliseconds;
    m_last_milliseconds = now;
 
+   m_fps.Frame(delta);
+   if (IsKeyReleased(KeyF6)) m_show_fps = !m_show_fps;
+
    if (m_next_state && m_current_state)
    {
       delete m_current_state;
@@ -153,6 +165,7 @@ void GameStateManager::Update()
    m_inside_update = false;
 
    // Reset our keypresses for the next frame
+   m_last_key_presses = m_key_presses;
    m_key_presses = 0;
 
    // Reset our mouse clicks for the next frame
@@ -176,6 +189,12 @@ void GameStateManager::Draw(Renderer &renderer)
 
    Renderer r(backbuffer_hdc);
    m_current_state->Draw(r);
+
+   if (m_show_fps)
+   {
+      TextWriter fps_writer(0, 0, r);
+      fps_writer << Text(L"FPS: ", Gray) << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
+   }
 
    // Copy the backbuffer to the screen
    BitBlt(renderer.GetHdc(), 0, 0, GetStateWidth(), GetStateHeight(), backbuffer_hdc, 0, 0, SRCCOPY);
