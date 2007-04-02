@@ -29,10 +29,9 @@ class Renderer
 {
 public:
    Renderer(HDC hdc);
-   ~Renderer();
 
-   Renderer(const Renderer& rhs);
-   Renderer operator=(const Renderer& rhs);
+   void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
+   void ResetOffset() { SetOffset(0,0); }
 
    void SetColor(Color c);
    void SetColor(int r, int g, int b);
@@ -41,13 +40,15 @@ public:
    // TODO: REMOVE!
    HDC GetHdc() { return m_hdc; }
 
-private:
+   // TODO: REMOVE!
+   int GetXoffset() const { return m_xoffset; }
+   int GetYoffset() const { return m_yoffset; }
 
-   bool m_color_changed;
-   Color m_c;
+private:
+   int m_xoffset;
+   int m_yoffset;
 
    HDC m_hdc;
-   HBRUSH m_brush;
 };
 
 #endif

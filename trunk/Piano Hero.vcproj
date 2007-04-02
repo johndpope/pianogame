@@ -251,6 +251,14 @@
 					RelativePath=".\src\TextWriter.h"
 					>
 				</File>
+				<File
+					RelativePath=".\src\Tga.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\Tga.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Support"

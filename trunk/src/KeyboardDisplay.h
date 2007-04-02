@@ -9,7 +9,6 @@
 #include <vector>
 #include <string>
 
-#include "Image.h"
 #include "libmidi/Note.h"
 #include "libmidi/MidiTypes.h"
 
@@ -44,9 +43,6 @@ public:
    void ResetActiveKeys() { m_active_keys.clear(); }
 
 private:
-
-   bool m_background_initialized;
-   Image m_cached_background;
 
    void DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height, 
       int key_space, int x_offset, int y_offset) const;

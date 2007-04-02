@@ -5,6 +5,8 @@
 #include "GameState.h"
 #include "Renderer.h"
 
+#include <gl\gl.h>
+
 // For FPS display
 #include "TextWriter.h"
 #include <iomanip>
@@ -125,12 +127,16 @@ void GameStateManager::ChangeState(GameState *new_state)
 
 
 
-void GameStateManager::Update()
+void GameStateManager::Update(bool skip_this_update)
 {
    // Manager's timer grows constantly
    const unsigned long now = timeGetTime();
    const unsigned long delta = now - m_last_milliseconds;
    m_last_milliseconds = now;
+
+   // Now that we've updated the time, we can return if
+   // we've been told to skip this one.
+   if (skip_this_update) return;
 
    m_fps.Frame(delta);
    if (IsKeyReleased(KeyF6)) m_show_fps = !m_show_fps;
@@ -181,26 +187,22 @@ void GameStateManager::Draw(Renderer &renderer)
    // the previous state *and* the current state during some transition
    // would be really easy.
 
-   // Create a backbuffer to eliminate flicker
-   HDC backbuffer_hdc = CreateCompatibleDC(renderer.GetHdc());
-   HBITMAP backbuffer = CreateCompatibleBitmap(renderer.GetHdc(), GetStateWidth(), GetStateHeight());
-   HGDIOBJ previous_object = SelectObject(backbuffer_hdc, backbuffer);
-   SetBkMode(backbuffer_hdc, TRANSPARENT);
+   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-   Renderer r(backbuffer_hdc);
-   m_current_state->Draw(r);
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   glTranslatef(0., static_cast<GLfloat>(GetStateHeight()), 0.);
+   glScalef (1., -1., 1.);
+   glTranslatef(0.375, 0.375, 0.);
+
+   m_current_state->Draw(renderer);
 
    if (m_show_fps)
    {
-      TextWriter fps_writer(0, 0, r);
+      TextWriter fps_writer(0, 0, renderer);
       fps_writer << Text(L"FPS: ", Gray) << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
    }
 
-   // Copy the backbuffer to the screen
-   BitBlt(renderer.GetHdc(), 0, 0, GetStateWidth(), GetStateHeight(), backbuffer_hdc, 0, 0, SRCCOPY);
-
-   // Clean up GDI
-   SelectObject(backbuffer_hdc, previous_object);
-   DeleteObject(backbuffer);
-   DeleteDC(backbuffer_hdc);
+   glFlush ();
+   SwapBuffers (renderer.GetHdc());
 }

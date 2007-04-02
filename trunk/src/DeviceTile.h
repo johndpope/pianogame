@@ -8,6 +8,7 @@
 #include "GameState.h"
 #include "MenuLayout.h"
 #include "TrackTile.h"
+#include "Image.h"
 #include <vector>
 
 class MidiCommOut;
@@ -47,6 +48,8 @@ public:
    const ButtonState ButtonRight() const { return button_mode_right; }
 
 private:
+   DeviceTile(const DeviceTile &);
+
    int m_x;
    int m_y;
 
@@ -54,6 +57,8 @@ private:
    int m_device_id;
 
    DeviceTileType m_tile_type;
+
+   Image m_graphics;
 
    ButtonState whole_tile;
    ButtonState button_preview;
