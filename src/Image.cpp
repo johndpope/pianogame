@@ -18,16 +18,7 @@ std::wstring ImageError::GetErrorDescription() const
    {
    case Error_CannotLoadFile:                      message = L"Cannot load image from file."; break;
    case Error_CannotLoadResource:                  message = L"Cannot load image from resource."; break;
-   case Error_CannotCreateNewImage:                message = L"Cannot create a new blank image."; break;
    case Error_CannotDetermineSize:                 message = L"Cannot determine image dimensions."; break;
-
-   case Error_AlreadyInDrawingMode:                message = L"Cannot enter image draw mode more than once."; break;
-   case Error_InvalidDrawingModeExit:              message = L"Cannot leave image draw mode before entering it."; break;
-
-   case Error_AlreadyDrawingOn:                    message = L"Cannot enter draw-on mode more than once."; break;
-   case Error_InvalidDrawingOnExit:                message = L"Cannot leave draw-on mode before entering it."; break;
-
-   case Error_AttemptedDrawWhileNotInDrawingMode:  message = L"Cannot draw before entering image draw mode."; break;
 
    default:                                        message = WSTRING(L"Unknown ImageError Code (" << m_error << L")."); break;
    }
@@ -43,49 +34,21 @@ std::wstring ImageError::GetErrorDescription() const
 
 
 Image::Image(const wstring &filename)
-: m_drawing(false), m_drawing_on(false), m_transparency_enabled(false), m_image(0), m_image_mask(0)
+: m_image(0), m_texture(0)
 {
-   m_original_image = (HBITMAP)LoadImage(0, filename.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-   if (!m_original_image) ThrowWithLastError(Error_CannotLoadFile);
+   m_image = (HBITMAP)LoadImage(0, filename.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+   if (!m_image) ThrowWithLastError(Error_CannotLoadFile);
 
-   GetDimensions();
-   CopyOriginalToWorkingImage();
+   Init();
 }
 
 Image::Image(HINSTANCE module_instance, const wstring &resource_name)
-   : m_drawing(false), m_drawing_on(false), m_transparency_enabled(false), m_image(0), m_image_mask(0)
+   : m_image(0), m_texture(0)
 {
-   m_original_image = (HBITMAP)LoadImage(module_instance, resource_name.c_str(), IMAGE_BITMAP, 0, 0, 0);
-   if (!m_original_image) ThrowWithLastError(Error_CannotLoadResource);
+   m_image = (HBITMAP)LoadImage(module_instance, resource_name.c_str(), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+   if (!m_image) ThrowWithLastError(Error_CannotLoadResource);
 
-   GetDimensions();
-   CopyOriginalToWorkingImage();
-}
-
-Image::Image(int width, int height, Color initial_fill)
-   : m_drawing(false), m_drawing_on(false), m_transparency_enabled(false), m_image(0), m_image_mask(0)
-{
-   // Create a DC that works with the current display
-   HDC screen = CreateDC(L"DISPLAY", 0, 0, 0);
-   m_original_image = CreateCompatibleBitmap(screen, width, height);
-   DeleteDC(screen);
-
-   if (!m_original_image) ThrowWithLastError(Error_CannotCreateNewImage);
-
-   const RECT r = { 0, 0, width, height };
-   HBRUSH fill_brush = CreateSolidBrush(ToCOLORREF(initial_fill));
-   HDC hdc = CreateCompatibleDC(0);
-
-   // Fill with the transparent color
-   HBITMAP previous_bitmap = (HBITMAP)SelectObject(hdc, m_original_image);
-   FillRect(hdc, &r, fill_brush);
-   SelectObject(m_image_dc, previous_bitmap);
-
-   DeleteObject(fill_brush);
-   DeleteDC(hdc);
-
-   GetDimensions();
-   CopyOriginalToWorkingImage();
+   Init();
 }
 
 void Image::ThrowWithLastError(ImageErrorCode code)
@@ -100,169 +63,82 @@ void Image::ThrowWithLastError(ImageErrorCode code)
    throw ImageError(code, error_message);
 }
 
-void Image::GetDimensions()
+void Image::Init()
 {
    BITMAP bm;
 
-   if (GetObject(m_original_image, sizeof(bm), &bm) == 0) ThrowWithLastError(Error_CannotDetermineSize);
+   if (GetObject(m_image, sizeof(bm), &bm) == 0) ThrowWithLastError(Error_CannotDetermineSize);
    m_width = bm.bmWidth;
    m_height = bm.bmHeight;
-}
 
-void Image::CopyOriginalToWorkingImage()
-{
-   if (!m_image)
-   {
-      HDC screen = CreateDC(L"DISPLAY", 0, 0, 0);
-      m_image = CreateCompatibleBitmap(screen, m_width, m_height);
-      DeleteDC (screen);
-   }
-
-   HDC dc_working = CreateCompatibleDC(0);
-   HDC dc_original = CreateCompatibleDC(0);
-   
-   HBITMAP previous_working = (HBITMAP)SelectObject(dc_working, m_image);
-   HBITMAP previous_original = (HBITMAP)SelectObject(dc_original, m_original_image);
-
-   BitBlt(dc_working, 0, 0, m_width, m_height, dc_original, 0, 0, SRCCOPY);
-
-   SelectObject(dc_working, previous_working);
-   SelectObject(dc_original, previous_original);
-
-   DeleteDC(dc_working);
-   DeleteDC(dc_original);
-}
-
-void Image::EnableTransparency()
-{
-   m_transparency_enabled = true;
-   BuildMask();
-}
-
-void Image::DisableTransparency()
-{
-   m_transparency_enabled = false;
-}
-
-void Image::BuildMask()
-{
-   CopyOriginalToWorkingImage();
-   if (!m_image_mask) m_image_mask = CreateBitmap(m_width, m_height, 1, 1, 0);
-
-   HDC dc_image = CreateCompatibleDC(0);
-   HDC dc_mask = CreateCompatibleDC(0);
-
-   // Select the two bitmaps into the new DCs, and grab whatever might
-   // be in the new DCs, and hold until we're finished with them.
-   HBITMAP old_image_bitmap = (HBITMAP)SelectObject(dc_image, m_image);
-   HBITMAP old_mask_bitmap = (HBITMAP)SelectObject(dc_mask, m_image_mask);
-
-   // Grab the alpha color from the bottom right pixel, and set it as the 
-   // background color of the original graphics
-   COLORREF alpha_color = GetPixel(dc_image, m_width - 1, m_height - 1);
-   SetBkColor(dc_image, alpha_color);
-
-   // Straight copy the image over to our mask bitmap
-   BitBlt(dc_mask, 0, 0, m_width, m_height, dc_image, 0, 0, SRCCOPY);
-
-   // Set the text color to white for some reason and get back what was there
-   SetTextColor(dc_image, 0x00FFFFFF);
-
-   // Change the background color of the original graphics to pure black (we don't need
-   // to save what was there, because we just set it to the alpha_color ourselves)
-   SetBkColor(dc_image, 0x00000000);
-
-   // Copy the mask onto the original image
-   BitBlt(dc_image, 0, 0, m_width, m_height, dc_mask, 0, 0, SRCAND);
-
-   // Restore the text color, background color and whatever
-   // might have been in the DCs when we first made them
-   SelectObject(dc_image, old_image_bitmap);
-   SelectObject(dc_mask, old_mask_bitmap);
-
-   // Clean up the DCs
-   DeleteDC(dc_image);
-   DeleteDC(dc_mask);
+   glGenTextures(1, &m_texture);
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+   glBindTexture(GL_TEXTURE_2D, m_texture);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexImage2D(GL_TEXTURE_2D, 0, 3, bm.bmWidth, bm.bmHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, bm.bmBits);
 }
 
 Image::~Image()
 {
-   DeleteObject(m_original_image);
    DeleteObject(m_image);
-   DeleteObject(m_image_mask);
+   glDeleteTextures(1, &m_texture);
 }
 
-void Image::draw(int x, int y) const
+void Image::draw(Renderer &r, int x, int y) const
 {
-   draw(x, y, m_width, m_height, 0, 0);
+   draw(r, x, y, m_width, m_height, 0, 0);
 }
 
-void Image::draw(int x, int y, int width, int height, int src_x, int src_y) const
+void Image::draw(Renderer &r, int in_x, int in_y, int width, int height, int src_x, int src_y) const
 {
-   if (!m_drawing) throw ImageError(Error_AttemptedDrawWhileNotInDrawingMode);
+   const int x = in_x + r.GetXoffset();
+   const int y = in_y + r.GetYoffset();
 
-   // Select the mask into the new DC. Then AND the mask over to the destination.
-   HBITMAP previous_bitmap = (HBITMAP)SelectObject(m_image_dc, m_image_mask);
+   const double tx = static_cast<double>(src_x) / static_cast<double>(m_width);
+   const double ty = -static_cast<double>(src_y) / static_cast<double>(m_height);
+   const double tw = static_cast<double>(width) / static_cast<double>(m_width);
+   const double th = -static_cast<double>(height)/ static_cast<double>(m_height);
 
-   if (m_transparency_enabled)
-   {
-      BitBlt(m_cached_destination_dc, x, y, width, height, m_image_dc, src_x, src_y, SRCAND);
-   }
+   glBindTexture(GL_TEXTURE_2D, m_texture);
 
-   // Swap out the selected bitmap for the actual graphics and draw it on
-   // the destination, ORing it with the mask.
-   SelectObject(m_image_dc, m_image);
+   glBegin(GL_QUADS);
+   glTexCoord2d(   tx,    ty); glVertex3i(      x,        y, 0);
+   glTexCoord2d(   tx, ty+th); glVertex3i(      x, y+height, 0);
+   glTexCoord2d(tx+tw, ty+th); glVertex3i(x+width, y+height, 0);
+   glTexCoord2d(tx+tw,    ty); glVertex3i(x+width,        y, 0);
+   glEnd();
 
-   DWORD raster_op = (m_transparency_enabled ? SRCPAINT : SRCCOPY);
-   BitBlt(m_cached_destination_dc, x, y, width, height, m_image_dc, src_x, src_y, raster_op);
-
-   // Reselect whatever was in the DC before this call.
-   SelectObject(m_image_dc, previous_bitmap);
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Image::beginDrawing(Renderer &renderer) const
+
+
+void Image::drawTga(Renderer &r, const Tga *tga, int x, int y)
 {
-   if (m_drawing) throw ImageError(Error_AlreadyInDrawingMode);
-
-   m_cached_destination_dc = renderer.GetHdc();
-   m_image_dc = CreateCompatibleDC(0);
-
-   m_drawing = true;
+   drawTga(r, tga, x, y, (int)tga->GetWidth(), (int)tga->GetHeight(), 0, 0);
 }
 
-void Image::endDrawing() const
+void Image::drawTga(Renderer &r, const Tga *tga, int in_x, int in_y, int width, int height, int src_x, int src_y)
 {
-   if (!m_drawing) throw ImageError(Error_InvalidDrawingModeExit);
+   const int x = in_x + r.GetXoffset();
+   const int y = in_y + r.GetYoffset();
 
-   DeleteDC(m_image_dc);
+   const double tx = static_cast<double>(src_x) / static_cast<double>(tga->GetWidth());
+   const double ty = -static_cast<double>(src_y) / static_cast<double>(tga->GetHeight());
+   const double tw = static_cast<double>(width) / static_cast<double>(tga->GetWidth());
+   const double th = -static_cast<double>(height)/ static_cast<double>(tga->GetHeight());
 
-   m_drawing = false;
-}
+   glBindTexture(GL_TEXTURE_2D, tga->GetId());
 
-Renderer Image::beginDrawingOn()
-{
-   if (m_drawing_on) throw ImageError(Error_AlreadyDrawingOn);
+   glBegin(GL_QUADS);
+   glTexCoord2d(   tx,    ty); glVertex3i(      x,        y, 0);
+   glTexCoord2d(   tx, ty+th); glVertex3i(      x, y+height, 0);
+   glTexCoord2d(tx+tw, ty+th); glVertex3i(x+width, y+height, 0);
+   glTexCoord2d(tx+tw,    ty); glVertex3i(x+width,        y, 0);
+   glEnd();
 
-   m_draw_on_dc = CreateCompatibleDC(0);
-   m_previous_draw_on_obj = SelectObject(m_draw_on_dc, m_original_image);
-
-   SetBkMode(m_draw_on_dc, TRANSPARENT);
-
-   m_drawing_on = true;
-   return Renderer(m_draw_on_dc);
-}
-
-void Image::endDrawingOn()
-{
-   if (!m_drawing_on) throw ImageError(Error_InvalidDrawingOnExit);
-
-   SelectObject(m_draw_on_dc, m_previous_draw_on_obj);
-   DeleteDC(m_draw_on_dc);
-
-   m_drawing_on = false;
-
-   CopyOriginalToWorkingImage();
-
-   // Rebuild our transparency mask
-   if (m_transparency_enabled) BuildMask();
+   glBindTexture(GL_TEXTURE_2D, 0);
 }

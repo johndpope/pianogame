@@ -156,7 +156,7 @@ public:
    void MouseMove(int x, int y);
    const MouseInfo &Mouse() const { return m_mouse; }
 
-   void Update();
+   void Update(bool skip_this_update);
    void Draw(Renderer &renderer);
 
    void ChangeState(GameState *new_state);

@@ -96,47 +96,41 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
 
    Color color_tile = dark;
    Color color_tile_hovered = medium;
-   Image tile(TrackTileWidth, TrackTileHeight, whole_tile.hovering ? color_tile_hovered : color_tile );
-   Renderer tile_renderer = tile.beginDrawingOn();
+
+   renderer.SetOffset(m_x, m_y);
+
+   renderer.SetColor(whole_tile.hovering ? color_tile_hovered : color_tile);
+   renderer.DrawQuad(0, 0, TrackTileWidth, TrackTileHeight);
 
    // Draw horizontal rule between info and mode
-   tile_renderer.SetColor(light);
-   tile_renderer.DrawQuad(10, 60, TrackTileWidth - 20, 1);
+   renderer.SetColor(light);
+   renderer.DrawQuad(10, 60, TrackTileWidth - 20, 1);
 
    // Write song info to the tile
-   TextWriter title(10, 10, tile_renderer, false, 14);
+   TextWriter title(10, 10, renderer, false, 14);
    title << Text(L"Instrument:", light);
 
-   TextWriter track_info(100, 10, tile_renderer, false, 14);
+   TextWriter track_info(100, 10, renderer, false, 14);
    track_info << track.InstrumentName() << newline;
    track_info << static_cast<const unsigned int>(track.Notes().size()) << L" notes" << newline;
 
    Image graphics(Image::GetGlobalModuleInstance(), L"BITMAP_TRACKTILE");
-   graphics.EnableTransparency();
 
    int color_offset = GraphicHeight * static_cast<int>(m_color);
    if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
 
-   graphics.beginDrawing(tile_renderer);
-   graphics.draw(BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
-   graphics.draw(BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
-   graphics.draw(BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
+   graphics.draw(renderer, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
+   graphics.draw(renderer, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
+   graphics.draw(renderer, BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
 
    TrackTileGraphic preview_graphic = GraphicPreviewTurnOn;
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
-   graphics.draw(BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
-
-   graphics.endDrawing();
+   graphics.draw(renderer, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
    // Draw mode text
-   TextWriter mode(39, 76, tile_renderer, false, 14);
+   TextWriter mode(39, 76, renderer, false, 14);
    mode << TrackModeText[m_mode];
 
-   tile.endDrawingOn();
-
-   // Draw the tile to the screen
-   tile.beginDrawing(renderer);
-   tile.draw(m_x, m_y);
-   tile.endDrawing();
+   renderer.ResetOffset();
 }
 

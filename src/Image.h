@@ -8,7 +8,10 @@
 #include <Windows.h>
 #include <string>
 
+#include <gl\gl.h>
+
 #include "Renderer.h"
+#include "Tga.h"
 
 enum ImageErrorCode
 {
@@ -16,14 +19,6 @@ enum ImageErrorCode
    Error_CannotLoadResource,
    Error_CannotCreateNewImage,
    Error_CannotDetermineSize,
-
-   Error_AlreadyInDrawingMode,
-   Error_InvalidDrawingModeExit,
-
-   Error_AlreadyDrawingOn,
-   Error_InvalidDrawingOnExit,
-
-   Error_AttemptedDrawWhileNotInDrawingMode
 };
 
 class ImageError : public std::exception
@@ -63,63 +58,33 @@ public:
    // Consider using GetGlobalModuleInstance()
    Image(HINSTANCE module_instance, const std::wstring &resource_name);
 
-   // Create a new solid color image of the specified size
-   Image(int width, int height, Color initial_fill = ToColor(0,0,0));
-
    ~Image();
-
-   // Transparency is disabled by default.  Bottom-right
-   // pixel of image is used as transparent color.
-   void EnableTransparency();
-   void DisableTransparency();
-
-   // Wrap any draw calls inside a matched pair of beginDrawing/endDrawing
-   // calls.  Nesting is not allowed.
-   void beginDrawing(Renderer &renderer) const;
-   void endDrawing() const;
-
-   // You can also draw directly on an image's surface using the following
-   // matched pair of calls.  Nesting is not allowed.
-   Renderer beginDrawingOn();
-   void endDrawingOn();
 
    // Convenience drawing function to draw entire image
    // at the specified destination coordinates
-   void draw(int x, int y) const;
+   void draw(Renderer &r, int x, int y) const;
 
-   void draw(int x, int y, int width, int height, int src_x, int src_y) const;
+   void draw(Renderer &r, int x, int y, int width, int height, int src_x, int src_y) const;
 
    int getWidth() const { return m_width; }
    int getHeight() const { return m_height; }
 
+   static void drawTga(Renderer &r, const Tga *tga, int x, int y);
+   static void drawTga(Renderer &r, const Tga *tga, int x, int y, int width, int height, int src_x, int src_y);
+
 private:
    // Disable copying
-   Image(const Image &i);
+   Image(const Image &);
 
-   void GetDimensions();
-   void BuildMask();
-   void CopyOriginalToWorkingImage();
+   void Init();
 
    void ThrowWithLastError(ImageErrorCode code);
 
-   HBITMAP m_original_image;
    HBITMAP m_image;
-   HBITMAP m_image_mask;
-
-   bool m_transparency_enabled;
+   GLuint m_texture;
 
    int m_width;
    int m_height;
-
-   // State for drawing this image onto other surfaces
-   mutable bool m_drawing;
-   mutable HDC m_image_dc;
-   mutable HDC m_cached_destination_dc;
-
-   // State for drawing on the surface of this image
-   bool m_drawing_on;
-   HDC m_draw_on_dc;
-   HGDIOBJ m_previous_draw_on_obj;
 
    static HINSTANCE m_global_hinstance;
 };

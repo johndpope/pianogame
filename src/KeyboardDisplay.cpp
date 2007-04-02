@@ -11,8 +11,7 @@
 using namespace std;
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
-   : m_size(size), m_width(pixelWidth), m_height(pixelHeight),
-   m_cached_background(pixelWidth, pixelHeight), m_background_initialized(false)
+   : m_size(size), m_width(pixelWidth), m_height(pixelHeight)
 {
 }
 
@@ -49,34 +48,10 @@ void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNot
    int x_offset = (m_width - final_width) / 2;
    int y_offset = (m_height - white_height);
 
-   // Generate our one-time background image that has the guidelines,
-   // and empty keyboard.
-   if (!m_background_initialized)
-   {
-      // Temporarily turn off any active keys
-      KeyNames active_keys;
-      m_active_keys = KeyNames();
-
-      Renderer brenderer = m_cached_background.beginDrawingOn();
-
-      DrawGuides(brenderer, white_key_count, white_width, white_space, x_offset, 0, y_offset);
-
-      DrawWhiteKeys(brenderer, false, white_key_count, white_width, white_height, white_space, x_offset, y_offset);
-      DrawBlackKeys(brenderer, false, white_key_count, white_width, black_width, black_height, white_space, x_offset, y_offset, black_offset);
-
-      m_cached_background.endDrawingOn();
-
-      m_active_keys = active_keys;
-      m_background_initialized = true;
-   }
-
-   m_cached_background.beginDrawing(renderer);
-   m_cached_background.draw(x, y);
-   m_cached_background.endDrawing();
-
+   DrawGuides(renderer, white_key_count, white_width, white_space, x + x_offset, y, y_offset);
    DrawNotes(renderer, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
 
-   DrawWhiteKeys(renderer, true, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
+   DrawWhiteKeys(renderer, false, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
    DrawBlackKeys(renderer, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
 }
 

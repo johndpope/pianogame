@@ -3,7 +3,6 @@
 // See license.txt for license information
 
 #include "MenuLayout.h"
-#include "Image.h"
 #include "TextWriter.h"
 #include "Renderer.h"
 
@@ -27,15 +26,15 @@ void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstrin
    const static Color color = ToColor(0x40,0x40,0x40);
    const static Color color_hover = ToColor(0x60,0x60,0x60);
 
-   Image button_img(ButtonWidth, ButtonHeight, button.hovering ? color_hover : color );
-   Renderer button_renderer = button_img.beginDrawingOn();
-   TextWriter button_text(text_x, 8, button_renderer, false, ButtonFontSize);
-   button_text << Text(text, ToColor(0xFF, 0xFF, 0xFF));
-   button_img.endDrawingOn();
+   renderer.SetOffset(button.x, button.y);
 
-   button_img.beginDrawing(renderer);
-   button_img.draw(button.x, button.y);
-   button_img.endDrawing();
+   renderer.SetColor(button.hovering ? color_hover : color);
+   renderer.DrawQuad(0, 0, ButtonWidth, ButtonHeight);
+
+   TextWriter button_text(text_x, 8, renderer, false, ButtonFontSize);
+   button_text << Text(text, ToColor(0xFF, 0xFF, 0xFF));
+
+   renderer.ResetOffset();
 }
 
 

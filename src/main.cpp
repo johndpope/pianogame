@@ -6,7 +6,6 @@
 
 #include <gl\gl.h>
 #include <gl\glu.h>
-#include <gl\glaux.h>
 
 #include <set>
 #include <string>
@@ -18,6 +17,7 @@
 #include "libmidi/Midi.h"
 #include "libmidi/SynthVolume.h"
 
+#include "Image.h"
 #include "Renderer.h"
 #include "SharedState.h"
 #include "GameState.h"
@@ -37,6 +37,26 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 // TODO: Make this better
 HWND g_hwnd;
+
+static bool WindowActive = true;
+
+typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
+PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+
+void setVSync(int interval=1)
+{
+  const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
+
+  if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
+    return; // Error: WGL_EXT_swap_control extension not supported on your computer.\n");
+  else
+  {
+    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+
+    if( wglSwapIntervalEXT )
+      wglSwapIntervalEXT(interval);
+  }
+}
 
 int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
 {
@@ -105,11 +125,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       if (command_line.length() > 0 && command_line[0] == L'\"') command_line = command_line.substr(1, command_line.length() - 1);
       if (command_line.length() > 0 && command_line[command_line.length()-1] == L'\"') command_line = command_line.substr(0, command_line.length() - 1);
 
-      HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
-         WS_POPUP, 0, 0, WindowWidth, WindowHeight, 0, 0, instance, 0);
-
-      g_hwnd = hwnd;
-
       Midi *midi = 0;
 
       // Attempt to open the midi file given on the command line first
@@ -169,9 +184,59 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       // resets what it does during its destruction
       ReasonableSynthVolume volume_correct;
 
+
+      HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
+         WS_POPUP, 0, 0, WindowWidth, WindowHeight, HWND_DESKTOP, 0, instance, 0);
+      g_hwnd = hwnd;
+
+      HDC dc = GetDC(hwnd);
+      if (!dc) throw std::exception("Couldn't get window device context.");
+      
+      // Grab the current pixel format and change a few fields
+      int pixel_format_id = GetPixelFormat(dc);
+      PIXELFORMATDESCRIPTOR pfd;
+      DescribePixelFormat(dc, pixel_format_id, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+      pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+      pfd.nVersion = 1;
+      pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+      pfd.iPixelType = PFD_TYPE_RGBA;
+      pfd.iLayerType = PFD_MAIN_PLANE;
+
+      // After our changes, get the closest match the device has to offer
+      pixel_format_id = ChoosePixelFormat(dc, &pfd);
+      if (!pixel_format_id) throw std::exception("Unable to find a good pixel format.");
+      if (!SetPixelFormat(dc, pixel_format_id, &pfd)) throw std::exception("Couldn't set pixel format.");
+
+      HGLRC glrc = wglCreateContext(dc);
+      if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
+      if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
+
+      setVSync(0);
+
+      // All of this OpenGL stuff only needs to be set once
+      glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+      glClearDepth(1.0f);
+      glDepthFunc(GL_LEQUAL);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_TEXTURE_2D);
+
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glEnable(GL_BLEND);
+
+//      gl
+
+      glShadeModel(GL_SMOOTH);
+
+      glViewport(0, 0, WindowWidth, WindowHeight);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, WindowWidth, 0, WindowHeight);
+
+
+
       ShowWindow (hwnd, iCmdShow);
       UpdateWindow (hwnd);
-   
+
       Image::SetGlobalModuleInstance(instance);
 
       SharedState state;
@@ -183,6 +248,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       MSG msg;
       ZeroMemory(&msg, sizeof(MSG));
 
+      bool was_inactive = true;
       bool running = true;
       while (running)
       {
@@ -193,46 +259,25 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
          }
          else
          {
-            // Redraw the window as often as possible
-            InvalidateRect(hwnd, 0, false);
-
-            state_manager.Update();
-
-
-
-/*
-
-            static double angle = 0.0;
-            angle += 0.5;
-
-            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glLoadIdentity();
-            glTranslatef (0.0f, 0.0f, -6.0f);							// Translate 6 Units Into The Screen
-            glRotatef (angle, 0.0f, 1.0f, 0.0f);						// Rotate On The Y-Axis By angle
-
-            for (rot1=0; rot1<2; rot1++)
+            if (WindowActive)
             {
-               glRotatef(90.0f,0.0f,1.0f,0.0f);						   // Rotate 90 Degrees On The Y-Axis
-               glRotatef(180.0f,1.0f,0.0f,0.0f);						// Rotate 180 Degress On The X-Axis
-               for (rot2=0; rot2<2; rot2++)
-               {
-                  glRotatef(180.0f,0.0f,1.0f,0.0f);					// Rotate 180 Degrees On The Y-Axis
-                  glBegin (GL_TRIANGLES);
-                  glColor3f (1.f, 0.f, 0.f);	glVertex3f( 0.0f, 1.0f, 0.0f);
-                  glColor3f (0.f, 1.f, 0.f);	glVertex3f(-1.0f,-1.0f, 1.0f);
-                  glColor3f (0.f, 0.f, 1.f);	glVertex3f( 1.0f,-1.0f, 1.0f);
-                  glEnd ();
-               }
+               state_manager.Update(was_inactive);
+               was_inactive = false;
+
+               Renderer renderer(dc);
+               state_manager.Draw(renderer);
             }
-
-            glFlush ();
-
-            SwapBuffers (window.hDC);
-
-*/
-
+            else
+            {
+               was_inactive = true;
+            }
          }
       }
+
+      wglMakeCurrent(dc, 0);
+      wglDeleteContext(glrc);
+      ReleaseDC(hwnd, dc);
+      DestroyWindow(hwnd);
 
       UnregisterClass(application_name.c_str(), instance);
 
@@ -286,6 +331,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          return 0;
       }
 
+   case WM_ACTIVATE:
+      {
+         WindowActive = (LOWORD(wParam) != WA_INACTIVE);
+         return 0;
+      }
+
    case WM_SYSCOMMAND:
       {
          // TODO: I'm not convinced this (NeHe code) is the appropriate behavior!
@@ -335,17 +386,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    case WM_RBUTTONUP:   state_manager.MouseRelease(MouseRight); return 0;
    case WM_RBUTTONDOWN: state_manager.MousePress(MouseRight);   return 0;
 
-   case WM_PAINT:
-      {
-         PAINTSTRUCT ps;
-
-         HDC hdc = BeginPaint(hwnd, &ps);
-         Renderer renderer(hdc);
-         state_manager.Draw(renderer);
-         EndPaint (hwnd, &ps);
-
-         return 0;
-      }
    }
    return DefWindowProc (hwnd, message, wParam, lParam);
 }

@@ -25,8 +25,18 @@ const static wstring OutputKeySpecialDisabled = L"[no output device]";
 const static wstring InputDeviceKey = L"Last Input Device";
 const static wstring InputKeySpecialDisabled = L"[no input device]";
 
+TitleState::~TitleState()
+{
+   if (m_graphics) delete m_graphics;
+
+   if (m_output_tile) delete m_output_tile;
+   if (m_input_tile) delete m_input_tile;
+}
+
 void TitleState::Init()
 {
+   m_graphics = new Image(Image::GetGlobalModuleInstance(), L"BITMAP_LOGO");
+
    m_back_button = ButtonState(Layout::ScreenMarginX,
       GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
       Layout::ButtonWidth, Layout::ButtonHeight);
@@ -76,7 +86,14 @@ void TitleState::Init()
       {
          if (devices[i].name == last_input_device)
          {
-            m_state.midi_in = new MidiCommIn(devices[i].id);
+            try
+            {
+               m_state.midi_in = new MidiCommIn(devices[i].id);
+            }
+            catch (MidiErrorCode)
+            {
+               m_state.midi_in = 0;
+            }
          }
       }
 
@@ -105,8 +122,8 @@ void TitleState::Init()
    m_file_tile.SetTitle(L"Song:");
    m_file_tile.SetString(m_state.song_title);
 
-   m_output_tile = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id);
-   m_input_tile  = DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id);
+   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id);
+   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id);
 
 }
 
@@ -124,14 +141,14 @@ void TitleState::Update()
    m_back_button.Update(mouse);
 
    MouseInfo output_mouse(mouse);
-   output_mouse.x -= m_output_tile.GetX();
-   output_mouse.y -= m_output_tile.GetY();
-   m_output_tile.Update(output_mouse);
+   output_mouse.x -= m_output_tile->GetX();
+   output_mouse.y -= m_output_tile->GetY();
+   m_output_tile->Update(output_mouse);
 
    MouseInfo input_mouse(mouse);
-   input_mouse.x -= m_input_tile.GetX();
-   input_mouse.y -= m_input_tile.GetY();
-   m_input_tile.Update(input_mouse);
+   input_mouse.x -= m_input_tile->GetX();
+   input_mouse.y -= m_input_tile->GetY();
+   m_input_tile->Update(input_mouse);
 
    MouseInfo file_mouse(mouse);
    file_mouse.x -= m_file_tile.GetX();
@@ -146,7 +163,7 @@ void TitleState::Update()
       if (m_state.midi_out)
       {
          m_state.midi_out->Reset();
-         m_output_tile.TurnOffPreview();
+         m_output_tile->TurnOffPreview();
       }
 
       Midi *new_midi = 0;
@@ -188,7 +205,7 @@ void TitleState::Update()
    }
 
    // Check to see if we need to switch to a newly selected output device
-   int output_id = m_output_tile.GetDeviceId();
+   int output_id = m_output_tile->GetDeviceId();
    if (!m_state.midi_out || output_id != static_cast<int>(m_state.midi_out->GetDeviceDescription().id))
    {
       if (m_state.midi_out) m_state.midi_out->Reset();
@@ -216,11 +233,11 @@ void TitleState::Update()
    {
       PlayDevicePreview(static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000);
 
-      if (m_output_tile.HitPreviewButton())
+      if (m_output_tile->HitPreviewButton())
       {
          m_state.midi_out->Reset();
 
-         if (m_output_tile.IsPreviewOn())
+         if (m_output_tile->IsPreviewOn())
          {
             const microseconds_t PreviewLeadIn  = 250000;
             const microseconds_t PreviewLeadOut = 250000;
@@ -232,7 +249,7 @@ void TitleState::Update()
    }
 
 
-   int input_id = m_input_tile.GetDeviceId();
+   int input_id = m_input_tile->GetDeviceId();
    if (!m_state.midi_in || input_id != static_cast<int>(m_state.midi_in->GetDeviceDescription().id))
    {
       if (m_state.midi_in) m_state.midi_in->Reset();
@@ -246,9 +263,15 @@ void TitleState::Update()
 
       if (input_id >= 0)
       {
-         m_state.midi_in = new MidiCommIn(input_id);
-
-         reg.Write(InputDeviceKey, m_state.midi_in->GetDeviceDescription().name);
+         try
+         {
+            m_state.midi_in = new MidiCommIn(input_id);
+            reg.Write(InputDeviceKey, m_state.midi_in->GetDeviceDescription().name);
+         }
+         catch (MidiErrorCode)
+         {
+            m_state.midi_in = 0;
+         }
       }
       else
       {
@@ -256,7 +279,7 @@ void TitleState::Update()
       }
    }
 
-   if (m_state.midi_in && m_input_tile.IsPreviewOn())
+   if (m_state.midi_in && m_input_tile->IsPreviewOn())
    {
       // Read note events to display on screen
       while (m_state.midi_in->KeepReading())
@@ -314,19 +337,19 @@ void TitleState::Update()
 
    if (m_file_tile.WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
 
-   if (m_input_tile.ButtonLeft().hovering) m_tooltip = L"Cycle through available input devices.";
-   if (m_input_tile.ButtonRight().hovering) m_tooltip = L"Cycle through available input devices.";
-   if (m_input_tile.ButtonPreview().hovering)
+   if (m_input_tile->ButtonLeft().hovering) m_tooltip = L"Cycle through available input devices.";
+   if (m_input_tile->ButtonRight().hovering) m_tooltip = L"Cycle through available input devices.";
+   if (m_input_tile->ButtonPreview().hovering)
    {
-      if (m_input_tile.IsPreviewOn()) m_tooltip = L"Turn off test MIDI input for this device.";
+      if (m_input_tile->IsPreviewOn()) m_tooltip = L"Turn off test MIDI input for this device.";
       else m_tooltip = L"Click to test your MIDI input device by playing notes.";
    }
 
-   if (m_output_tile.ButtonLeft().hovering) m_tooltip = L"Cycle through available output devices.";
-   if (m_output_tile.ButtonRight().hovering) m_tooltip = L"Cycle through available output devices.";
-   if (m_output_tile.ButtonPreview().hovering)
+   if (m_output_tile->ButtonLeft().hovering) m_tooltip = L"Cycle through available output devices.";
+   if (m_output_tile->ButtonRight().hovering) m_tooltip = L"Cycle through available output devices.";
+   if (m_output_tile->ButtonPreview().hovering)
    {
-      if (m_output_tile.IsPreviewOn()) m_tooltip = L"Turn off output test for this device.";
+      if (m_output_tile->IsPreviewOn()) m_tooltip = L"Turn off output test for this device.";
       else m_tooltip = L"Click to test MIDI output on this device.";
    }
 
@@ -334,7 +357,7 @@ void TitleState::Update()
 
 void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 {
-   if (!m_output_tile.IsPreviewOn()) return;
+   if (!m_output_tile->IsPreviewOn()) return;
    if (!m_state.midi_out) return;
 
    MidiEventListWithTrackId evs = m_state.midi->Update(delta_microseconds);
@@ -347,36 +370,34 @@ void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 
 void TitleState::Draw(Renderer &renderer) const
 {
-   Image graphics(Image::GetGlobalModuleInstance(), L"BITMAP_LOGO");
-   graphics.EnableTransparency();
+   const static int TitleWidth = 508;
+   const static int TitleHeight = 69;
 
-   int left = GetStateWidth() / 2 - graphics.getWidth() / 2;
+   int left = GetStateWidth() / 2 - TitleWidth / 2;
 
    const static int TitleY = 100;
-   graphics.beginDrawing(renderer);
-   graphics.draw(left, TitleY);
-   graphics.endDrawing();
+   m_graphics->draw(renderer, left, TitleY);
 
-   TextWriter version(left + graphics.getWidth() - 80,
-      TitleY + graphics.getHeight(), renderer, false, Layout::SmallFontSize);
-   version << Text(L"version ", Gray) << Text(PianoHeroVersionString, Gray);
+   TextWriter version(left + TitleWidth - 80,
+      TitleY + TitleHeight, renderer, false, Layout::SmallFontSize);
+   version << Text(WSTRING(L"version " << PianoHeroVersionString), Gray);
 
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
    Layout::DrawButton(renderer, m_continue_button, L"Choose Tracks", 15);
    Layout::DrawButton(renderer, m_back_button, L"Exit", 55);
 
-   m_output_tile.Draw(renderer);
-   m_input_tile.Draw(renderer);
+   m_output_tile->Draw(renderer);
+   m_input_tile->Draw(renderer);
    m_file_tile.Draw(renderer);
 
-   if (m_input_tile.IsPreviewOn())
+   if (m_input_tile->IsPreviewOn())
    {
       const static int PreviewWidth = 60;
       const static int PreviewHeight = 40;
 
-      const int x = m_input_tile.GetX() + DeviceTileWidth + 12;
-      const int y = m_input_tile.GetY() + 38;
+      const int x = m_input_tile->GetX() + DeviceTileWidth + 12;
+      const int y = m_input_tile->GetY() + 38;
 
       renderer.SetColor(0xFF, 0xFF, 0xFF);
       renderer.DrawQuad(x, y, PreviewWidth, PreviewHeight);
@@ -385,7 +406,7 @@ void TitleState::Draw(Renderer &renderer) const
       renderer.DrawQuad(x+1, y+1, PreviewWidth-2, PreviewHeight-2);
    }
 
-   TextWriter last_note(m_input_tile.GetX() + DeviceTileWidth + 20, m_input_tile.GetY() + 43, renderer, false, Layout::TitleFontSize);
+   TextWriter last_note(m_input_tile->GetX() + DeviceTileWidth + 20, m_input_tile->GetY() + 43, renderer, false, Layout::TitleFontSize);
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
@@ -411,5 +432,4 @@ void TitleState::Draw(Renderer &renderer) const
 
    TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
-
 }
