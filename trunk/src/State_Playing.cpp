@@ -53,6 +53,8 @@ void PlayingState::ResetSong()
    m_state.stats.total_note_count = static_cast<int>(m_notes.size());
 
    m_current_combo = 0;
+
+   m_note_offset = 0;
 }
 
 PlayingState::PlayingState(const SharedState &state)
@@ -175,6 +177,10 @@ void PlayingState::Listen()
 
       // We're only interested in NoteOn and NoteOff
       if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff) continue;
+
+      // Octave Sliding
+      ev.ShiftNote(m_note_offset);
+
       string note_name = MidiEvent::NoteName(ev.NoteNumber());
 
       // On key release we have to look for existing "active" notes and turn them off.
@@ -327,6 +333,16 @@ void PlayingState::Update()
 
          m_notes.erase(note);
       }
+   }
+
+   if(IsKeyPressed(KeyPlus))
+   {
+      m_note_offset += 12;
+   }
+
+   if(IsKeyPressed(KeyMinus))
+   {
+      m_note_offset -= 12;
    }
 
    if (IsKeyPressed(KeyUp))

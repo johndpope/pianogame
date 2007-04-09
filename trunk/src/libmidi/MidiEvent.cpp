@@ -271,6 +271,12 @@ NoteId MidiEvent::NoteNumber() const
    return m_data1;
 }
 
+void MidiEvent::ShiftNote(int shift_amount)
+{
+   if (Type() != MidiEventType_NoteOn && Type() != MidiEventType_NoteOff) return;
+   m_data1 += shift_amount;
+}
+
 int MidiEvent::ProgramNumber() const
 {
    if (Type() != MidiEventType_ProgramChange) return 0;

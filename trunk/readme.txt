@@ -10,6 +10,7 @@ The following people have also contributed to the project:
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro
 - NeHe Productions for their OpenGL base code
+- Christian Auby for input octave shifting code
 --------------------------------------------------------------------------------
 
 Piano Hero's video game music samples are provided by Game Music Themes.
