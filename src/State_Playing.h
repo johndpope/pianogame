@@ -74,6 +74,9 @@ private:
 
    SharedState m_state;
    int m_current_combo;
+
+   // For octave sliding
+   int m_note_offset;
 };
 
 #endif

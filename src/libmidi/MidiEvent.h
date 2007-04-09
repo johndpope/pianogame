@@ -45,6 +45,8 @@ public:
    // This is generally for internal Midi library use only.
    void SetDeltaPulses(unsigned long delta_pulses) { m_delta_pulses = delta_pulses; }
 
+   void ShiftNote(int shift_amount);
+
    NoteId NoteNumber() const;
 
    // Returns a friendly name for this particular Note-On or Note-

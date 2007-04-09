@@ -38,6 +38,9 @@ enum GameKey
    KeyEnter =  0x0040,
 
    KeyF6 =     0x0080,
+
+   KeyPlus =   0x0100,
+   KeyMinus =  0x0200
 };
 
 enum MouseButton

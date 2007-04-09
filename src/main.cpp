@@ -362,7 +362,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
          case VK_SPACE:    state_manager.KeyPress(KeySpace);   break;
          case VK_RETURN:   state_manager.KeyPress(KeyEnter);   break;
          case VK_ESCAPE:   state_manager.KeyPress(KeyEscape);  break;
+
          case VK_F6:       state_manager.KeyPress(KeyF6);      break;
+
+         case VK_OEM_PLUS: state_manager.KeyPress(KeyPlus);    break;
+         case VK_OEM_MINUS:state_manager.KeyPress(KeyMinus);   break;
          }
 
          return 0;
