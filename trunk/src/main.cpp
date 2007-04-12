@@ -17,7 +17,7 @@
 #include "libmidi/Midi.h"
 #include "libmidi/SynthVolume.h"
 
-#include "Image.h"
+#include "Tga.h"
 #include "Renderer.h"
 #include "SharedState.h"
 #include "GameState.h"
@@ -237,8 +237,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       ShowWindow (hwnd, iCmdShow);
       UpdateWindow (hwnd);
 
-      Image::SetGlobalModuleInstance(instance);
-
       SharedState state;
       state.song_title = TrimFilename(command_line);
       state.midi = midi;
@@ -292,11 +290,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
    catch (const MidiError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
-      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
-   }
-   catch (const ImageError &e)
-   {
-      wstring wrapped_description = WSTRING(error_header1 << L"n image" << error_header2 << e.GetErrorDescription() << error_footer);
       MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
    }
    catch (const std::exception &e)

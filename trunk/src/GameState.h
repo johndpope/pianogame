@@ -9,9 +9,13 @@
 
 #include <exception>
 #include <string>
+#include <map>
 
 #include "FrameCounter.h"
 class Renderer;
+class Tga;
+
+enum Texture;
 
 class GameStateError : public std::exception
 {
@@ -115,6 +119,8 @@ protected:
    // of the memory to the state handling subsystem.
    void ChangeState(GameState *new_state);
 
+   Tga *GetTexture(Texture tex_name) const;
+
    // These are usable inside Update()
    bool IsKeyPressed(GameKey key) const;
    const MouseInfo &Mouse() const;
@@ -145,6 +151,8 @@ public:
       m_inside_update(false), m_fps(500.0), m_show_fps(false)
    { }
    
+   ~GameStateManager();
+
    // first_state must be dynamically allocated.
    // GameStateManager takes ownership of the memory
    // from this point forward.
@@ -163,6 +171,8 @@ public:
    void Draw(Renderer &renderer);
 
    void ChangeState(GameState *new_state);
+
+   Tga *GetTexture(Texture tex_name) const;
 
    int GetStateWidth() const { return m_screen_x; }
    int GetStateHeight() const { return m_screen_y; }
@@ -184,6 +194,8 @@ private:
 
    int m_screen_x;
    int m_screen_y;
+
+   mutable std::map<Texture, Tga*> m_textures;
 };
 
 

@@ -7,6 +7,8 @@
 
 #include <Windows.h>
 
+class Tga;
+
 struct Color
 {
    int r, g, b;
@@ -36,6 +38,9 @@ public:
    void SetColor(Color c);
    void SetColor(int r, int g, int b);
    void DrawQuad(int x, int y, int w, int h);
+
+   void DrawTga(const Tga *tga, int x, int y) const;
+   void DrawTga(const Tga *tga, int x, int y, int width, int height, int src_x, int src_y) const;
 
    // TODO: REMOVE!
    HDC GetHdc() { return m_hdc; }

@@ -11,7 +11,6 @@
 #include <gl\gl.h>
 
 #include "Renderer.h"
-#include "Tga.h"
 
 enum ImageErrorCode
 {
@@ -68,9 +67,6 @@ public:
 
    int getWidth() const { return m_width; }
    int getHeight() const { return m_height; }
-
-   static void drawTga(Renderer &r, const Tga *tga, int x, int y);
-   static void drawTga(Renderer &r, const Tga *tga, int x, int y, int width, int height, int src_x, int src_y);
 
 private:
    // Disable copying

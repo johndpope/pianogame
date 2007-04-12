@@ -21,10 +21,10 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_MAIN_ICON           ICON           "..\\Piano Hero Icon.ico"
-BITMAP_TRACKTILE        BITMAP         "..\\graphics\\track_tile.bmp"
-BITMAP_LOGO             BITMAP         "..\\graphics\\logo.bmp"
 
-//SOME_TGA                GRAPHICS       "..\\graphics\\some_filename.tga"
+TitleLogo               GRAPHICS       "..\\graphics\\TitleLogo.tga"
+InterfaceButtons        GRAPHICS       "..\\graphics\\InterfaceButtons.tga"
+
 
 #ifdef APSTUDIO_INVOKED
 
