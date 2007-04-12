@@ -8,11 +8,11 @@
 #include "GameState.h"
 #include "MenuLayout.h"
 #include "TrackTile.h"
-#include "Image.h"
 #include <vector>
 
 class MidiCommOut;
 class Renderer;
+class Tga;
 
 const int DeviceTileWidth = 510;
 const int DeviceTileHeight = 80;
@@ -28,7 +28,7 @@ enum DeviceTileType
 class DeviceTile
 {
 public:
-   DeviceTile(int x, int y, DeviceTileType type, int device_id);
+   DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *graphics);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(Renderer &renderer) const;
@@ -48,8 +48,6 @@ public:
    const ButtonState ButtonRight() const { return button_mode_right; }
 
 private:
-   DeviceTile(const DeviceTile &);
-
    int m_x;
    int m_y;
 
@@ -58,7 +56,7 @@ private:
 
    DeviceTileType m_tile_type;
 
-   Image m_graphics;
+   Tga *m_graphics;
 
    ButtonState whole_tile;
    ButtonState button_preview;

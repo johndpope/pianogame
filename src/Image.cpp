@@ -113,32 +113,3 @@ void Image::draw(Renderer &r, int in_x, int in_y, int width, int height, int src
 
    glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-
-
-void Image::drawTga(Renderer &r, const Tga *tga, int x, int y)
-{
-   drawTga(r, tga, x, y, (int)tga->GetWidth(), (int)tga->GetHeight(), 0, 0);
-}
-
-void Image::drawTga(Renderer &r, const Tga *tga, int in_x, int in_y, int width, int height, int src_x, int src_y)
-{
-   const int x = in_x + r.GetXoffset();
-   const int y = in_y + r.GetYoffset();
-
-   const double tx = static_cast<double>(src_x) / static_cast<double>(tga->GetWidth());
-   const double ty = -static_cast<double>(src_y) / static_cast<double>(tga->GetHeight());
-   const double tw = static_cast<double>(width) / static_cast<double>(tga->GetWidth());
-   const double th = -static_cast<double>(height)/ static_cast<double>(tga->GetHeight());
-
-   glBindTexture(GL_TEXTURE_2D, tga->GetId());
-
-   glBegin(GL_QUADS);
-   glTexCoord2d(   tx,    ty); glVertex3i(      x,        y, 0);
-   glTexCoord2d(   tx, ty+th); glVertex3i(      x, y+height, 0);
-   glTexCoord2d(tx+tw, ty+th); glVertex3i(x+width, y+height, 0);
-   glTexCoord2d(tx+tw,    ty); glVertex3i(x+width,        y, 0);
-   glEnd();
-
-   glBindTexture(GL_TEXTURE_2D, 0);
-}

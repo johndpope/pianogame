@@ -4,8 +4,8 @@
 
 #include "TrackTile.h"
 #include "libmidi\Midi.h"
-#include "Image.h"
 #include "Renderer.h"
+#include "Tga.h"
 
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
@@ -77,7 +77,7 @@ int TrackTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) con
    return (set_offset * graphic_set) + graphic_offset;
 }
 
-void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
+void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *graphics) const
 {
    const MidiTrack &track = midi->Tracks()[m_track_id];
 
@@ -114,18 +114,16 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi) const
    track_info << track.InstrumentName() << newline;
    track_info << static_cast<const unsigned int>(track.Notes().size()) << L" notes" << newline;
 
-   Image graphics(Image::GetGlobalModuleInstance(), L"BITMAP_TRACKTILE");
-
    int color_offset = GraphicHeight * static_cast<int>(m_color);
    if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
 
-   graphics.draw(renderer, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
-   graphics.draw(renderer, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
-   graphics.draw(renderer, BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
+   renderer.DrawTga(graphics, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
+   renderer.DrawTga(graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
+   renderer.DrawTga(graphics, BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
 
    TrackTileGraphic preview_graphic = GraphicPreviewTurnOn;
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
-   graphics.draw(renderer, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
+   renderer.DrawTga(graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
    // Draw mode text
    TextWriter mode(39, 76, renderer, false, 14);

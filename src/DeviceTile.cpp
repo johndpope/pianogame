@@ -5,6 +5,7 @@
 #include "DeviceTile.h"
 #include "TextWriter.h"
 #include "Renderer.h"
+#include "Tga.h"
 
 #include "libmidi\Midi.h"
 #include "libmidi\MidiComm.h"
@@ -12,9 +13,9 @@
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
 
-DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id)
+DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *graphics)
 : m_x(x), m_y(y), m_device_id(device_id), m_preview_on(false), m_tile_type(type),
-   m_graphics(Image::GetGlobalModuleInstance(), L"BITMAP_TRACKTILE")
+   m_graphics(graphics)
 {
    // Initialize the size and position of each button
    whole_tile = ButtonState(0, 0, DeviceTileWidth, DeviceTileHeight);
@@ -106,12 +107,12 @@ void DeviceTile::Draw(Renderer &renderer) const
    // Choose the last (gray) color in the TrackTile bitmap
    int color_offset = GraphicHeight * UserSelectableColorCount;
 
-   m_graphics.draw(renderer, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
-   m_graphics.draw(renderer, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
+   renderer.DrawTga(m_graphics, BUTTON_RECT(button_mode_left), LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
+   renderer.DrawTga(m_graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
 
    TrackTileGraphic preview_graphic = GraphicPreviewTurnOn;
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
-   m_graphics.draw(renderer, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
+   renderer.DrawTga(m_graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
    const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
    const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();

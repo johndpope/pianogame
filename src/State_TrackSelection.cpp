@@ -8,6 +8,7 @@
 #include "State_Playing.h"
 #include "MenuLayout.h"
 #include "Renderer.h"
+#include "Textures.h"
 
 #include "libmidi\Midi.h"
 #include "libmidi\MidiUtil.h"
@@ -301,6 +302,6 @@ void TrackSelectionState::Draw(Renderer &renderer) const
    size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
-      m_track_tiles[i].Draw(renderer, m_state.midi);
+      m_track_tiles[i].Draw(renderer, m_state.midi, GetTexture(InterfaceButtons));
    }
 }

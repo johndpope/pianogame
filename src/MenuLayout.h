@@ -34,7 +34,7 @@ struct ButtonState
    int w, h;
 };
 
-// Macro to turn replace Image::draw()'s 4 parameters with one
+// Macro to turn replace Renderer::DrawTga()'s 4 parameters with one
 #define BUTTON_RECT(button) ((button).x), ((button).y), ((button).w), ((button).h)
 
 namespace Layout

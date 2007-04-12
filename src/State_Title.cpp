@@ -8,10 +8,10 @@
 #include "version.h"
 
 #include "MenuLayout.h"
-#include "Image.h"
 #include "registry.h"
 #include "file_selector.h"
 #include "Renderer.h"
+#include "Textures.h"
 
 #include "libmidi/Midi.h"
 #include "libmidi/MidiUtil.h"
@@ -27,16 +27,12 @@ const static wstring InputKeySpecialDisabled = L"[no input device]";
 
 TitleState::~TitleState()
 {
-   if (m_graphics) delete m_graphics;
-
    if (m_output_tile) delete m_output_tile;
    if (m_input_tile) delete m_input_tile;
 }
 
 void TitleState::Init()
 {
-   m_graphics = new Image(Image::GetGlobalModuleInstance(), L"BITMAP_LOGO");
-
    m_back_button = ButtonState(Layout::ScreenMarginX,
       GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
       Layout::ButtonWidth, Layout::ButtonHeight);
@@ -122,8 +118,8 @@ void TitleState::Init()
    m_file_tile.SetTitle(L"Song:");
    m_file_tile.SetString(m_state.song_title);
 
-   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id);
-   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id);
+   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id, GetTexture(InterfaceButtons));
+   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id, GetTexture(InterfaceButtons));
 
 }
 
@@ -376,7 +372,8 @@ void TitleState::Draw(Renderer &renderer) const
    int left = GetStateWidth() / 2 - TitleWidth / 2;
 
    const static int TitleY = 100;
-   m_graphics->draw(renderer, left, TitleY);
+   
+   renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
 
    TextWriter version(left + TitleWidth - 80,
       TitleY + TitleHeight, renderer, false, Layout::SmallFontSize);

@@ -4,12 +4,20 @@
 
 #include "GameState.h"
 #include "Renderer.h"
+#include "Textures.h"
+#include "Tga.h"
 
 #include <gl\gl.h>
 
 // For FPS display
 #include "TextWriter.h"
 #include <iomanip>
+
+Tga *GameState::GetTexture(Texture tex_name) const
+{
+   if (!m_manager) throw GameStateError("Cannot retrieve texture if manager not set!");
+   return m_manager->GetTexture(tex_name);
+}
 
 void GameState::ChangeState(GameState *new_state)
 {
@@ -47,6 +55,28 @@ void GameState::SetManager(GameStateManager *manager)
 
    m_manager = manager;
    Init();
+}
+
+
+
+
+GameStateManager::~GameStateManager()
+{
+   for (std::map<Texture, Tga*>::iterator i = m_textures.begin(); i != m_textures.end(); ++i)
+   {
+      if (i->second) Tga::Release(i->second);
+      i->second = 0;
+   }
+}
+
+Tga *GameStateManager::GetTexture(Texture tex_name) const
+{
+   if (!m_textures[tex_name])
+   {
+      m_textures[tex_name] = Tga::Load(TextureResourceNames[tex_name]);
+   }
+
+   return m_textures[tex_name];
 }
 
 void GameStateManager::KeyPress(GameKey key)
