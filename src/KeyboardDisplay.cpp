@@ -213,7 +213,7 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
    {
       const int key_x = i * (key_width + key_space) + x_offset - 1;
 
-      int guide_thickness = 3;
+      int guide_thickness = 1;
       Color guide_color = thin;
 
       bool draw_guide = true;
@@ -229,7 +229,7 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
       case 'G':
       case 'A':
          guide_color = thick;
-         guide_thickness = 5;
+         guide_thickness = 2;
          break;
 
       default:

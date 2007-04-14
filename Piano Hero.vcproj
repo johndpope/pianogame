@@ -228,14 +228,6 @@
 				Name="Graphics Support"
 				>
 				<File
-					RelativePath=".\src\Image.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\Image.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\Renderer.cpp"
 					>
 				</File>
