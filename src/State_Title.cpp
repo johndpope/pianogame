@@ -29,16 +29,17 @@ TitleState::~TitleState()
 {
    if (m_output_tile) delete m_output_tile;
    if (m_input_tile) delete m_input_tile;
+   if (m_file_tile) delete m_file_tile;
 }
 
 void TitleState::Init()
 {
    m_back_button = ButtonState(Layout::ScreenMarginX,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
    m_continue_button = ButtonState(GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
    Registry reg(Registry::CurrentUser, L"Piano Hero");
@@ -114,12 +115,12 @@ void TitleState::Init()
       m_state.midi_in->Reset();
    }
 
-   m_file_tile = StringTile((GetStateWidth() - StringTileWidth) / 2, 370);
-   m_file_tile.SetTitle(L"Song:");
-   m_file_tile.SetString(m_state.song_title);
+   m_file_tile = new StringTile((GetStateWidth() - StringTileWidth) / 2, 360, GetTexture(SongBox));
+   m_file_tile->SetString(m_state.song_title);
 
-   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 470, DeviceTileOutput, output_device_id, GetTexture(InterfaceButtons));
-   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 570, DeviceTileInput,  input_device_id, GetTexture(InterfaceButtons));
+   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 460, DeviceTileOutput, output_device_id, GetTexture(InterfaceButtons), GetTexture(OutputBox));
+   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 560, DeviceTileInput,  input_device_id, GetTexture(InterfaceButtons), GetTexture(InputBox));
+
 
 }
 
@@ -147,12 +148,12 @@ void TitleState::Update()
    m_input_tile->Update(input_mouse);
 
    MouseInfo file_mouse(mouse);
-   file_mouse.x -= m_file_tile.GetX();
-   file_mouse.y -= m_file_tile.GetY();
-   m_file_tile.Update(file_mouse);
+   file_mouse.x -= m_file_tile->GetX();
+   file_mouse.y -= m_file_tile->GetY();
+   m_file_tile->Update(file_mouse);
 
    // Check to see for clicks on the file box
-   if (m_file_tile.Hit())
+   if (m_file_tile->Hit())
    {
       m_skip_next_mouse_up = true;
 
@@ -195,7 +196,7 @@ void TitleState::Update()
             delete m_state.midi;
             m_state = new_state;
 
-            m_file_tile.SetString(m_state.song_title);
+            m_file_tile->SetString(m_state.song_title);
          }
       }
    }
@@ -331,7 +332,7 @@ void TitleState::Update()
    if (m_back_button.hovering) m_tooltip = L"Click to exit Piano Hero.";
    if (m_continue_button.hovering) m_tooltip = L"Click to continue on to the track selection screen.";
 
-   if (m_file_tile.WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
+   if (m_file_tile->WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
 
    if (m_input_tile->ButtonLeft().hovering) m_tooltip = L"Cycle through available input devices.";
    if (m_input_tile->ButtonRight().hovering) m_tooltip = L"Cycle through available input devices.";
@@ -371,22 +372,28 @@ void TitleState::Draw(Renderer &renderer) const
 
    int left = GetStateWidth() / 2 - TitleWidth / 2;
 
-   const static int TitleY = 100;
+   const static int TitleY = 70;
    
    renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
 
-   TextWriter version(left + TitleWidth - 80,
+   TextWriter version(left + TitleWidth - 66,
       TitleY + TitleHeight, renderer, false, Layout::SmallFontSize);
-   version << Text(WSTRING(L"version " << PianoHeroVersionString), Gray);
+
+   std::wstring extra = L"";
+#ifdef _DEBUG
+   extra = L" debug";
+#endif
+
+   version << Text(WSTRING(L"version " << PianoHeroVersionString << extra), Gray);
 
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer, m_continue_button, L"Choose Tracks", 15);
-   Layout::DrawButton(renderer, m_back_button, L"Exit", 55);
+   Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonChooseTracks));
+   Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonExit));
 
    m_output_tile->Draw(renderer);
    m_input_tile->Draw(renderer);
-   m_file_tile.Draw(renderer);
+   m_file_tile->Draw(renderer);
 
    if (m_input_tile->IsPreviewOn())
    {
@@ -407,26 +414,8 @@ void TitleState::Draw(Renderer &renderer) const
    Widen<wchar_t> w;
    last_note << w(m_last_input_note_name);
 
-   const static int InstructionsY = 224;
-   TextWriter instructions(left, InstructionsY, renderer, false, Layout::SmallFontSize);
+   renderer.DrawTga(GetTexture(GameMusicThemes), left, 230);
 
-   const static Color Title = ToColor(114, 159, 207);
-   const static Color Highlight = ToColor(138, 226, 52);
-
-   instructions << Text(L"During Play", Title) << newline
-      << Text(L"The ", Gray) << Text(L"up", Highlight) << Text(L" and ", Gray)
-      << Text(L"down", Highlight) << Text(L" arrow keys change your view. ", Gray)
-      << Text(L"Left", Highlight) << Text(L" and ", Gray) << Text(L"right", Highlight)
-      << Text(L" change the song's speed.", Gray) << newline
-      << Text(L"Space", Highlight) << Text(L" pauses.  ", Gray)
-      << Text(L"Escape", Highlight) << Text(L" returns to track selection.", Gray) << newline
-      << newline
-      << newline
-      << Text(L"Piano Hero's video game music samples are provided by ", Gray)
-      << Text(L"Game Music Themes", Highlight) << Text(L".", Gray) << newline
-      << Text(L"Visit ", Gray) << Text(L"http://www.gamemusicthemes.com/", Title)
-      << Text(L" for high quality piano MIDI and sheet music.", Gray);
-
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;
 }

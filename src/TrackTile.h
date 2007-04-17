@@ -35,7 +35,7 @@ public:
    TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode mode);
 
    void Update(const MouseInfo &translated_mouse);
-   void Draw(Renderer &renderer, const Midi *midi, Tga *graphics) const;
+   void Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *box) const;
 
    int GetX() { return m_x; }
    int GetY() { return m_y; }

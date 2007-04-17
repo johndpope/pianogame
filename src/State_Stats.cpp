@@ -6,6 +6,7 @@
 #include "State_TrackSelection.h"
 #include "State_Playing.h"
 #include "Renderer.h"
+#include "Textures.h"
 
 #include <iomanip>
 
@@ -14,11 +15,11 @@ using namespace std;
 void StatsState::Init()
 {
    m_back_button = ButtonState(Layout::ScreenMarginX,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
    m_continue_button = ButtonState(GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 }
 
@@ -52,8 +53,8 @@ void StatsState::Draw(Renderer &renderer) const
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer, m_continue_button, L"Retry Song", 28);
-   Layout::DrawButton(renderer, m_back_button, L"Track Selection", 13);
+   Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonRetrySong));
+   Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonChooseTracks));
 
    const static Color Title = ToColor(114, 159, 207);
    const static Color Highlight = ToColor(138, 226, 52);
@@ -110,6 +111,6 @@ void StatsState::Draw(Renderer &renderer) const
       << Text(L"Longest Combo: ", Gray) << WSTRING(s.longest_combo) << newline
       << newline;
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;
 }

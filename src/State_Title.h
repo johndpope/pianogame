@@ -25,7 +25,7 @@ public:
    // screen pick a device for you.
    TitleState(const SharedState &state)
       : m_state(state), m_output_tile(0), m_input_tile(0),
-        m_file_tile(0,0), m_skip_next_mouse_up(false)
+        m_file_tile(0), m_skip_next_mouse_up(false)
    { }
 
    ~TitleState();
@@ -48,9 +48,9 @@ private:
 
    DeviceTile *m_output_tile;
    DeviceTile *m_input_tile;
+   StringTile *m_file_tile;
 
    bool m_skip_next_mouse_up;
-   StringTile m_file_tile;
 };
 
 #endif

@@ -21,7 +21,7 @@ class TextWriter
 public:
    // Centering only works for single-write lines... in other words, centered
    // lines can only be 1 color.
-   TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered = false, int in_size = 12, std::wstring fontname = L"Lucida Sans Unicode");
+   TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered = false, int in_size = 12, std::wstring fontname = L"Trebuchet MS");
    ~TextWriter();
 
    // Skips at least 1 line, or the height of the last write... whichever is greater
@@ -51,25 +51,25 @@ private:
 };
 
 // Some colors to choose from, for convenience
-const static Color Black       = { 0x00,0x00,0x00 };
-const static Color Dk_Blue     = { 0xC4,0x00,0x00 };
-const static Color Dk_Green    = { 0x00,0xC4,0x00 };
-const static Color Dk_Cyan     = { 0xFF,0x80,0x00 };
-const static Color Dk_Red      = { 0x00,0x00,0xC4 };
-const static Color Dk_Purple   = { 0x80,0x00,0x80 };
-const static Color Brown       = { 0x00,0x40,0x80 };
-const static Color Gray        = { 0xBB,0xBB,0xBB };
-const static Color Dk_Gray     = { 0x55,0x55,0x55 };
-const static Color Blue        = { 0xFF,0x00,0x00 };
-const static Color Green       = { 0x00,0xFF,0x00 };
-const static Color Cyan        = { 0xFF,0xFF,0x00 };
-const static Color Red         = { 0x00,0x00,0xFF };
-const static Color Magenta     = { 0xFF,0x00,0xFF };
-const static Color Yellow      = { 0x00,0xFF,0xFF };
-const static Color White       = { 0xFF,0xFF,0xFF };
-const static Color Orange      = { 0x20,0x80,0xFF };
-const static Color Pink        = { 0xA0,0x80,0xFF };
-const static Color CheatYellow = { 0x00,0xCC,0xFF };
+const static Color Black       = { 0x00,0x00,0x00, 0xFF };
+const static Color Dk_Blue     = { 0xC4,0x00,0x00, 0xFF };
+const static Color Dk_Green    = { 0x00,0xC4,0x00, 0xFF };
+const static Color Dk_Cyan     = { 0xFF,0x80,0x00, 0xFF };
+const static Color Dk_Red      = { 0x00,0x00,0xC4, 0xFF };
+const static Color Dk_Purple   = { 0x80,0x00,0x80, 0xFF };
+const static Color Brown       = { 0x00,0x40,0x80, 0xFF };
+const static Color Gray        = { 0xBB,0xBB,0xBB, 0xFF };
+const static Color Dk_Gray     = { 0x55,0x55,0x55, 0xFF };
+const static Color Blue        = { 0xFF,0x00,0x00, 0xFF };
+const static Color Green       = { 0x00,0xFF,0x00, 0xFF };
+const static Color Cyan        = { 0xFF,0xFF,0x00, 0xFF };
+const static Color Red         = { 0x00,0x00,0xFF, 0xFF };
+const static Color Magenta     = { 0xFF,0x00,0xFF, 0xFF };
+const static Color Yellow      = { 0x00,0xFF,0xFF, 0xFF };
+const static Color White       = { 0xFF,0xFF,0xFF, 0xFF };
+const static Color Orange      = { 0x20,0x80,0xFF, 0xFF };
+const static Color Pink        = { 0xA0,0x80,0xFF, 0xFF };
+const static Color CheatYellow = { 0x00,0xCC,0xFF, 0xFF };
 
 
 // A class to use TextWriter, and write to the screen

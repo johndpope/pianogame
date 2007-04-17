@@ -10,6 +10,7 @@
 #include <string>
 
 class Renderer;
+class Tga;
 
 const int StringTileWidth = 510;
 const int StringTileHeight = 80;
@@ -17,7 +18,7 @@ const int StringTileHeight = 80;
 class StringTile
 {
 public:
-   StringTile(int x, int y);
+   StringTile(int x, int y, Tga *graphics);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(Renderer &renderer) const;
@@ -35,6 +36,8 @@ public:
 private:
    int m_x;
    int m_y;
+
+   Tga *m_graphics;
 
    std::wstring m_string;
    std::wstring m_title;

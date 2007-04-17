@@ -6,7 +6,7 @@
 #include "TextWriter.h"
 #include "Renderer.h"
 
-StringTile::StringTile(int x, int y) : m_x(x), m_y(y)
+StringTile::StringTile(int x, int y, Tga *graphics) : m_x(x), m_y(y), m_graphics(graphics)
 {
    whole_tile = ButtonState(0, 0, StringTileWidth, StringTileHeight);
 }
@@ -18,23 +18,18 @@ void StringTile::Update(const MouseInfo &translated_mouse)
 
 void StringTile::Draw(Renderer &renderer) const
 {
-   const Color light  = ToColor(0xB0,0xB0,0xB0);
-   const Color medium = ToColor(0x70,0x70,0x70);
-   const Color dark   = ToColor(0x50,0x50,0x50);
-
    renderer.SetOffset(m_x, m_y);
 
-   renderer.SetColor(whole_tile.hovering ? medium : dark);
-   renderer.DrawQuad(0, 0, StringTileWidth, StringTileHeight);
+   const Color hover = ToColor(0xFF,0xFF,0xFF);
+   const Color no_hover = ToColor(0xE0,0xE0,0xE0);
+   renderer.SetColor(whole_tile.hovering ? hover : no_hover);
+   renderer.DrawTga(m_graphics, 0, 0);
 
-   // Draw horizontal rule
-   renderer.SetColor(light);
-   renderer.DrawQuad(10, 30, StringTileWidth - 20, 1);
+   // NOTE: Title drawing disabled.  Expected to be in the texture
+   //TextWriter title(10, 10, renderer, false, 14);
+   //title << Text(m_title, ToColor(0xB0, 0xB0, 0xB0));
 
-   TextWriter title(10, 10, renderer, false, 14);
-   title << Text(m_title, light);
-
-   TextWriter text(10, 46, renderer, false, 14);
+   TextWriter text(20, 46, renderer, false, 14);
    text << m_string;
 
    renderer.ResetOffset();

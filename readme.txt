@@ -52,9 +52,10 @@ Changes
 
 Release 0.6.0
 -------------
+NEW: All new menu graphics
 NEW: Right-click association option in installer.
 CHG: Improved exception handling.
-FIX: Don't exit automatically if "Piano Hero MIDI" folder doesn't exist.
+FIX: Don't crash if "Piano Hero MIDI" folder doesn't exist.
 CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
 
 
