@@ -77,7 +77,7 @@ int TrackTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) con
    return (set_offset * graphic_set) + graphic_offset;
 }
 
-void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *graphics) const
+void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *box) const
 {
    const MidiTrack &track = midi->Tracks()[m_track_id];
 
@@ -94,39 +94,35 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *graphics) const
       dark   = ToColor(0x50,0x50,0x50);
    }
 
-   Color color_tile = dark;
-   Color color_tile_hovered = medium;
+   Color color_tile = medium;
+   Color color_tile_hovered = light;
 
    renderer.SetOffset(m_x, m_y);
 
    renderer.SetColor(whole_tile.hovering ? color_tile_hovered : color_tile);
-   renderer.DrawQuad(0, 0, TrackTileWidth, TrackTileHeight);
+   renderer.DrawTga(box, -10, -6);
 
-   // Draw horizontal rule between info and mode
-   renderer.SetColor(light);
-   renderer.DrawQuad(10, 60, TrackTileWidth - 20, 1);
+   renderer.SetColor(White);
 
    // Write song info to the tile
-   TextWriter title(10, 10, renderer, false, 14);
-   title << Text(L"Instrument:", light);
-
-   TextWriter track_info(100, 10, renderer, false, 14);
-   track_info << track.InstrumentName() << newline;
-   track_info << static_cast<const unsigned int>(track.Notes().size()) << L" notes" << newline;
+   TextWriter instrument(95, 12, renderer, false, 14);
+   instrument << track.InstrumentName();
+   TextWriter note_count(95, 33, renderer, false, 14);
+   note_count << static_cast<const unsigned int>(track.Notes().size());
 
    int color_offset = GraphicHeight * static_cast<int>(m_color);
    if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
 
-   renderer.DrawTga(graphics, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
-   renderer.DrawTga(graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
-   renderer.DrawTga(graphics, BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
+   renderer.DrawTga(buttons, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
+   renderer.DrawTga(buttons, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
+   renderer.DrawTga(buttons, BUTTON_RECT(button_color),      LookupGraphic(GraphicColor,      button_color.hovering), color_offset);
 
    TrackTileGraphic preview_graphic = GraphicPreviewTurnOn;
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
-   renderer.DrawTga(graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
+   renderer.DrawTga(buttons, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
    // Draw mode text
-   TextWriter mode(39, 76, renderer, false, 14);
+   TextWriter mode(42, 76, renderer, false, 14);
    mode << TrackModeText[m_mode];
 
    renderer.ResetOffset();

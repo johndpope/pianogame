@@ -8,6 +8,7 @@
 #include "GameState.h"
 
 class Renderer;
+class Tga;
 
 struct ButtonState
 {
@@ -41,19 +42,19 @@ namespace Layout
 {
    void DrawTitle(Renderer &renderer, const std::wstring &title);
    void DrawHorizontalRule(Renderer &renderer, int state_width, int y);
-   void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstring &text, int text_x);
+   void DrawButton(Renderer &renderer, const ButtonState &button, const Tga *tga);
 
    // Pixel margin forced at edges of screen
    const static int ScreenMarginX = 16;
-   const static int ScreenMarginY = 70;
+   const static int ScreenMarginY = 86;
 
    const static int TitleFontSize = 20;
    const static int ScoreFontSize = 26;
    const static int ButtonFontSize = 14;
    const static int SmallFontSize = 12;
 
-   const static int ButtonWidth = 140;
-   const static int ButtonHeight = 35;
+   const static int ButtonWidth = 176;
+   const static int ButtonHeight = 46;
 
 };
 

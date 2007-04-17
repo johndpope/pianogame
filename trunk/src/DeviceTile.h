@@ -28,7 +28,7 @@ enum DeviceTileType
 class DeviceTile
 {
 public:
-   DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *graphics);
+   DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *button_graphics, Tga *frame_graphics);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(Renderer &renderer) const;
@@ -56,7 +56,8 @@ private:
 
    DeviceTileType m_tile_type;
 
-   Tga *m_graphics;
+   Tga *m_button_graphics;
+   Tga *m_frame_graphics;
 
    ButtonState whole_tile;
    ButtonState button_preview;

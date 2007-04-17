@@ -20,10 +20,25 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON           "..\\Piano Hero Icon.ico"
+IDI_MAIN_ICON           ICON        "..\\Piano Hero Icon.ico"
 
-TitleLogo               GRAPHICS       "..\\graphics\\TitleLogo.tga"
-InterfaceButtons        GRAPHICS       "..\\graphics\\InterfaceButtons.tga"
+TitleLogo               GRAPHICS    "..\\graphics\\TitleLogo.tga"
+InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"
+
+KeyboardHelp            GRAPHICS    "..\\graphics\\play_Keys.tga"
+GameMusicThemes         GRAPHICS    "..\\graphics\\title_GameMusicThemes.tga"
+
+ButtonRetrySong         GRAPHICS    "..\\graphics\\score_RetrySong.tga"
+ButtonChooseTracks      GRAPHICS    "..\\graphics\\title_ChooseTracks.tga"
+ButtonExit              GRAPHICS    "..\\graphics\\title_Exit.tga"
+ButtonBackToTitle       GRAPHICS    "..\\graphics\\tracks_BackToTitle.tga"
+ButtonPlaySong          GRAPHICS    "..\\graphics\\tracks_PlaySong.tga"
+
+InputBox                GRAPHICS    "..\\graphics\\title_InputBox.tga"
+OutputBox               GRAPHICS    "..\\graphics\\title_OutputBox.tga"
+SongBox                 GRAPHICS    "..\\graphics\\title_SongBox.tga"
+
+TrackBox                GRAPHICS    "..\\graphics\\trackbox.tga"
 
 
 #ifdef APSTUDIO_INVOKED

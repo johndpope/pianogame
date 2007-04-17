@@ -11,21 +11,19 @@ class Tga;
 
 struct Color
 {
-   int r, g, b;
+   int r, g, b, a;
 };
 
-static Color ToColor(int r, int g, int b)
+static Color ToColor(int r, int g, int b, int a = 0xFF)
 {
    Color c;
    c.r = r;
    c.g = g;
    c.b = b;
+   c.a = a;
 
    return c;
 }
-
-// TODO: Remove
-#define ToCOLORREF(x) ( RGB((x).r, (x).g, (x).b) )
 
 class Renderer
 {
@@ -36,7 +34,7 @@ public:
    void ResetOffset() { SetOffset(0,0); }
 
    void SetColor(Color c);
-   void SetColor(int r, int g, int b);
+   void SetColor(int r, int g, int b, int a = 0xFF);
    void DrawQuad(int x, int y, int w, int h);
 
    void DrawTga(const Tga *tga, int x, int y) const;

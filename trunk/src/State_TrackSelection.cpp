@@ -34,11 +34,11 @@ void TrackSelectionState::Init()
    }
 
    m_back_button = ButtonState(Layout::ScreenMarginX,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
    m_continue_button = ButtonState(GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
-      GetStateHeight() - Layout::ScreenMarginX - Layout::ButtonHeight,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
    // Determine how many track tiles we can fit
@@ -66,7 +66,7 @@ void TrackSelectionState::Init()
    int all_tile_widths = tiles_across * TrackTileWidth + (tiles_across-1) * Layout::ScreenMarginX;
    int global_x_offset = (GetStateWidth() - all_tile_widths) / 2;
 
-   const static int starting_y = 90;
+   const static int starting_y = 100;
 
    int tiles_on_this_line = 0;
    int tiles_on_this_page = 0;
@@ -284,24 +284,25 @@ void TrackSelectionState::Draw(Renderer &renderer) const
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
-   Layout::DrawButton(renderer, m_continue_button, L"Play Song", 33);
-   Layout::DrawButton(renderer, m_back_button, L"Back to Title", 23);
+   Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonPlaySong));
+   Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonBackToTitle));
 
    // Write our page count on the screen
-   const static int TypicalPaginationTextWidth = 280;
-   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 20, renderer, false, Layout::ButtonFontSize);
-   
-   pagination << Text(L"Page ", Gray) << (m_current_page+1) << Text(L" of ", Gray) << m_page_count <<
-      Text(L" (arrow keys change page)", Gray);
+   const static int TypicalPaginationTextWidth = 240;
+   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, false, Layout::ButtonFontSize);
+   pagination << Text(WSTRING(L"Page " << (m_current_page+1) << L" of " << m_page_count << L" (arrow keys change page)"), Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 44, renderer, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 54, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
+
+   Tga *buttons = GetTexture(InterfaceButtons);
+   Tga *box = GetTexture(TrackBox);
 
    // Draw each track tile on the current page
    size_t start = m_current_page * m_tiles_per_page;
    size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
-      m_track_tiles[i].Draw(renderer, m_state.midi, GetTexture(InterfaceButtons));
+      m_track_tiles[i].Draw(renderer, m_state.midi, buttons, box);
    }
 }

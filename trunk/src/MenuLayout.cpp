@@ -11,7 +11,7 @@ namespace Layout
 
 void DrawTitle(Renderer &renderer, const std::wstring &title)
 {
-   TextWriter title_writer(ScreenMarginX, ScreenMarginX + TitleFontSize, renderer, false, TitleFontSize);
+   TextWriter title_writer(ScreenMarginX, ScreenMarginY - TitleFontSize - 10, renderer, false, TitleFontSize);
    title_writer << title;
 }
 
@@ -21,20 +21,13 @@ void DrawHorizontalRule(Renderer &renderer, int state_width, int y)
    renderer.DrawQuad(ScreenMarginX, y - 1, state_width - 2*ScreenMarginX, 3);
 }
 
-void DrawButton(Renderer &renderer, const ButtonState &button, const std::wstring &text, int text_x)
+void DrawButton(Renderer &renderer, const ButtonState &button, const Tga *tga)
 {
-   const static Color color = ToColor(0x40,0x40,0x40);
-   const static Color color_hover = ToColor(0x60,0x60,0x60);
-
-   renderer.SetOffset(button.x, button.y);
+   const static Color color = ToColor(0xE0,0xE0,0xE0);
+   const static Color color_hover = ToColor(0xFF,0xFF,0xFF);
 
    renderer.SetColor(button.hovering ? color_hover : color);
-   renderer.DrawQuad(0, 0, ButtonWidth, ButtonHeight);
-
-   TextWriter button_text(text_x, 8, renderer, false, ButtonFontSize);
-   button_text << Text(text, ToColor(0xFF, 0xFF, 0xFF));
-
-   renderer.ResetOffset();
+   renderer.DrawTga(tga, button.x, button.y);
 }
 
 

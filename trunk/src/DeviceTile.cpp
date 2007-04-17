@@ -13,9 +13,9 @@
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
 
-DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *graphics)
+DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *button_graphics, Tga *frame_graphics)
 : m_x(x), m_y(y), m_device_id(device_id), m_preview_on(false), m_tile_type(type),
-   m_graphics(graphics)
+   m_button_graphics(button_graphics), m_frame_graphics(frame_graphics)
 {
    // Initialize the size and position of each button
    whole_tile = ButtonState(0, 0, DeviceTileWidth, DeviceTileHeight);
@@ -84,35 +84,22 @@ int DeviceTile::LookupGraphic(TrackTileGraphic graphic, bool button_hovering) co
 
 void DeviceTile::Draw(Renderer &renderer) const
 {
-   const Color light  = ToColor(0xB0,0xB0,0xB0);
-   const Color medium = ToColor(0x70,0x70,0x70);
-   const Color dark   = ToColor(0x50,0x50,0x50);
-
    renderer.SetOffset(m_x, m_y);
 
-   renderer.SetColor(whole_tile.hovering ? medium : dark);
-   renderer.DrawQuad(0, 0, DeviceTileWidth, DeviceTileHeight);
-
-   // Draw horizontal rule
-   renderer.SetColor(light);
-   renderer.DrawQuad(10, 30, DeviceTileWidth - 20, 1);
-
-   TextWriter title(10, 10, renderer, false, 14);
-   switch (m_tile_type)
-   {
-   case DeviceTileOutput: title << Text(L"Choose MIDI Output Device:", light); break;
-   case DeviceTileInput:  title << Text(L"Choose MIDI Input Device:", light);  break;
-   }
+   const Color hover = ToColor(0xFF,0xFF,0xFF);
+   const Color no_hover = ToColor(0xE0,0xE0,0xE0);
+   renderer.SetColor(whole_tile.hovering ? hover : no_hover);
+   renderer.DrawTga(m_frame_graphics, 0, 0);
 
    // Choose the last (gray) color in the TrackTile bitmap
    int color_offset = GraphicHeight * UserSelectableColorCount;
 
-   renderer.DrawTga(m_graphics, BUTTON_RECT(button_mode_left), LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
-   renderer.DrawTga(m_graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
+   renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_mode_left), LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
+   renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
 
    TrackTileGraphic preview_graphic = GraphicPreviewTurnOn;
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
-   renderer.DrawTga(m_graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
+   renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
    const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
    const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
