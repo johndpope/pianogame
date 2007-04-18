@@ -119,7 +119,7 @@ protected:
    // of the memory to the state handling subsystem.
    void ChangeState(GameState *new_state);
 
-   Tga *GetTexture(Texture tex_name) const;
+   Tga *GetTexture(Texture tex_name, bool smooth = false) const;
 
    // These are usable inside Update()
    bool IsKeyPressed(GameKey key) const;
@@ -172,7 +172,7 @@ public:
 
    void ChangeState(GameState *new_state);
 
-   Tga *GetTexture(Texture tex_name) const;
+   Tga *GetTexture(Texture tex_name, bool smooth) const;
 
    int GetStateWidth() const { return m_screen_x; }
    int GetStateHeight() const { return m_screen_y; }

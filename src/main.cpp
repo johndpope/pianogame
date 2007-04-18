@@ -223,8 +223,6 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnable(GL_BLEND);
 
-//      gl
-
       glShadeModel(GL_SMOOTH);
 
       glViewport(0, 0, WindowWidth, WindowHeight);

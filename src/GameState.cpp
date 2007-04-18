@@ -13,10 +13,10 @@
 #include "TextWriter.h"
 #include <iomanip>
 
-Tga *GameState::GetTexture(Texture tex_name) const
+Tga *GameState::GetTexture(Texture tex_name, bool smooth) const
 {
    if (!m_manager) throw GameStateError("Cannot retrieve texture if manager not set!");
-   return m_manager->GetTexture(tex_name);
+   return m_manager->GetTexture(tex_name, smooth);
 }
 
 void GameState::ChangeState(GameState *new_state)
@@ -69,12 +69,14 @@ GameStateManager::~GameStateManager()
    }
 }
 
-Tga *GameStateManager::GetTexture(Texture tex_name) const
+Tga *GameStateManager::GetTexture(Texture tex_name, bool smooth) const
 {
    if (!m_textures[tex_name])
    {
       m_textures[tex_name] = Tga::Load(TextureResourceNames[tex_name]);
    }
+
+   m_textures[tex_name]->SetSmooth(smooth);
 
    return m_textures[tex_name];
 }

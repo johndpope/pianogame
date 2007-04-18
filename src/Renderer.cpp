@@ -57,3 +57,30 @@ void Renderer::DrawTga(const Tga *tga, int in_x, int in_y, int width, int height
 
    glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void Renderer::DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) const
+{
+   DrawStretchedTga(tga, x, y, w, h, 0, 0, (int)tga->GetWidth(), (int)tga->GetHeight());
+}
+
+void Renderer::DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const
+{
+   const int sx = x + GetXoffset();
+   const int sy = y + GetYoffset();
+
+   const double tx =  static_cast<double>(src_x) / static_cast<double>(tga->GetWidth());
+   const double ty = -static_cast<double>(src_y) / static_cast<double>(tga->GetHeight());
+   const double tw =  static_cast<double>(src_w) / static_cast<double>(tga->GetWidth());
+   const double th = -static_cast<double>(src_h) / static_cast<double>(tga->GetHeight());
+
+   glBindTexture(GL_TEXTURE_2D, tga->GetId());
+
+   glBegin(GL_QUADS);
+   glTexCoord2d(   tx,    ty); glVertex3i(  sx,   sy, 0);
+   glTexCoord2d(   tx, ty+th); glVertex3i(  sx, sy+h, 0);
+   glTexCoord2d(tx+tw, ty+th); glVertex3i(sx+w, sy+h, 0);
+   glTexCoord2d(tx+tw,    ty); glVertex3i(sx+w,   sy, 0);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D, 0);
+}

@@ -31,8 +31,10 @@ Tga* Tga::Load(const std::wstring &resource_name)
    }
 
    Tga *ret = LoadFromData(bytes);
-
    FreeResource(resource);
+
+   ret->SetSmooth(false);
+
    return ret;
 }
 
@@ -48,6 +50,16 @@ void Tga::Release(Tga *tga)
 const static int TgaTypeHeaderLength = 12;
 const static unsigned char UncompressedTgaHeader[TgaTypeHeaderLength] = {0,0,2,0,0,0,0,0,0,0,0,0};
 const static unsigned char CompressedTgaHeader[TgaTypeHeaderLength] = {0,0,10,0,0,0,0,0,0,0,0,0};
+
+void Tga::SetSmooth(bool smooth)
+{
+   GLint filter = GL_NEAREST;
+   if (smooth) filter = GL_LINEAR;
+
+   glBindTexture(GL_TEXTURE_2D, m_texture_id);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+}
 
 enum TgaType
 {
@@ -208,8 +220,6 @@ Tga *Tga::BuildFromParameters(const unsigned char *raw, unsigned int width, unsi
 
    glBindTexture(GL_TEXTURE_2D, id);
    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    glTexImage2D(GL_TEXTURE_2D, 0, bpp/8, width, height, 0, pixel_format, GL_UNSIGNED_BYTE, raw);
 
    Tga *t = new Tga();

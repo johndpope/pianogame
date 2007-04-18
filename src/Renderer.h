@@ -40,6 +40,9 @@ public:
    void DrawTga(const Tga *tga, int x, int y) const;
    void DrawTga(const Tga *tga, int x, int y, int width, int height, int src_x, int src_y) const;
 
+   void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) const;
+   void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const;
+
    // TODO: REMOVE!
    HDC GetHdc() { return m_hdc; }
 
