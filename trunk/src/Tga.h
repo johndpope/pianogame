@@ -13,6 +13,8 @@ public:
    unsigned int GetWidth() const { return m_width; }
    unsigned int GetHeight() const { return m_height; }
 
+   void SetSmooth(bool smooth);
+
 private:
    unsigned int m_texture_id;
    unsigned int m_width;
