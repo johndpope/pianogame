@@ -8,7 +8,10 @@
 #include <gl\gl.h>
 
 #include <map>
+
+// TODO: These should be deleted at shutdown
 static std::map<int, int> font_size_lookup;
+static std::map<int, HFONT> font_handle_lookup;
 static int next_call_list_start = 1;
 
 TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered, int in_size, std::wstring fontname) :
@@ -19,7 +22,7 @@ x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered
 
    y += renderer.GetYoffset();
 
-   font = 0;
+   HFONT font = 0;
    if (font_size_lookup[in_size] == 0)
    {
       // Set up the LOGFONT structure
@@ -45,6 +48,7 @@ x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered
 
       wglUseFontBitmaps(renderer.GetHdc(), 0, 255, next_call_list_start);
       font_size_lookup[in_size] = next_call_list_start;
+      font_handle_lookup[in_size] = font;
       next_call_list_start += 260;
 
       SelectObject(renderer.GetHdc(), previous_font);
@@ -53,7 +57,6 @@ x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered
 
 TextWriter::~TextWriter()
 {
-   if (font) DeleteObject(font);
 }
 
 int TextWriter::get_point_size()
@@ -86,9 +89,11 @@ TextWriter& Text::operator<<(TextWriter& tw)
 
    int previous_map_mode = SetMapMode(tw.renderer.GetHdc(), MM_TEXT);
 
+   HFONT font = font_handle_lookup[tw.size];
+
    // Create the font we want to use, and swap it out with
    // whatever is currently in there, along with our color
-   HFONT previous_font = (HFONT)SelectObject(tw.renderer.GetHdc(), tw.font);
+   HFONT previous_font = (HFONT)SelectObject(tw.renderer.GetHdc(), font);
 
    // Call DrawText to find out how large our text is
    RECT drawing_rect = { tw.x, tw.y, 0, 0 };

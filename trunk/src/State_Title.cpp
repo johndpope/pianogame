@@ -408,11 +408,11 @@ void TitleState::Draw(Renderer &renderer) const
 
       renderer.SetColor(0,0,0);
       renderer.DrawQuad(x+1, y+1, PreviewWidth-2, PreviewHeight-2);
-   }
 
-   TextWriter last_note(m_input_tile->GetX() + DeviceTileWidth + 20, m_input_tile->GetY() + 43, renderer, false, Layout::TitleFontSize);
-   Widen<wchar_t> w;
-   last_note << w(m_last_input_note_name);
+      TextWriter last_note(x + PreviewWidth/2 - 1, m_input_tile->GetY() + 44, renderer, true, Layout::TitleFontSize);
+      Widen<wchar_t> w;
+      last_note << w(m_last_input_note_name);
+   }
 
    renderer.DrawTga(GetTexture(GameMusicThemes), left, 230);
 

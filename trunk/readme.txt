@@ -5,7 +5,7 @@ Visit http://pianohero.sourceforge.net/ for more information.
 
 Piano Hero is mostly written by Nicholas Piegdon.
 
-The following people have contributed:
+Although, the following people have also contributed:
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro
@@ -54,9 +54,10 @@ Release 0.6.0
 -------------
 NEW: All new menu graphics
 NEW: Right-click association option in installer.
+CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
+CHG: Moved status display to the bottom of the screen during play
 CHG: Improved exception handling.
 FIX: Don't crash if "Piano Hero MIDI" folder doesn't exist.
-CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
 
 
 Release 0.5.1

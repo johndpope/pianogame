@@ -6,6 +6,7 @@
 #include "State_TrackSelection.h"
 #include "State_Stats.h"
 #include "Renderer.h"
+#include "Textures.h"
 #include "version.h"
 
 #include <string>
@@ -39,7 +40,7 @@ void PlayingState::ResetSong()
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
-   const static microseconds_t LeadIn = 5000000;
+   const static microseconds_t LeadIn = 6000000;
    const static microseconds_t LeadOut = 1000000;
 
    if (!m_state.midi) return;
@@ -77,10 +78,10 @@ void PlayingState::Init()
 
    // This many microseconds of the song will
    // be shown on the screen at once
-   const static microseconds_t DefaultShowDurationMicroseconds = 3500000;
+   const static microseconds_t DefaultShowDurationMicroseconds = 3250000;
    m_show_duration = DefaultShowDurationMicroseconds;
 
-   m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - 2*Layout::ScreenMarginX, CalcKeyboardHeight());
+   m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
    // Hide the mouse cursor while we're playing
    ShowCursor(false);
@@ -98,11 +99,7 @@ int PlayingState::CalcKeyboardHeight() const
    // Start with the size of the screen
    int height = GetStateHeight();
 
-   // Leave at least enough for a title bar and horizontal
-   // rule at the top
-   height -= Layout::ScreenMarginY;
-
-   // Allow another couple lines of text below the HR
+   // Allow a couple lines of text below the keys
    height -= Layout::ButtonFontSize * 8;
 
    return height;
@@ -397,48 +394,56 @@ void PlayingState::Update()
 
 void PlayingState::Draw(Renderer &renderer) const
 {
-   m_keyboard->Draw(renderer, Layout::ScreenMarginX, GetStateHeight() - CalcKeyboardHeight(), m_notes,
-      m_show_duration, m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
+   m_keyboard->Draw(renderer, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
+      m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
-   // Draw a song progress bar along the top of the screen
-   const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
-   const int pb_x = Layout::ScreenMarginX;
-   const int pb_y = GetStateHeight() - CalcKeyboardHeight() - 20;
+   // Show the title for a while and then fade it out
+   const static double stay_ms = 2500.0;
+   const static double fade_ms = 500.0;
 
-   renderer.SetColor(0x50, 0x50, 0x50);
-   renderer.DrawQuad(pb_x, pb_y, time_pb_width, 16);
+   double alpha = 1.0;
+   unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
+   if (double(ms) > stay_ms) alpha = max((fade_ms - (ms - stay_ms)) / fade_ms, 0);
 
-   if (m_look_ahead_you_play_note_count > 0)
+   wstring title_text = m_state.song_title;
+   if (m_paused)
    {
-      const double note_count = 1.0 * m_look_ahead_you_play_note_count;
-
-      const int note_miss_pb_width = static_cast<int>(m_state.stats.notes_user_could_have_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
-      const int note_hit_pb_width = static_cast<int>(m_state.stats.notes_user_actually_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
-
-      renderer.SetColor(0xCE,0x5C,0x00);
-      renderer.DrawQuad(pb_x, pb_y - 20, note_miss_pb_width, 16);
-
-      renderer.SetColor(0xFC,0xAF,0x3E);
-      renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16);
+      alpha = 1.0;
+      title_text = L"Game Paused";
    }
 
-   Layout::DrawTitle(renderer, m_state.song_title);
-   Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
+   if (alpha > 0.001)
+   {
+      renderer.SetColor(0, 0, 0, int(alpha * 160));
+      renderer.DrawQuad(0, GetStateHeight() / 3, GetStateWidth(), 80);
+      const Color c = ToColor(255, 255, 255, int(alpha * 0xFF));
+      TextWriter title(GetStateWidth()/2, GetStateHeight()/3 + 25, renderer, true, 24);
+      title << Text(title_text, c);
 
-   int text_y = Layout::ScreenMarginY + Layout::SmallFontSize;
+      // While we're at it, show the key legend
+      renderer.SetColor(c);
+      const Tga *keys = GetTexture(PlayKeys);
+      renderer.DrawTga(keys, GetStateWidth() / 2 - 250, GetStateHeight() / 2);
+   }
 
-   wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier() << L" multiplier");
-   wstring speed_text = WSTRING(m_state.song_speed << "% speed");
+   int text_y = CalcKeyboardHeight() + 42;
 
-   TextWriter score(Layout::ScreenMarginX, text_y, renderer, false, Layout::ScoreFontSize);
-   score << Text(L"Score: ", Gray) << static_cast<int>(m_state.stats.score);
+   renderer.SetColor(White);
+   renderer.DrawTga(GetTexture(PlayStatus),  Layout::ScreenMarginX - 1,   text_y);
+   renderer.DrawTga(GetTexture(PlayStatus2), Layout::ScreenMarginX + 273, text_y);
 
-   TextWriter multipliers(Layout::ScreenMarginX + 220, text_y + 8, renderer, false, Layout::TitleFontSize);
-   multipliers << Text(L"  x  ", Gray) << Text(multiplier_text, ToColor(138, 226, 52))
-      << Text(L"  x  ", Gray) << Text(speed_text, ToColor(114, 159, 207))
-      << newline;
+   wstring multiplier_text = WSTRING(fixed << setprecision(1) << CalculateScoreMultiplier());
+   wstring speed_text = WSTRING(m_state.song_speed << "%");
 
+   TextWriter score(Layout::ScreenMarginX + 92, text_y + 3, renderer, false, Layout::ScoreFontSize);
+   score << static_cast<int>(m_state.stats.score);
 
+   TextWriter multipliers(Layout::ScreenMarginX + 236, text_y + 9, renderer, false, Layout::TitleFontSize);
+   multipliers << Text(multiplier_text, ToColor(138, 226, 52));
+
+   int speed_x_offset = (m_state.song_speed >= 100 ? 0 : 11);
+   TextWriter speed(Layout::ScreenMarginX + 413 + speed_x_offset, text_y + 9, renderer, false, Layout::TitleFontSize);
+   speed << Text(speed_text, ToColor(114, 159, 207));
 
    double non_zero_playback_speed = ( (m_state.song_speed == 0) ? 0.1 : (m_state.song_speed/100.0) );
    microseconds_t tot_seconds = static_cast<microseconds_t>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);
@@ -459,10 +464,31 @@ void PlayingState::Draw(Renderer &renderer) const
    const wstring current_time = WSTRING(cur_min << L":" << setfill(L'0') << setw(2) << cur_sec << L"." << cur_ten);
    const wstring percent_complete = WSTRING(L" (" << completion << L"%)");
 
-   text_y += 28 + Layout::SmallFontSize;
+   text_y += 30 + Layout::SmallFontSize;
+   TextWriter time_text(Layout::ScreenMarginX + 39, text_y, renderer, false, Layout::SmallFontSize);
+   time_text << WSTRING(current_time << L" / " << total_time << percent_complete);
 
-   TextWriter time_text(Layout::ScreenMarginX, text_y, renderer, false, Layout::SmallFontSize);
-   time_text << Text(L"Time: ", Gray) << current_time << Text(L" / ", Gray) << total_time << Text(percent_complete, Gray);
+   // Draw a song progress bar along the top of the screen
+   const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() - Layout::ScreenMarginX*2));
+   const int pb_x = Layout::ScreenMarginX;
+   const int pb_y = CalcKeyboardHeight() + 25;
+
+   renderer.SetColor(0x50, 0x50, 0x50);
+   renderer.DrawQuad(pb_x, pb_y, time_pb_width, 16);
+
+   if (m_look_ahead_you_play_note_count > 0)
+   {
+      const double note_count = 1.0 * m_look_ahead_you_play_note_count;
+
+      const int note_miss_pb_width = static_cast<int>(m_state.stats.notes_user_could_have_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
+      const int note_hit_pb_width = static_cast<int>(m_state.stats.notes_user_actually_played / note_count * (GetStateWidth() - Layout::ScreenMarginX*2));
+
+      renderer.SetColor(0xCE,0x5C,0x00);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_miss_pb_width, 16);
+
+      renderer.SetColor(0xFC,0xAF,0x3E);
+      renderer.DrawQuad(pb_x, pb_y - 20, note_hit_pb_width, 16);
+   }
 
    // Show the combo
    if (m_current_combo > 5)

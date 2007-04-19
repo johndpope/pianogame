@@ -42,6 +42,10 @@ TrackBox                GRAPHICS    "..\\graphics\\trackbox.tga"
 
 StatsText               GRAPHICS    "..\\graphics\\stats_text.tga"
 
+PlayStatus              GRAPHICS    "..\\graphics\\play_Status.tga"
+PlayStatus2             GRAPHICS    "..\\graphics\\play_Status2.tga"
+PlayKeys                GRAPHICS    "..\\graphics\\play_Keys.tga"
+
 
 #ifdef APSTUDIO_INVOKED
 

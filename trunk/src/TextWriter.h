@@ -40,7 +40,6 @@ public:
    int x, y, size, original_x;
    int last_line_height;
    bool centered;
-   HFONT font;
    Renderer renderer;
 
    friend class Text;
