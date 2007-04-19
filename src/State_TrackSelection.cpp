@@ -288,11 +288,10 @@ void TrackSelectionState::Draw(Renderer &renderer) const
    Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonBackToTitle));
 
    // Write our page count on the screen
-   const static int TypicalPaginationTextWidth = 240;
-   TextWriter pagination((GetStateWidth() - TypicalPaginationTextWidth)/2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, false, Layout::ButtonFontSize);
+   TextWriter pagination(GetStateWidth()/2, GetStateHeight() - Layout::SmallFontSize - 30, renderer, true, Layout::ButtonFontSize);
    pagination << Text(WSTRING(L"Page " << (m_current_page+1) << L" of " << m_page_count << L" (arrow keys change page)"), Gray);
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::SmallFontSize - 54, renderer, true, Layout::ButtonFontSize);
+   TextWriter tooltip(GetStateWidth()/2, GetStateHeight() - Layout::SmallFontSize - 54, renderer, true, Layout::ButtonFontSize);
    tooltip << m_tooltip;
 
    Tga *buttons = GetTexture(InterfaceButtons);

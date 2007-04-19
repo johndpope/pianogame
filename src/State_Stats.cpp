@@ -90,7 +90,7 @@ void StatsState::Draw(Renderer &renderer) const
    const static int InstructionsY = 263;
 
    renderer.SetColor(White);
-   renderer.DrawTga(GetTexture(StatsText), 420, 150);
+   renderer.DrawTga(GetTexture(StatsText), left - 270, 150);
 
    // Choose a dynamic color for the grade
    const double p = hit_percent / 100.0;
@@ -98,7 +98,7 @@ void StatsState::Draw(Renderer &renderer) const
    const double g = max(0, 1 - (((p-  1)*4)*((p-  1)*4)));
    const double b = max(0, 1 - (((p-.75)*5)*((p-.75)*5)));
 
-   const Color c = ToColor(int(r*256), int(g*256), int(b*256));
+   const Color c = ToColor(int(r*0xFF), int(g*0xFF), int(b*0xFF));
 
    TextWriter grade_text(left - 5, InstructionsY - 15, renderer, false, 100);
    grade_text << Text(grade, c);
