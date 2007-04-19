@@ -40,6 +40,8 @@ SongBox                 GRAPHICS    "..\\graphics\\title_SongBox.tga"
 
 TrackBox                GRAPHICS    "..\\graphics\\trackbox.tga"
 
+StatsText               GRAPHICS    "..\\graphics\\stats_text.tga"
+
 
 #ifdef APSTUDIO_INVOKED
 

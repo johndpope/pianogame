@@ -25,6 +25,8 @@ enum Texture
 
    TrackBox,
 
+   StatsText,
+
    _TextureEnumCount
 };
 
@@ -46,7 +48,9 @@ const static wchar_t* TextureResourceNames[_TextureEnumCount] =
    L"OutputBox",
    L"SongBox",
 
-   L"TrackBox"
+   L"TrackBox",
+
+   L"StatsText"
 };
 
 #endif

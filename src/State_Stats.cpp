@@ -56,9 +56,6 @@ void StatsState::Draw(Renderer &renderer) const
    Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonRetrySong));
    Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonChooseTracks));
 
-   const static Color Title = ToColor(114, 159, 207);
-   const static Color Highlight = ToColor(138, 226, 52);
-
    const SongStatistics &s = m_state.stats;
 
    double hit_percent = 0.0;
@@ -83,33 +80,44 @@ void StatsState::Draw(Renderer &renderer) const
    if (hit_percent >= 99) grade = L"A++";
    if (hit_percent >= 100) grade = L"A+++";
 
-   int left = GetStateWidth() / 2 - (300 / 2);
-   const static int InstructionsY = 234;
-   
-   TextWriter grade_text(left + 110, InstructionsY + 43, renderer, false, 72);
-   grade_text << grade;
-   
    int stray_percent = 0;
    if (s.total_notes_user_pressed > 0) stray_percent = static_cast<int>((100.0 * s.stray_notes) / s.total_notes_user_pressed);
 
    int average_speed = 0;
    if (s.notes_user_could_have_played > 0) average_speed = s.speed_integral / s.notes_user_could_have_played;
 
-   TextWriter score(left, InstructionsY, renderer, false, Layout::TitleFontSize);
-   score << Text(L"Song Statistics", Title) << newline
-      << newline 
-      << newline 
-      << Text(L"Grade: ", Gray) << newline
-      << newline
-      << newline
-      << Text(L"Score: ", Gray) << WSTRING(static_cast<int>(s.score)) << newline
-      << Text(L"Average Speed: ", Gray) << WSTRING(average_speed << L" %") << newline
-      << newline
-      << Text(L"Good Notes: ", Gray) << WSTRING(s.notes_user_actually_played) << Text(L" / ", Gray) << WSTRING(s.notes_user_could_have_played) << Text(WSTRING(L"  (" << static_cast<int>(hit_percent) << L" %" << L")"), Dk_Gray) << newline
-      << Text(L"Stray Notes: ", Gray) << WSTRING(s.stray_notes) << Text(WSTRING(L"  (" << stray_percent << L" %" << L")"), Dk_Gray) << newline
-      << newline
-      << Text(L"Longest Combo: ", Gray) << WSTRING(s.longest_combo) << newline
-      << newline;
+   int left = GetStateWidth() / 2 + 40;
+   const static int InstructionsY = 263;
+
+   renderer.SetColor(White);
+   renderer.DrawTga(GetTexture(StatsText), 420, 150);
+
+   // Choose a dynamic color for the grade
+   const double p = hit_percent / 100.0;
+   const double r = max(0, 1 - (p*p*p*p));
+   const double g = max(0, 1 - (((p-  1)*4)*((p-  1)*4)));
+   const double b = max(0, 1 - (((p-.75)*5)*((p-.75)*5)));
+
+   const Color c = ToColor(int(r*256), int(g*256), int(b*256));
+
+   TextWriter grade_text(left - 5, InstructionsY - 15, renderer, false, 100);
+   grade_text << Text(grade, c);
+   
+   TextWriter score(left, InstructionsY + 112, renderer, false, 28);
+   score << WSTRING(static_cast<int>(s.score));
+
+   TextWriter speed(left, InstructionsY + 147, renderer, false, 28);
+   speed << WSTRING(average_speed << L" %");
+
+   TextWriter good(left, InstructionsY + 218, renderer, false, 28);
+   good << WSTRING(s.notes_user_actually_played << L" / " << s.notes_user_could_have_played << L"  (" << static_cast<int>(hit_percent) << L" %" << L")");
+
+   TextWriter stray(left, InstructionsY + 255, renderer, false, 28);
+   stray << WSTRING(s.stray_notes << L"  (" << stray_percent << L" %" << L")");
+
+   TextWriter combo(left, InstructionsY + 323, renderer, false, 28);
+   combo << WSTRING(s.longest_combo);
+
 
    TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;
