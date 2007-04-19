@@ -398,11 +398,13 @@ void PlayingState::Draw(Renderer &renderer) const
       m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
    // Show the title for a while and then fade it out
+   const static double fade_in_ms = 350.0;
    const static double stay_ms = 2500.0;
    const static double fade_ms = 500.0;
 
-   double alpha = 1.0;
+   double alpha = 0.0;
    unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
+   if (double(ms) < stay_ms) alpha = min(1.0, ms / fade_in_ms);
    if (double(ms) > stay_ms) alpha = max((fade_ms - (ms - stay_ms)) / fade_ms, 0);
 
    wstring title_text = m_state.song_title;
