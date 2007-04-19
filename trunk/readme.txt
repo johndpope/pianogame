@@ -3,9 +3,9 @@ Visit http://pianohero.sourceforge.net/ for more information.
 
 --------------------------------------------------------------------------------
 
-Piano Hero is written by Nicholas Piegdon.
+Piano Hero is mostly written by Nicholas Piegdon.
 
-The following people have also contributed to the project:
+The following people have contributed:
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro
