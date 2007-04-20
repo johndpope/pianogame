@@ -108,6 +108,8 @@ TextWriter& Text::operator<<(TextWriter& tw)
    // TODO: This isn't Unicode!
    std::string narrow(m_text.begin(), m_text.end());
 
+   glBindTexture(GL_TEXTURE_2D, 0);
+   
    glPushMatrix();
    tw.renderer.SetColor(m_color);
    glListBase(font_size_lookup[tw.size]); 
