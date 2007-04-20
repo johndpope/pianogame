@@ -205,7 +205,6 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
 
    const static Color thick(ToColor(0x48,0x48,0x48));
    const static Color thin(ToColor(0x50,0x50,0x50));
-   const static Color center(ToColor(0x70,0x70,0x70));
 
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
@@ -222,7 +221,6 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
       case 'C':
       case 'D':
          guide_color = thin;
-         if (current_octave == 5) guide_color = center;
          break;
 
       case 'F':
