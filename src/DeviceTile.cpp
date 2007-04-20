@@ -7,15 +7,15 @@
 #include "Renderer.h"
 #include "Tga.h"
 
-#include "libmidi\Midi.h"
-#include "libmidi\MidiComm.h"
-
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
 
-DeviceTile::DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *button_graphics, Tga *frame_graphics)
+DeviceTile::DeviceTile(int x, int y, int device_id, DeviceTileType type,
+                       const MidiCommDescriptionList &device_list, 
+                       Tga *button_graphics, Tga *frame_graphics)
 : m_x(x), m_y(y), m_device_id(device_id), m_preview_on(false), m_tile_type(type),
-   m_button_graphics(button_graphics), m_frame_graphics(frame_graphics)
+  m_device_list(device_list), m_button_graphics(button_graphics),
+  m_frame_graphics(frame_graphics)
 {
    // Initialize the size and position of each button
    whole_tile = ButtonState(0, 0, DeviceTileWidth, DeviceTileHeight);
@@ -32,19 +32,9 @@ void DeviceTile::Update(const MouseInfo &translated_mouse)
    button_mode_left.Update(translated_mouse);
    button_mode_right.Update(translated_mouse);
 
-   const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
-   const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
-
-   const MidiCommDescriptionList *devices = 0;
-   switch (m_tile_type)
+   if (m_device_list.size() > 0)
    {
-   case DeviceTileOutput: devices = &output_devices; break;
-   case DeviceTileInput:  devices = &input_devices;  break;
-   }
-
-   if (devices && devices->size() > 0)
-   {
-      const int last_device = static_cast<int>(devices->size() - 1);
+      const int last_device = static_cast<int>(m_device_list.size() - 1);
 
       if (button_mode_left.hit)
       {
@@ -101,19 +91,9 @@ void DeviceTile::Draw(Renderer &renderer) const
    if (m_preview_on) preview_graphic = GraphicPreviewTurnOff;
    renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_preview), LookupGraphic(preview_graphic, button_preview.hovering), color_offset);
 
-   const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
-   const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
-
-   const MidiCommDescriptionList *devices = 0;
-   switch (m_tile_type)
-   {
-   case DeviceTileOutput: devices = &output_devices; break;
-   case DeviceTileInput:  devices = &input_devices;  break;
-   }
-
    // Draw mode text
    TextWriter mode(44, 46, renderer, false, 14);
-   if (devices->size() == 0)
+   if (m_device_list.size() == 0)
    {
       mode << L"[No Devices Found]";
    }
@@ -122,8 +102,7 @@ void DeviceTile::Draw(Renderer &renderer) const
       // A -1 for device_id means "disabled"
       if (m_device_id >= 0)
       {
-         MidiCommDescriptionList d = *devices;
-         mode << d[m_device_id].name;
+         mode << m_device_list[m_device_id].name;
       }
       else
       {

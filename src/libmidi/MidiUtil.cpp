@@ -68,6 +68,7 @@ std::wstring MidiError::GetErrorDescription() const
    case MidiError_UnknownMetaEventType:               return L"Found an unknown MIDI Meta Event Type.";
 
    case MidiError_MM_NoDevice:                        return L"Could not open the specified MIDI device.";
+   case MidiError_MM_NotEnabled:                      return L"MIDI device failed enable.";
    case MidiError_MM_AlreadyAllocated:                return L"The specified MIDI device is already in use.";
    case MidiError_MM_BadDeviceID:                     return L"The MIDI device ID specified is out of range.";
    case MidiError_MM_InvalidParameter:                return L"An invalid parameter was used with the MIDI device.";

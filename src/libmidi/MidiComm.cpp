@@ -18,13 +18,14 @@ void midi_check(MMRESULT ret)
 
    switch (ret)
    {
-   case MIDIERR_NODEVICE:     throw MidiError_MM_NoDevice;
-   case MMSYSERR_ALLOCATED:   throw MidiError_MM_AlreadyAllocated;
-   case MMSYSERR_BADDEVICEID: throw MidiError_MM_BadDeviceID;
-   case MMSYSERR_INVALPARAM:  throw MidiError_MM_InvalidParameter;
-   case MMSYSERR_NODRIVER:    throw MidiError_MM_NoDriver;
-   case MMSYSERR_NOMEM:       throw MidiError_MM_NoMemory;
-   default:                   throw MidiError_MM_Unknown;
+   case MIDIERR_NODEVICE:     throw MidiError(MidiError_MM_NoDevice);
+   case MMSYSERR_NOTENABLED:  throw MidiError(MidiError_MM_NotEnabled);
+   case MMSYSERR_ALLOCATED:   throw MidiError(MidiError_MM_AlreadyAllocated);
+   case MMSYSERR_BADDEVICEID: throw MidiError(MidiError_MM_BadDeviceID);
+   case MMSYSERR_INVALPARAM:  throw MidiError(MidiError_MM_InvalidParameter);
+   case MMSYSERR_NODRIVER:    throw MidiError(MidiError_MM_NoDriver);
+   case MMSYSERR_NOMEM:       throw MidiError(MidiError_MM_NoMemory);
+   default:                   throw MidiError(MidiError_MM_Unknown);
    }
 }
 
@@ -41,7 +42,24 @@ MidiCommDescriptionList MidiCommIn::GetDeviceList()
    for (unsigned int i = 0; i < dev_count; ++i)
    {
       MIDIINCAPS dev;
-      midi_check(midiInGetDevCaps(i, &dev, sizeof(MIDIINCAPS)));
+
+      const static int MaxTries = 10;
+      int tries = 0;
+      while (tries++ < MaxTries)
+      {
+         try
+         {
+            midi_check(midiInGetDevCaps(i, &dev, sizeof(MIDIINCAPS)));
+            break;
+         }
+         catch (MidiError ex)
+         {
+            // Sometimes input needs to take a quick break
+            if (ex.m_error != MidiError_MM_NotEnabled) throw;
+            Sleep(50);
+         }
+      }
+      if (tries == MaxTries) throw MidiError_MM_NotEnabled;
 
       MidiCommDescription d;
       d.id = i;

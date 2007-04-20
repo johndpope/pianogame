@@ -10,7 +10,9 @@
 #include "TrackTile.h"
 #include <vector>
 
-class MidiCommOut;
+#include "libmidi\Midi.h"
+#include "libmidi\MidiComm.h"
+
 class Renderer;
 class Tga;
 
@@ -28,7 +30,8 @@ enum DeviceTileType
 class DeviceTile
 {
 public:
-   DeviceTile(int x, int y, DeviceTileType type, int device_id, Tga *button_graphics, Tga *frame_graphics);
+   DeviceTile(int x, int y, int device_id, DeviceTileType type, const MidiCommDescriptionList &device_list, 
+                       Tga *button_graphics, Tga *frame_graphics);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(Renderer &renderer) const;
@@ -53,6 +56,8 @@ private:
 
    bool m_preview_on;
    int m_device_id;
+
+   const MidiCommDescriptionList m_device_list;
 
    DeviceTileType m_tile_type;
 

@@ -50,6 +50,7 @@ enum MidiErrorCode
 
    // MMSYSTEM Errors for MIDI I/O
    MidiError_MM_NoDevice,
+   MidiError_MM_NotEnabled,
    MidiError_MM_AlreadyAllocated,
    MidiError_MM_BadDeviceID,
    MidiError_MM_InvalidParameter,
