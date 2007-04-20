@@ -118,10 +118,10 @@ void TitleState::Init()
    m_file_tile = new StringTile((GetStateWidth() - StringTileWidth) / 2, 360, GetTexture(SongBox));
    m_file_tile->SetString(m_state.song_title);
 
-   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 460, DeviceTileOutput, output_device_id, GetTexture(InterfaceButtons), GetTexture(OutputBox));
-   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 560, DeviceTileInput,  input_device_id, GetTexture(InterfaceButtons), GetTexture(InputBox));
-
-
+   const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
+   const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
+   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 460, output_device_id, DeviceTileOutput, output_devices, GetTexture(InterfaceButtons), GetTexture(OutputBox));
+   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 560, input_device_id, DeviceTileInput, input_devices, GetTexture(InterfaceButtons), GetTexture(InputBox));
 }
 
 void TitleState::Update()

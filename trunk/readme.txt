@@ -58,6 +58,7 @@ CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
 CHG: Moved status display to the bottom of the screen during play
 CHG: Improved exception handling.
 FIX: Don't crash if "Piano Hero MIDI" folder doesn't exist.
+FIX: No more crash sometimes when app regains focus on the title screen.
 
 
 Release 0.5.1
