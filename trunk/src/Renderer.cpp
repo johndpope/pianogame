@@ -13,10 +13,9 @@
 #undef max
 #endif
 
+static unsigned int last_texture_id = std::numeric_limits<unsigned int>::max();
 void SelectTexture(unsigned int texture_id)
 {
-   static unsigned int last_texture_id = std::numeric_limits<unsigned int>::max();
-
    if (texture_id == last_texture_id) return;
    
    glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -25,6 +24,12 @@ void SelectTexture(unsigned int texture_id)
 
 Renderer::Renderer(HDC hdc) : m_hdc(hdc), m_xoffset(0), m_yoffset(0)
 {
+}
+
+void Renderer::ForceTexture(unsigned int texture_id)
+{
+   last_texture_id = std::numeric_limits<unsigned int>::max();
+   SelectTexture(texture_id);
 }
 
 void Renderer::SetColor(Color c)

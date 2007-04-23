@@ -394,7 +394,13 @@ void PlayingState::Update()
 
 void PlayingState::Draw(Renderer &renderer) const
 {
-   m_keyboard->Draw(renderer, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
+   const Tga *note_tex[4] = { GetTexture(PlayNotesWhiteShadow, true),
+                              GetTexture(PlayNotesBlackShadow, true),
+                              GetTexture(PlayNotesWhiteColor, true),
+                              GetTexture(PlayNotesBlackColor, true) };
+   renderer.ForceTexture(0);
+
+   m_keyboard->Draw(renderer, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
       m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
    // Show the title for a while and then fade it out

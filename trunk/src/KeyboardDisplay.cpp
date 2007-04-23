@@ -6,9 +6,15 @@
 #include "TrackProperties.h"
 #include "PianoHeroError.h"
 #include "string_util.h"
+
 #include "Renderer.h"
+#include "Textures.h"
+#include "Tga.h"
 
 using namespace std;
+
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteDimensions = { 32, 128, 5, 24, 22, 26, 95, 100 };
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackDimensions = { 32,  64, 8, 20,  3,  7, 50,  55 };
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
    : m_size(size), m_width(pixelWidth), m_height(pixelHeight)
@@ -17,7 +23,7 @@ KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHei
 
 
 
-void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNoteSet &notes,
+void KeyboardDisplay::Draw(Renderer &renderer, const Tga *note_tex[4], int x, int y, const TranslatedNoteSet &notes,
                            microseconds_t show_duration, microseconds_t current_time,
                            const std::vector<TrackProperties> &track_properties)
 {
@@ -35,21 +41,31 @@ void KeyboardDisplay::Draw(Renderer &renderer, int x, int y, const TranslatedNot
 
    int white_height = static_cast<int>(white_width * WhiteWidthHeightRatio);
 
-   int black_width = static_cast<int>(white_width * WhiteBlackWidthRatio);
-   int black_height = static_cast<int>(black_width * BlackWidthHeightRatio);
-   int black_offset = white_width - (black_width / 2);
+   const int black_width = static_cast<int>(white_width * WhiteBlackWidthRatio);
+   const int black_height = static_cast<int>(black_width * BlackWidthHeightRatio);
+   const int black_offset = white_width - (black_width / 2);
 
    // The dimensions given to the keyboard object are bounds.  Because of pixel
    // rounding, the keyboard will usually occupy less than the maximum in
    // either direction.
    //
    // So, we just try to center the keyboard inside the bounds.
-   int final_width = (white_width + white_space) * white_key_count;
-   int x_offset = (m_width - final_width) / 2;
-   int y_offset = (m_height - white_height);
+   const int final_width = (white_width + white_space) * white_key_count;
+   const int x_offset = (m_width - final_width) / 2;
+   const int y_offset = (m_height - white_height);
+
+   // Give the notes a little more room to work with so they can roll under
+   // the keys without distortion
+   const int y_roll_under = white_height*3/4;
 
    DrawGuides(renderer, white_key_count, white_width, white_space, x + x_offset, y, y_offset);
-   DrawNotes(renderer, white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, notes, show_duration, current_time, track_properties);
+   
+   // Do two passes on the notes, the first for note shadows and the second
+   // for the note blocks themselves.  This is to avoid shadows being drawn
+   // on top of notes.
+   renderer.SetColor(ToColor(255, 255, 255));
+   DrawNotePass(renderer, note_tex[0], note_tex[1], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
+   DrawNotePass(renderer, note_tex[2], note_tex[3], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
 
    DrawWhiteKeys(renderer, false, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
    DrawBlackKeys(renderer, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
@@ -114,7 +130,6 @@ int KeyboardDisplay::GetWhiteKeyCount() const
    default: throw PianoHeroError(Error_BadPianoType);
    }
 }
-
 
 void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height,
    int key_space, int x_offset, int y_offset) const
@@ -254,91 +269,133 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
    renderer.DrawQuad(x_offset, y+y_offset-PixelsOffKeyboard, keyboard_width, hr_thickness);
 }
 
-void KeyboardDisplay::DrawNotes(Renderer &renderer, int white_width, int key_space, int black_width, int black_offset,
-                                 int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
-                                 microseconds_t show_duration, microseconds_t current_time,
-                                 const std::vector<TrackProperties> &track_properties) const
+void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTexDimensions &tex_dimensions, int x, int y, int w, int h, int color_id) const
 {
-   for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
+   const NoteTexDimensions &d = tex_dimensions;
+
+   const int tex_w = d.right - d.left;
+   const int crown_h = d.crown_end - d.crown_start;
+   const int heel_h = d.heel_end - d.heel_start;
+
+   // We have to enforce a minimum size to make the note ends look good
+   if (h < crown_h + heel_h)
    {
-      const TrackMode mode = track_properties[i->track_id].mode;
-      if (mode == ModeNotPlayed) continue;
-      if (mode == ModePlayedButHidden) continue;
+      const int diff = (crown_h + heel_h) - h;
+      h += diff;
+      y -= diff;
+   }
 
-      const TrackColor color = track_properties[i->track_id].color;
-      const int &brush_id = (i->state == UserMissed ? MissedNote : color);
+   const int src_x = (color_id * d.total_width) + d.left;
+   const int src_y = d.crown_start;
+   const int src_w = d.right - d.left;
+   const int src_h = d.heel_end - d.crown_start;
 
-      // This list is sorted by note start time.  The moment we encounter
-      // a note scrolled off the window, we're done drawing
-      if (i->start > current_time + show_duration) break;
+   const int dest_x = x;
+   const int dest_y = y;
+   const int dest_w = w;
+   const int dest_h = h;
 
-      const long long adjusted_start = max(max(current_time,                 i->start) - current_time, 0);
-      const long long adjusted_end   = max(min(current_time + show_duration, i->end)   - current_time, 0);
+   // TODO!
+   renderer.DrawStretchedTga(tex, dest_x, dest_y, dest_w, dest_h, src_x, src_y, src_w, src_h);
+}
 
-      if (adjusted_end < adjusted_start) continue;
 
-      const double scaling_factor = static_cast<double>(y_offset) / static_cast<double>(show_duration);
+void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, const Tga *tex_black, int white_width,
+   int key_space, int black_width, int black_offset, int x_offset, int y, int y_offset, int y_roll_under, 
+   const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
+   const std::vector<TrackProperties> &track_properties) const
+{
+   // Shiny music domain knowledge
+   const static unsigned int NotesPerOctave = 12;
+   const static unsigned int WhiteNotesPerOctave = 7;
+   const static bool IsBlackNote[12] = { false, true,  false, true,  false, false,
+                                         true,  false, true,  false, true,  false };
 
-      // Convert our times to pixel coordinates
-      const int y_end   = y - static_cast<int>(adjusted_start * scaling_factor) + y_offset;
-      const int y_start = y - static_cast<int>(adjusted_end   * scaling_factor) + y_offset;
+   // The constants used in the switch below refer to the number
+   // of white keys off 'C' that type of piano starts on
+   int keyboard_type_offset = 0;
+   switch (m_size)
+   {
+   case KeyboardSize37: keyboard_type_offset = 4 - WhiteNotesPerOctave; break;
+   case KeyboardSize49: keyboard_type_offset = 0 - WhiteNotesPerOctave; break; // TODO!
+   case KeyboardSize61: keyboard_type_offset = 7 - WhiteNotesPerOctave; break; // TODO!
+   case KeyboardSize76: keyboard_type_offset = 5 - WhiteNotesPerOctave; break; // TODO!
+   case KeyboardSize88: keyboard_type_offset = 2 - WhiteNotesPerOctave; break;
+   default: throw PianoHeroError(Error_BadPianoType);
+   }
 
-      // Shiny music domain knowledge
-      const static unsigned int NotesPerOctave = 12;
-      const static unsigned int WhiteNotesPerOctave = 7;
-      const static bool IsBlackNote[12] = { false, true,  false, true,  false, false,
-                                            true,  false, true,  false, true,  false };
+   // This array describes how to "stack" notes in a single place.  The IsBlackNote array
+   // then tells which one should be shifted slightly to the right
+   const static int NoteToWhiteNoteOffset[12] = { 0, -1, -1, -2, -2, -2, -3, -3, -4, -4, -5, -5 };
 
-      // This array describes how to "stack" notes in a single place.  The IsBlackNote array
-      // then tells which one should be shifted slightly to the right
-      const static int NoteToWhiteNoteOffset[12] = { 0, -1, -1, -2, -2, -2, -3, -3, -4, -4, -5, -5 };
+   const static int MinNoteHeight = 3;
 
-      const int octave = (i->note_id / NotesPerOctave) - GetStartingOctave();
-      const int octave_base = i->note_id % NotesPerOctave;
-      const int stack_offset = NoteToWhiteNoteOffset[octave_base];
-      const bool is_black = IsBlackNote[octave_base];
-
-      // The constants used in the switch below refer to the number
-      // of white keys off 'C' that type of piano starts on
-      int keyboard_type_offset = 0;
-      switch (m_size)
+   bool drawing_black = false;
+   for (int toggle = 0; toggle < 2; ++toggle)
+   {
+      for (TranslatedNoteSet::const_iterator i = notes.begin(); i != notes.end(); ++i)
       {
-      case KeyboardSize37: keyboard_type_offset = 4 - WhiteNotesPerOctave; break;
-      case KeyboardSize49: keyboard_type_offset = 0 - WhiteNotesPerOctave; break; // TODO!
-      case KeyboardSize61: keyboard_type_offset = 7 - WhiteNotesPerOctave; break; // TODO!
-      case KeyboardSize76: keyboard_type_offset = 5 - WhiteNotesPerOctave; break; // TODO!
-      case KeyboardSize88: keyboard_type_offset = 2 - WhiteNotesPerOctave; break;
-      default: throw PianoHeroError(Error_BadPianoType);
+         // This list is sorted by note start time.  The moment we encounter
+         // a note scrolled off the window, we're done drawing
+         if (i->start > current_time + show_duration) break;
+
+         const TrackMode mode = track_properties[i->track_id].mode;
+         if (mode == ModeNotPlayed) continue;
+         if (mode == ModePlayedButHidden) continue;
+
+         const int octave = (i->note_id / NotesPerOctave) - GetStartingOctave();
+         const int octave_base = i->note_id % NotesPerOctave;
+         const int stack_offset = NoteToWhiteNoteOffset[octave_base];
+         const bool is_black = IsBlackNote[octave_base];
+
+         if (drawing_black != is_black) continue;
+
+         const int octave_offset = (max(octave - 1, 0) * WhiteNotesPerOctave);
+         const int inner_octave_offset = (octave_base + stack_offset);
+         const int generalized_black_offset = (is_black?black_offset:0);
+
+         const double scaling_factor = static_cast<double>(y_offset) / static_cast<double>(show_duration);
+
+         const long long roll_under = static_cast<int>(y_roll_under / scaling_factor);
+         const long long adjusted_start = max(i->start - current_time, -roll_under);
+         const long long adjusted_end   = max(i->end   - current_time, 0);
+         if (adjusted_end < adjusted_start) continue;
+
+         // Convert our times to pixel coordinates
+         const int y_end   = y - static_cast<int>(adjusted_start * scaling_factor) + y_offset;
+         const int y_start = y - static_cast<int>(adjusted_end   * scaling_factor) + y_offset;
+
+         const int start_x = (octave_offset + inner_octave_offset + keyboard_type_offset) * (white_width + key_space)
+            + generalized_black_offset + x_offset;
+
+         RECT outline_rect = { start_x - 1, y_start, start_x + (is_black?black_width:white_width) + 1, y_end };
+
+         // Force a note to be a minimum height at all times
+         // except when scrolling off underneath the keyboard and
+         // coming in from the top of the screen.
+         const bool hitting_bottom = (adjusted_start + current_time != i->start);
+         const bool hitting_top    = (adjusted_end   + current_time != i->end);
+         if (!hitting_bottom && !hitting_top)
+         {
+            while ( (outline_rect.bottom - outline_rect.top) < MinNoteHeight) outline_rect.bottom++;
+         }
+
+         const TrackColor color = track_properties[i->track_id].color;
+         const int &brush_id = (i->state == UserMissed ? MissedNote : color);
+
+         if (drawing_black)
+         {
+            DrawNote(renderer, tex_black, BlackDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
+               outline_rect.bottom - outline_rect.top, brush_id);
+         }
+         else
+         {
+            DrawNote(renderer, tex_white, WhiteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
+               outline_rect.bottom - outline_rect.top, brush_id);
+         }
       }
 
-      const int octave_offset = (max(octave - 1, 0) * WhiteNotesPerOctave);
-      const int inner_octave_offset = (octave_base + stack_offset);
-      const int generalized_black_offset = (is_black?black_offset:0);
-
-      const int start_x = (octave_offset + inner_octave_offset + keyboard_type_offset) * (white_width + key_space)
-         + generalized_black_offset + x_offset;
-
-      RECT outline_rect = { start_x - 1, y_start, start_x + (is_black?black_width:white_width) + 1, y_end };
-
-      // Force a note to be at least 1 pixel tall at all times
-      // except when scrolling off underneath the keyboard and
-      // coming in from the top of the screen.
-      const bool hitting_bottom = (adjusted_start + current_time != i->start);
-      const bool hitting_top    = (adjusted_end   + current_time != i->end);
-      if (!hitting_bottom && !hitting_top)
-      {
-         while ( (outline_rect.bottom - outline_rect.top) < 3) outline_rect.bottom++;
-      }
-
-      renderer.SetColor(TrackColorNoteBorder[brush_id]);
-      renderer.DrawQuad(outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left, outline_rect.bottom - outline_rect.top);
-
-      Color c = (i->state == UserHit ? TrackColorNoteHit[brush_id] : TrackColorNoteWhite[brush_id]);
-      if (is_black) c = (i->state == UserHit ? TrackColorNoteHit[brush_id] : TrackColorNoteBlack[brush_id]);
-      renderer.SetColor(c);
-
-      const RECT note_rect = { outline_rect.left + 1, outline_rect.top + 1, outline_rect.right - 1, outline_rect.bottom - 1 };
-      renderer.DrawQuad(note_rect.left, note_rect.top, note_rect.right - note_rect.left, note_rect.bottom - note_rect.top);
+      drawing_black = !drawing_black;
    }
 }
 

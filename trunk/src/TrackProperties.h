@@ -49,10 +49,10 @@ const static Color TrackColorNoteWhite[TrackColorCount] = {
    { 138, 226,  52, 0xFF },
    { 252, 175,  62, 0xFF },
    { 252, 235,  87, 0xFF },
-   { 173, 127, 168, 0xFF },
+   { 173, 104, 180, 0xFF },
    { 238,  94,  94, 0xFF },
 
-   { 180, 180, 180, 0xFF },
+   {  90,  90,  90, 0xFF },
    {  60,  60,  60, 0xFF }
 };
 
@@ -70,26 +70,14 @@ const static Color TrackColorNoteHit[TrackColorCount] = {
 
 const static Color TrackColorNoteBlack[TrackColorCount] = {
    {  52, 101, 164, 0xFF },
-   {  96, 176,  19, 0xFF },
+   {  86, 157,  17, 0xFF },
    { 245, 121,   0, 0xFF },
    { 218, 195,   0, 0xFF },
-   { 117,  80, 123, 0xFF },
+   { 108,  76, 113, 0xFF },
    { 233,  49,  49, 0xFF },
 
-   { 120, 120, 120, 0xFF },
-   {  40,  40,  40, 0xFF }
-};
-
-const static Color TrackColorNoteBorder[TrackColorCount] = {
-   {  32,  64, 115, 0xFF },
-   {  58, 114,   6, 0xFF },
-   { 166,  72,   0, 0xFF },
-   { 145, 120,   0, 0xFF },
-   {  92,  53, 102, 0xFF },
-   { 164,   0,   0, 0xFF },
-
-   {  40,  40,  40, 0xFF },
-   {   0,   0,   0, 0xFF }
+   {  90,  90,  90, 0xFF },
+   {  60,  60,  60, 0xFF }
 };
 
 struct TrackProperties

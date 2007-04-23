@@ -46,6 +46,11 @@ PlayStatus              GRAPHICS    "..\\graphics\\play_Status.tga"
 PlayStatus2             GRAPHICS    "..\\graphics\\play_Status2.tga"
 PlayKeys                GRAPHICS    "..\\graphics\\play_Keys.tga"
 
+PlayNotesBlackColor     GRAPHICS    "..\\graphics\\play_NotesBlackColor.tga"
+PlayNotesBlackShadow    GRAPHICS    "..\\graphics\\play_NotesBlackShadow.tga"
+PlayNotesWhiteColor     GRAPHICS    "..\\graphics\\play_NotesWhiteColor.tga"
+PlayNotesWhiteShadow    GRAPHICS    "..\\graphics\\play_NotesWhiteShadow.tga"
+
 
 #ifdef APSTUDIO_INVOKED
 
