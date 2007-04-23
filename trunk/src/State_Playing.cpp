@@ -351,7 +351,7 @@ void PlayingState::Update()
    if (IsKeyPressed(KeyDown))
    {
       m_show_duration += 250000;
-      if (m_show_duration > 10000000) m_show_duration = 10000000;
+      if (m_show_duration > 5000000) m_show_duration = 5000000;
    }
 
    if (IsKeyPressed(KeyLeft))

@@ -211,7 +211,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
       if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
 
-      setVSync(0);
+      // TODO: Enable v-sync for releases
+      setVSync(1);
 
       // All of this OpenGL stuff only needs to be set once
       glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
