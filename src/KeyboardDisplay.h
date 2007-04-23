@@ -25,7 +25,9 @@ enum TrackColor;
 
 typedef std::map<std::string, TrackColor> KeyNames;
 struct TrackProperties;
+
 class Renderer;
+class Tga;
 
 class KeyboardDisplay
 {
@@ -34,7 +36,7 @@ public:
 
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
-   void Draw(Renderer &renderer, int x, int y, const TranslatedNoteSet &notes,
+   void Draw(Renderer &renderer, const Tga *note_tex[4], int x, int y, const TranslatedNoteSet &notes,
       microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties);
 
@@ -43,6 +45,23 @@ public:
    void ResetActiveKeys() { m_active_keys.clear(); }
 
 private:
+
+   struct NoteTexDimensions
+   {
+      int total_width;
+      int total_height;
+
+      int left;
+      int right;
+
+      int crown_start;
+      int crown_end;
+
+      int heel_start;
+      int heel_end;
+   };
+   const static NoteTexDimensions WhiteDimensions;
+   const static NoteTexDimensions BlackDimensions;
 
    void DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height, 
       int key_space, int x_offset, int y_offset) const;
@@ -53,10 +72,15 @@ private:
    void DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,
       int x_offset, int y, int y_offset) const;
 
-   void DrawNotes(Renderer &renderer, int white_width, int key_space, int black_width, int black_offset,
-      int x_offset, int y, int y_offset, const TranslatedNoteSet &notes,
-      microseconds_t show_duration, microseconds_t current_time,
+   void DrawNotePass(Renderer &renderer, const Tga *tex_white, const Tga *tex_black, int white_width,
+      int key_space, int black_width, int black_offset, int x_offset, int y, int y_offset, int y_roll_under,
+      const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties) const;
+
+   // This takes the rectangle where the actual note block should appear and transforms
+   // it to the multi-quad (with relatively complicated texture coordinates) using the
+   // passed-in texture descriptor, and then draws the result
+   void DrawNote(Renderer &renderer, const Tga *tex, const NoteTexDimensions &tex_dimensions, int x, int y, int w, int h, int color_id) const;
 
    // Retrieves which white-key a piano with the given key count
    // will start with on the far left side

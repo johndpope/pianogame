@@ -84,14 +84,12 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *bo
    bool gray_out_buttons = false;
    Color light  = TrackColorNoteWhite[m_color];
    Color medium = TrackColorNoteBlack[m_color];
-   Color dark   = TrackColorNoteBorder[m_color];
 
    if (m_mode == ModePlayedButHidden || m_mode == ModeNotPlayed)
    {
       gray_out_buttons = true;
       light  = ToColor(0xB0,0xB0,0xB0);
       medium = ToColor(0x70,0x70,0x70);
-      dark   = ToColor(0x50,0x50,0x50);
    }
 
    Color color_tile = medium;

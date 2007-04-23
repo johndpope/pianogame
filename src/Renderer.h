@@ -33,6 +33,8 @@ public:
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
    void ResetOffset() { SetOffset(0,0); }
 
+   void ForceTexture(unsigned int texture_id);
+
    void SetColor(Color c);
    void SetColor(int r, int g, int b, int a = 0xFF);
    void DrawQuad(int x, int y, int w, int h);
