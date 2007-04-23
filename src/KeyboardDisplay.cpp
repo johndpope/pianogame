@@ -13,8 +13,8 @@
 
 using namespace std;
 
-const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteDimensions = { 32, 128, 5, 24, 22, 26, 95, 100 };
-const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackDimensions = { 32,  64, 8, 20,  3,  7, 50,  55 };
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteDimensions = { 32, 128, 5, 24, 22, 28, 93, 100 };
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackDimensions = { 32,  64, 8, 20,  3,  8, 49,  55 };
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
    : m_size(size), m_width(pixelWidth), m_height(pixelHeight)
@@ -273,11 +273,25 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
 {
    const NoteTexDimensions &d = tex_dimensions;
 
-   const int tex_w = d.right - d.left;
+   // Width is super-easy
+   const int tex_note_w = d.right - d.left;
+
+   const double width_scale = double(w) / double(tex_note_w);
+   const double full_tex_width = d.total_width * width_scale;
+   const double left_offset = d.left * width_scale;
+
+   const int src_x = (color_id * d.total_width);
+   const int dest_x = int(x - left_offset);
+   const int dest_w = int(full_tex_width);
+
+   // Now we draw the note in three sections:
+   // - Crown (fixed (relative) height)
+   // - Middle (variable height)
+   // - Heel (fixed (relative) height)
+
+   // Force the note to be at least as large as the crown + heel height
    const int crown_h = d.crown_end - d.crown_start;
    const int heel_h = d.heel_end - d.heel_start;
-
-   // We have to enforce a minimum size to make the note ends look good
    if (h < crown_h + heel_h)
    {
       const int diff = (crown_h + heel_h) - h;
@@ -285,18 +299,22 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
       y -= diff;
    }
 
-   const int src_x = (color_id * d.total_width) + d.left;
-   const int src_y = d.crown_start;
-   const int src_w = d.right - d.left;
-   const int src_h = d.heel_end - d.crown_start;
+   // We actually use the width scale in height calculations
+   // to keep the proportions fixed.
+   const double crown_start_offset = d.crown_start * width_scale;
+   const double crown_end_offset = d.crown_end * width_scale;
+   const double heel_height = double(d.heel_end - d.heel_start) * width_scale;
+   const double bottom_height = double(d.total_height - d.heel_end) * width_scale;
 
-   const int dest_x = x;
-   const int dest_y = y;
-   const int dest_w = w;
-   const int dest_h = h;
+   const int dest_y1 = int(y - crown_start_offset);
+   const int dest_y2 = int(dest_y1 + crown_end_offset);
+   const int dest_y3 = int((y+h) - heel_height);
+   const int dest_y4 = int(dest_y3 + bottom_height);
 
    // TODO!
-   renderer.DrawStretchedTga(tex, dest_x, dest_y, dest_w, dest_h, src_x, src_y, src_w, src_h);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y1, dest_w, dest_y2 - dest_y1, src_x, 0, d.total_width, d.crown_end);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y2, dest_w, dest_y3 - dest_y2, src_x, d.crown_end, d.total_width, d.heel_start - d.crown_end);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y3, dest_w, dest_y4 - dest_y3, src_x, d.heel_start, d.total_width, d.total_height - d.heel_start);
 }
 
 
