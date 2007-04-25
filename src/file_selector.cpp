@@ -11,8 +11,6 @@ using namespace std;
 
 extern HWND g_hwnd;
 
-static bool first_time_directory_set = true;
-
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
    // Grab the filename of the last song we played from the
@@ -25,21 +23,26 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    wchar_t filename[BufferSize] = L"";
    wchar_t filetitle[BufferSize] = L"";
 
-   // NOTE: Disable this for now.  We're using the "default" music directory
-   /*
+   // Try to populate our "File Open" box with the last file selected
    if (StringCbCopyW(filename, BufferSize, last_filename.c_str()) == STRSAFE_E_INSUFFICIENT_BUFFER)
    {
+      // If there wasn't a last file, default to the built-in Music directory
       filename[0] = L'\0';
    }
-   */
 
    wstring default_dir;
-   reg.Read(L"Default Music Directory", &default_dir, L"");
-   if (!SetCurrentDirectory(default_dir.c_str()))
+   bool default_directory = false;
+   if (last_filename.length() == 0)
    {
-      // TODO: Log something some day, but take no other action.
-      //
-      // This is alright.
+      default_directory = true;
+
+      reg.Read(L"Default Music Directory", &default_dir, L"");
+      if (!SetCurrentDirectory(default_dir.c_str()))
+      {
+         // TODO: Log something some day, but take no other action.
+         //
+         // This is alright.
+      }
    }
 
    OPENFILENAME ofn;
@@ -51,14 +54,10 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ofn.lpstrFile =       filename;
    ofn.nMaxFile =        BufferSize;
    ofn.lpstrFileTitle =  filetitle;
+   ofn.lpstrInitialDir = default_dir.c_str();
    ofn.nMaxFileTitle =   BufferSize;
    ofn.lpstrDefExt =     L"mid";
    ofn.Flags =           OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-   if (first_time_directory_set)
-   {
-      ofn.lpstrInitialDir = default_dir.c_str();
-      first_time_directory_set = false;
-   }
 
    if (GetOpenFileName(&ofn))
    {
