@@ -13,8 +13,21 @@
 
 using namespace std;
 
-const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteDimensions = { 32, 128, 5, 24, 22, 28, 93, 100 };
-const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackDimensions = { 32,  64, 8, 20,  3,  8, 49,  55 };
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteNoteDimensions = { 32, 128, 4, 25, 22, 28, 93, 100 };
+const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackNoteDimensions = { 32,  64, 8, 20,  3,  8, 49,  55 };
+   struct KeyTexDimensions
+   {
+      int tex_width;
+      int tex_height;
+
+      int left;
+      int right;
+
+      int top;
+      int bottom;
+   };
+   const KeyboardDisplay::KeyTexDimensions KeyboardDisplay::BlackKeyDimensions = { 32, 128, 8, 20, 15, 109 };
+
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
    : m_size(size), m_width(pixelWidth), m_height(pixelHeight)
@@ -23,8 +36,8 @@ KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHei
 
 
 
-void KeyboardDisplay::Draw(Renderer &renderer, const Tga *note_tex[4], int x, int y, const TranslatedNoteSet &notes,
-                           microseconds_t show_duration, microseconds_t current_time,
+void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4], int x, int y,
+                           const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
                            const std::vector<TrackProperties> &track_properties)
 {
    // Source: Measured from Yamaha P-70
@@ -58,8 +71,11 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *note_tex[4], int x, in
    // the keys without distortion
    const int y_roll_under = white_height*3/4;
 
+   // Symbolic names for the arbitrary array passed in here
+   enum { Rail, Shadow, BlackKey };
+
    DrawGuides(renderer, white_key_count, white_width, white_space, x + x_offset, y, y_offset);
-   
+
    // Do two passes on the notes, the first for note shadows and the second
    // for the note blocks themselves.  This is to avoid shadows being drawn
    // on top of notes.
@@ -67,8 +83,12 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *note_tex[4], int x, in
    DrawNotePass(renderer, note_tex[0], note_tex[1], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
    DrawNotePass(renderer, note_tex[2], note_tex[3], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
 
+   // Black out the background of where the keys are about to appear
+   renderer.SetColor(ToColor(0, 0, 0));
+   renderer.DrawQuad(x + x_offset, y+y_offset, m_width, white_height);
+
    DrawWhiteKeys(renderer, false, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
-   DrawBlackKeys(renderer, false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
+   DrawBlackKeys(renderer, key_tex[BlackKey], false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
 }
 
 int KeyboardDisplay::GetStartingOctave() const
@@ -163,7 +183,32 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
    }
 }
 
-void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, bool active_only, int white_key_count, int white_width,
+void KeyboardDisplay::DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions,
+                                   int x, int y, int w, int h, TrackColor color) const
+{
+   const KeyTexDimensions &d = tex_dimensions;
+
+   const int tex_w = d.right - d.left;
+   const double width_scale = double(w) / double(tex_w);
+   const double full_tex_width = d.tex_width * width_scale;
+   const double left_offset = d.left * width_scale;
+
+   const int src_x = (int(color) * d.tex_width);
+   const int dest_x = int(x - left_offset) - 1;
+   const int dest_w = int(full_tex_width);
+
+   const int tex_h = d.bottom - d.top;
+   const double height_scale = double(h) / double(tex_h);
+   const double full_tex_height = d.tex_height * height_scale;
+   const double top_offset = d.top * height_scale;
+
+   const int dest_y = int(y - top_offset) - 1;
+   const int dest_h = int(full_tex_height);
+
+   renderer.DrawStretchedTga(tex, dest_x, dest_y, dest_w, dest_h, src_x, 0, d.tex_width, d.tex_height);
+}
+
+void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, const Tga *tex, bool active_only, int white_key_count, int white_width,
    int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const
 {
    Color black = ToColor(0x20, 0x20, 0x20);
@@ -189,15 +234,16 @@ void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, bool active_only, int wh
             KeyNames::const_iterator find_result = m_active_keys.find(note_name);
             bool active = (find_result != m_active_keys.end());
 
-            Color c = black;
-            if (active) c = TrackColorNoteBlack[find_result->second];
+            // In this case, MissedNote isn't actually MissedNote.  In the black key
+            // texture we use this value (which doesn't make any sense in this context)
+            // as the default "Black" color.
+            TrackColor c = MissedNote;
+            if (active) c = find_result->second;
 
             if (!active_only || (active_only && active))
             {
-               renderer.SetColor(c);
-
                const int start_x = i * (white_width + key_space) + x_offset + black_offset;
-               renderer.DrawQuad(start_x, y_offset, black_width, black_height);
+               DrawBlackKey(renderer, tex, BlackKeyDimensions, start_x, y_offset, black_width, black_height, c);
             }
          }
       }
@@ -277,10 +323,10 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
    const int tex_note_w = d.right - d.left;
 
    const double width_scale = double(w) / double(tex_note_w);
-   const double full_tex_width = d.total_width * width_scale;
+   const double full_tex_width = d.tex_width * width_scale;
    const double left_offset = d.left * width_scale;
 
-   const int src_x = (color_id * d.total_width);
+   const int src_x = (color_id * d.tex_width);
    const int dest_x = int(x - left_offset);
    const int dest_w = int(full_tex_width);
 
@@ -304,17 +350,16 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
    const double crown_start_offset = d.crown_start * width_scale;
    const double crown_end_offset = d.crown_end * width_scale;
    const double heel_height = double(d.heel_end - d.heel_start) * width_scale;
-   const double bottom_height = double(d.total_height - d.heel_end) * width_scale;
+   const double bottom_height = double(d.tex_height - d.heel_end) * width_scale;
 
    const int dest_y1 = int(y - crown_start_offset);
    const int dest_y2 = int(dest_y1 + crown_end_offset);
    const int dest_y3 = int((y+h) - heel_height);
    const int dest_y4 = int(dest_y3 + bottom_height);
 
-   // TODO!
-   renderer.DrawStretchedTga(tex, dest_x, dest_y1, dest_w, dest_y2 - dest_y1, src_x, 0, d.total_width, d.crown_end);
-   renderer.DrawStretchedTga(tex, dest_x, dest_y2, dest_w, dest_y3 - dest_y2, src_x, d.crown_end, d.total_width, d.heel_start - d.crown_end);
-   renderer.DrawStretchedTga(tex, dest_x, dest_y3, dest_w, dest_y4 - dest_y3, src_x, d.heel_start, d.total_width, d.total_height - d.heel_start);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y1, dest_w, dest_y2 - dest_y1, src_x, 0, d.tex_width, d.crown_end);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y2, dest_w, dest_y3 - dest_y2, src_x, d.crown_end, d.tex_width, d.heel_start - d.crown_end);
+   renderer.DrawStretchedTga(tex, dest_x, dest_y3, dest_w, dest_y4 - dest_y3, src_x, d.heel_start, d.tex_width, d.tex_height - d.heel_start);
 }
 
 
@@ -403,12 +448,12 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
 
          if (drawing_black)
          {
-            DrawNote(renderer, tex_black, BlackDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
+            DrawNote(renderer, tex_black, BlackNoteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
                outline_rect.bottom - outline_rect.top, brush_id);
          }
          else
          {
-            DrawNote(renderer, tex_white, WhiteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
+            DrawNote(renderer, tex_white, WhiteNoteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
                outline_rect.bottom - outline_rect.top, brush_id);
          }
       }
