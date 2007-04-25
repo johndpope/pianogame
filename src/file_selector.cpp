@@ -11,6 +11,9 @@ using namespace std;
 
 extern HWND g_hwnd;
 
+namespace FileSelector
+{
+
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
    // Grab the filename of the last song we played from the
@@ -111,3 +114,5 @@ std::wstring TrimFilename(const std::wstring &filename)
 
    return song_title;
 }
+
+}; // End namespace

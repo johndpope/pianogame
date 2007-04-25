@@ -167,7 +167,7 @@ void TitleState::Update()
 
       std::wstring filename;
       std::wstring file_title;
-      RequestMidiFilename(&filename, &file_title);
+      FileSelector::RequestMidiFilename(&filename, &file_title);
 
       if (filename != L"")
       {
@@ -191,7 +191,7 @@ void TitleState::Update()
             new_state.midi = new_midi;
             new_state.midi_in = m_state.midi_in;
             new_state.midi_out = m_state.midi_out;
-            new_state.song_title = TrimFilename(filename);
+            new_state.song_title = FileSelector::TrimFilename(filename);
 
             delete m_state.midi;
             m_state = new_state;
