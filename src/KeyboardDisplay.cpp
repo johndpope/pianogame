@@ -331,13 +331,6 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
       if (current_white == 'H') current_white = 'A';
       if (current_white == 'C') current_octave++;
    }
-
-   // Draw horizontal-lines
-   const static int hr_thickness = 2;
-   renderer.SetColor(thick);
-   renderer.DrawQuad(x_offset, y, keyboard_width, hr_thickness);
-   renderer.DrawQuad(x_offset, y+y_offset, keyboard_width, hr_thickness);
-   renderer.DrawQuad(x_offset, y+y_offset-PixelsOffKeyboard, keyboard_width, hr_thickness);
 }
 
 void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTexDimensions &tex_dimensions, int x, int y, int w, int h, int color_id) const
@@ -361,11 +354,12 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
    // - Heel (fixed (relative) height)
 
    // Force the note to be at least as large as the crown + heel height
-   const int crown_h = d.crown_end - d.crown_start;
-   const int heel_h = d.heel_end - d.heel_start;
-   if (h < crown_h + heel_h)
+   const double crown_h = (d.crown_end - d.crown_start) * width_scale;
+   const double heel_h = (d.heel_end - d.heel_start) * width_scale;
+   const double min_height = crown_h + heel_h + 1.0;
+   if (h < min_height)
    {
-      const int diff = (crown_h + heel_h) - h;
+      const int diff = int(min_height - h);
       h += diff;
       y -= diff;
    }
