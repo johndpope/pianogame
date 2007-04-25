@@ -54,10 +54,13 @@ Changes
 Release 0.6.0
 -------------
 NEW: All new note and keyboard graphics!
-NEW: All new menu graphics
+NEW: All new menu graphics.
 NEW: Right-click association option in installer.
 CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
-CHG: Moved status display to the bottom of the screen during play
+CHG: Moved status display to the bottom of the screen during play.
+CHG: Made default music folder less imposing.  Now the game will only default
+     to the directory the very first run.  Afterwards, it will remember the
+     last file you attempted to play (like it used to).
 CHG: Improved exception handling.
 FIX: Don't crash if "Piano Hero MIDI" folder doesn't exist.
 FIX: No more crash sometimes when app regains focus on the title screen.
