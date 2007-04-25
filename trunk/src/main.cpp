@@ -151,7 +151,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
          while (!midi)
          {
             std::wstring file_title;
-            RequestMidiFilename(&command_line, &file_title);
+            FileSelector::RequestMidiFilename(&command_line, &file_title);
 
             if (command_line != L"")
             {
@@ -178,7 +178,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
 
       // Save this filename for next time so we can
       // seek the "Open" dialog to the right folder.
-      SetLastMidiFilename(command_line);
+      FileSelector::SetLastMidiFilename(command_line);
 
       // This does what is necessary in construction and
       // resets what it does during its destruction
@@ -237,7 +237,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       UpdateWindow (hwnd);
 
       SharedState state;
-      state.song_title = TrimFilename(command_line);
+      state.song_title = FileSelector::TrimFilename(command_line);
       state.midi = midi;
 
       state_manager.SetInitialState(new TitleState(state));
