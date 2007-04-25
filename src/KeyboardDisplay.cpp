@@ -83,12 +83,20 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
    DrawNotePass(renderer, note_tex[0], note_tex[1], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
    DrawNotePass(renderer, note_tex[2], note_tex[3], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
 
+   const int ActualKeyboardWidth = white_width*white_key_count + white_space*(white_key_count-1);
+
    // Black out the background of where the keys are about to appear
    renderer.SetColor(ToColor(0, 0, 0));
-   renderer.DrawQuad(x + x_offset, y+y_offset, m_width, white_height);
+   renderer.DrawQuad(x + x_offset, y+y_offset, ActualKeyboardWidth, white_height);
 
    DrawWhiteKeys(renderer, false, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
    DrawBlackKeys(renderer, key_tex[BlackKey], false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
+   DrawShadow(renderer, key_tex[Shadow], x+x_offset, y+y_offset, ActualKeyboardWidth);
+   DrawRail(renderer, key_tex[Rail], x+x_offset, y+y_offset, ActualKeyboardWidth);
+
+   // Top of the screen shadow and rail
+   DrawShadow(renderer, key_tex[Shadow], x+x_offset, y, ActualKeyboardWidth+1);
+   DrawRail(renderer, key_tex[Rail], x+x_offset, y, ActualKeyboardWidth+1);
 }
 
 int KeyboardDisplay::GetStartingOctave() const
@@ -252,6 +260,23 @@ void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, const Tga *tex, bool act
       if (current_white == 'H') current_white = 'A';
       if (current_white == 'C') current_octave++;
    }
+}
+
+void DrawWidthStretched(Renderer &renderer, const Tga *tex, int x, int y, int width)
+{
+   renderer.DrawStretchedTga(tex, x, y, width, tex->GetHeight(), 0, 0, tex->GetWidth(), tex->GetWidth());
+}
+
+void KeyboardDisplay::DrawRail(Renderer &renderer, const Tga *tex, int x, int y, int width) const
+{
+   const static int RailOffsetY = -4;
+   DrawWidthStretched(renderer, tex, x, y + RailOffsetY, width);
+}
+
+void KeyboardDisplay::DrawShadow(Renderer &renderer, const Tga *tex, int x, int y, int width) const
+{
+   const static int ShadowOffsetY = 10;
+   DrawWidthStretched(renderer, tex, x, y + ShadowOffsetY, width);
 }
 
 void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,

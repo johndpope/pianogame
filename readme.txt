@@ -11,6 +11,7 @@ Although, the following people have also contributed:
 - Dave Ray for his STRING/WSTRING macro
 - NeHe Productions for their OpenGL base code
 - Christian Auby for input octave shifting code
+
 --------------------------------------------------------------------------------
 
 Piano Hero's video game music samples are provided by Game Music Themes.
@@ -52,6 +53,7 @@ Changes
 
 Release 0.6.0
 -------------
+NEW: All new note and keyboard graphics!
 NEW: All new menu graphics
 NEW: Right-click association option in installer.
 CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
