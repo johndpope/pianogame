@@ -345,13 +345,17 @@ void PlayingState::Update()
    if (IsKeyPressed(KeyUp))
    {
       m_show_duration -= 250000;
-      if (m_show_duration < 250000) m_show_duration = 250000;
+
+      const static microseconds_t MinShowDuration = 250000;
+      if (m_show_duration < MinShowDuration) m_show_duration = MinShowDuration;
    }
 
    if (IsKeyPressed(KeyDown))
    {
       m_show_duration += 250000;
-      if (m_show_duration > 5000000) m_show_duration = 5000000;
+
+      const static microseconds_t MaxShowDuration = 10000000;
+      if (m_show_duration > MaxShowDuration) m_show_duration = MaxShowDuration;
    }
 
    if (IsKeyPressed(KeyLeft))
