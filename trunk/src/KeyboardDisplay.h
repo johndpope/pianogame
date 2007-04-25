@@ -83,6 +83,9 @@ private:
    void DrawBlackKeys(Renderer &renderer, const Tga *tex, bool active_only,int white_key_count, int white_width,
       int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const;
 
+   void DrawRail(Renderer &renderer, const Tga *tex, int x, int y, int width) const;
+   void DrawShadow(Renderer &renderer, const Tga *tex, int x, int y, int width) const;
+
    void DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,
       int x_offset, int y, int y_offset) const;
 
