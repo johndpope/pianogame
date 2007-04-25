@@ -36,6 +36,10 @@ enum Texture
    PlayNotesWhiteColor,
    PlayNotesWhiteShadow,
 
+   PlayKeyRail,
+   PlayKeyShadow,
+   PlayKeysBlack,
+
    _TextureEnumCount
 };
 
@@ -68,7 +72,12 @@ const static wchar_t* TextureResourceNames[_TextureEnumCount] =
    L"PlayNotesBlackColor",
    L"PlayNotesBlackShadow",
    L"PlayNotesWhiteColor",
-   L"PlayNotesWhiteShadow"
+   L"PlayNotesWhiteShadow",
+
+   L"PlayKeyRail",
+   L"PlayKeyShadow",
+   L"PlayKeysBlack"
+
 };
 
 #endif

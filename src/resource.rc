@@ -51,6 +51,9 @@ PlayNotesBlackShadow    GRAPHICS    "..\\graphics\\play_NotesBlackShadow.tga"
 PlayNotesWhiteColor     GRAPHICS    "..\\graphics\\play_NotesWhiteColor.tga"
 PlayNotesWhiteShadow    GRAPHICS    "..\\graphics\\play_NotesWhiteShadow.tga"
 
+PlayKeyRail             GRAPHICS    "..\\graphics\\play_KeyRail.tga"
+PlayKeyShadow           GRAPHICS    "..\\graphics\\play_KeyShadow.tga"
+PlayKeysBlack           GRAPHICS    "..\\graphics\\play_KeysBlack.tga"
 
 #ifdef APSTUDIO_INVOKED
 

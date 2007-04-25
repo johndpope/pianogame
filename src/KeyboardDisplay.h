@@ -36,8 +36,8 @@ public:
 
    KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight);
 
-   void Draw(Renderer &renderer, const Tga *note_tex[4], int x, int y, const TranslatedNoteSet &notes,
-      microseconds_t show_duration, microseconds_t current_time,
+   void Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4], int x, int y,
+      const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
       const std::vector<TrackProperties> &track_properties);
 
    void SetKeyActive(const std::string &key_name, bool active, TrackColor color);
@@ -48,8 +48,8 @@ private:
 
    struct NoteTexDimensions
    {
-      int total_width;
-      int total_height;
+      int tex_width;
+      int tex_height;
 
       int left;
       int right;
@@ -60,13 +60,27 @@ private:
       int heel_start;
       int heel_end;
    };
-   const static NoteTexDimensions WhiteDimensions;
-   const static NoteTexDimensions BlackDimensions;
+   const static NoteTexDimensions WhiteNoteDimensions;
+   const static NoteTexDimensions BlackNoteDimensions;
+
+   struct KeyTexDimensions
+   {
+      int tex_width;
+      int tex_height;
+
+      int left;
+      int right;
+
+      int top;
+      int bottom;
+   };
+   const static KeyTexDimensions BlackKeyDimensions;
+
 
    void DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height, 
       int key_space, int x_offset, int y_offset) const;
 
-   void DrawBlackKeys(Renderer &renderer, bool active_only,int white_key_count, int white_width,
+   void DrawBlackKeys(Renderer &renderer, const Tga *tex, bool active_only,int white_key_count, int white_width,
       int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const;
 
    void DrawGuides(Renderer &renderer, int key_count, int key_width, int key_space,
@@ -81,6 +95,9 @@ private:
    // it to the multi-quad (with relatively complicated texture coordinates) using the
    // passed-in texture descriptor, and then draws the result
    void DrawNote(Renderer &renderer, const Tga *tex, const NoteTexDimensions &tex_dimensions, int x, int y, int w, int h, int color_id) const;
+
+   // This works very much like DrawNote
+   void DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions, int x, int y, int w, int h, TrackColor color) const;
 
    // Retrieves which white-key a piano with the given key count
    // will start with on the far left side
