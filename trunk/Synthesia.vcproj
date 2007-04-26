@@ -185,14 +185,6 @@
 			Name="Main"
 			>
 			<File
-				RelativePath=".\src\file_selector.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\file_selector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\GameState.cpp"
 				>
 			</File>
@@ -260,6 +252,14 @@
 				Name="Support"
 				>
 				<File
+					RelativePath=".\src\file_selector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\file_selector.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\registry.cpp"
 					>
 				</File>
@@ -269,6 +269,14 @@
 				</File>
 				<File
 					RelativePath=".\src\string_util.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\UserSettings.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\UserSettings.h"
 					>
 				</File>
 			</Filter>

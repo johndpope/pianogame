@@ -1,5 +1,5 @@
 #include "file_selector.h"
-#include "registry.h"
+#include "UserSettings.h"
 #include "string_util.h"
 
 #include <Windows.h>
@@ -16,11 +16,9 @@ namespace FileSelector
 
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
-   // Grab the filename of the last song we played from the
-   // registry and pre-load that filename in the open dialog
-   wstring last_filename;
-   Registry reg(Registry::CurrentUser, L"Synthesia");
-   reg.Read(L"Last File", &last_filename, L"");
+   // Grab the filename of the last song we played
+   // and pre-load it into the open dialog
+   wstring last_filename = UserSetting::Get(L"Last File", L"");
 
    const static int BufferSize = 512;
    wchar_t filename[BufferSize] = L"";
@@ -38,8 +36,8 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    if (last_filename.length() == 0)
    {
       default_directory = true;
+      default_dir = UserSetting::Get(L"Default Music Directory", L"");
 
-      reg.Read(L"Default Music Directory", &default_dir, L"");
       if (!SetCurrentDirectory(default_dir.c_str()))
       {
          // TODO: Log something some day, but take no other action.
@@ -79,8 +77,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
 void SetLastMidiFilename(const std::wstring &filename)
 {
-   Registry reg(Registry::CurrentUser, L"Synthesia");
-   reg.Write(L"Last File", filename);
+   UserSetting::Set(L"Last File", filename);
 }
 
 std::wstring TrimFilename(const std::wstring &filename)

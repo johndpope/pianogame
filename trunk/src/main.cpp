@@ -11,6 +11,7 @@
 #include <string>
 #include "string_util.h"
 #include "file_selector.h"
+#include "UserSettings.h"
 
 #include "SynthesiaError.h"
 #include "KeyboardDisplay.h"
@@ -89,6 +90,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
    try
 #endif
    {
+      UserSetting::Initialize(application_name);
+
       wstring command_line;
 
       // CommandLineToArgvW is only available in Windows XP or later.  So,

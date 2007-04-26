@@ -8,7 +8,7 @@
 #include "version.h"
 
 #include "MenuLayout.h"
-#include "registry.h"
+#include "UserSettings.h"
 #include "file_selector.h"
 #include "Renderer.h"
 #include "Textures.h"
@@ -42,13 +42,8 @@ void TitleState::Init()
       GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
-   Registry reg(Registry::CurrentUser, L"Synthesia");
-
-   wstring last_output_device;
-   reg.Read(OutputDeviceKey, &last_output_device, L"");
-
-   wstring last_input_device;
-   reg.Read(InputDeviceKey, &last_input_device, L"");
+   wstring last_output_device = UserSetting::Get(OutputDeviceKey, L"");
+   wstring last_input_device = UserSetting::Get(InputDeviceKey, L"");
 
    // midi_out could be in one of three states right now:
    //    1. We just started and were passed a null MidiCommOut pointer
@@ -210,19 +205,16 @@ void TitleState::Update()
       delete m_state.midi_out;
       m_state.midi_out = 0;
 
-      // Write last device to registry
-      Registry reg(Registry::CurrentUser, L"Synthesia");
-
       if (output_id >= 0)
       {
          m_state.midi_out = new MidiCommOut(output_id);
          m_state.midi->Reset(0,0);
 
-         reg.Write(OutputDeviceKey, m_state.midi_out->GetDeviceDescription().name);
+         UserSetting::Set(OutputDeviceKey, m_state.midi_out->GetDeviceDescription().name);
       }
       else
       {
-         reg.Write(OutputDeviceKey, OutputKeySpecialDisabled);
+         UserSetting::Set(OutputDeviceKey, OutputKeySpecialDisabled);
       }
    }
 
@@ -255,15 +247,12 @@ void TitleState::Update()
       delete m_state.midi_in;
       m_state.midi_in = 0;
 
-      // Write last device to registry 
-      Registry reg(Registry::CurrentUser, L"Synthesia");
-
       if (input_id >= 0)
       {
          try
          {
             m_state.midi_in = new MidiCommIn(input_id);
-            reg.Write(InputDeviceKey, m_state.midi_in->GetDeviceDescription().name);
+            UserSetting::Set(InputDeviceKey, m_state.midi_in->GetDeviceDescription().name);
          }
          catch (MidiErrorCode)
          {
@@ -272,7 +261,7 @@ void TitleState::Update()
       }
       else
       {
-         reg.Write(InputDeviceKey, InputKeySpecialDisabled);
+         UserSetting::Set(InputDeviceKey, InputKeySpecialDisabled);
       }
    }
 
