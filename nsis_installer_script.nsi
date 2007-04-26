@@ -1,10 +1,11 @@
 !include "MUI.nsh"
 
 !define VERSION 0.5.1
+!define PROJECT_NAME Synthesia
 
-Name "Piano Hero ${VERSION}"
-OutFile "PianoHero-${VERSION}-installer.exe"
-InstallDir "$PROGRAMFILES\Piano Hero"
+Name "${PROJECT_NAME} ${VERSION}"
+OutFile "${PROJECT_NAME}-${VERSION}-installer.exe"
+InstallDir "$PROGRAMFILES\${PROJECT_NAME}"
 BrandingText " "
 
 !define MUI_ABORTWARNING
@@ -22,36 +23,36 @@ BrandingText " "
 
 ; Registry key to check for directory (so if you install again, it will 
 ; overwrite the old one automatically)
-InstallDirRegKey HKLM SOFTWARE\PianoHero "Install_Dir"
+InstallDirRegKey HKLM SOFTWARE\${PROJECT_NAME} "Install_Dir"
 
-ComponentText "This will install Piano Hero ${VERSION} to your computer."
+ComponentText "This will install ${PROJECT_NAME} ${VERSION} to your computer."
 DirText "Choose a directory to install in to:"
 
 
 
-Section "!Piano Hero" PianoHero
+Section "!${PROJECT_NAME}" main_application
 SectionIn RO
   SetOutPath $INSTDIR
 
-  File "Release\Piano Hero.exe"
+  File "Release\${PROJECT_NAME}.exe"
   File "readme.txt"
   File "license.txt"
 
   ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\PianoHero "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM SOFTWARE\${PROJECT_NAME} "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero" "DisplayName" "Piano Hero (remove only)"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "DisplayName" "${PROJECT_NAME} (remove only)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteUninstaller "uninstall.exe"
 SectionEnd
 
 
 
 Section "Sample Music" MusicSamples
-  CreateDirectory "$DOCUMENTS\Piano Hero Music"
-  WriteRegStr HKCU "SOFTWARE\Piano Hero" "Default Music Directory" "$DOCUMENTS\Piano Hero Music"
-  SetOutPath "$DOCUMENTS\Piano Hero Music"
+  CreateDirectory "$DOCUMENTS\${PROJECT_NAME} Music"
+  WriteRegStr HKCU "SOFTWARE\${PROJECT_NAME}" "Default Music Directory" "$DOCUMENTS\${PROJECT_NAME} Music"
+  SetOutPath "$DOCUMENTS\${PROJECT_NAME} Music"
   File "music\Bubble Bobble - Main Theme.mid"
   File "music\Dragon Warrior - Town Theme.mid"
   File "music\Sonic the Hedgehog - Green Hill Zone.mid"
@@ -67,29 +68,29 @@ SectionEnd
 
 
 Section "Start Menu Shortcuts" ShortcutMenu
-  CreateDirectory "$SMPROGRAMS\Piano Hero"
-  CreateShortCut "$SMPROGRAMS\Piano Hero\Play Piano Hero.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
-  CreateShortCut "$SMPROGRAMS\Piano Hero\View Readme.lnk" "$INSTDIR\readme.txt"
-  CreateShortCut "$SMPROGRAMS\Piano Hero\View License.lnk" "$INSTDIR\license.txt"
-  CreateShortCut "$SMPROGRAMS\Piano Hero\Visit the Piano Hero Website.lnk" "http://www.halitestudios.com/pianohero.aspx"
-  CreateShortCut "$SMPROGRAMS\Piano Hero\Uninstall Piano Hero.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateDirectory "$SMPROGRAMS\${PROJECT_NAME}"
+  CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\Play ${PROJECT_NAME}.lnk" "$INSTDIR\${PROJECT_NAME}.exe" "" "$INSTDIR\${PROJECT_NAME}.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\View Readme.lnk" "$INSTDIR\readme.txt"
+  CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\View License.lnk" "$INSTDIR\license.txt"
+  CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\Visit the ${PROJECT_NAME} Website.lnk" "http://www.synthesiagame.com/"
+  CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\Uninstall ${PROJECT_NAME}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 SectionEnd
 
 
 
 Section "Right-click Association" Association
-  WriteRegStr HKCR "MIDFile\shell\Play in Piano Hero\command" "" "$\"$INSTDIR\Piano Hero.exe$\" $\"%1$\""
+  WriteRegStr HKCR "MIDFile\shell\Play in ${PROJECT_NAME}\command" "" "$\"$INSTDIR\${PROJECT_NAME}.exe$\" $\"%1$\""
 SectionEnd
 
 
 
 Section /o "Desktop Icon" DesktopIcon
-  CreateShortCut "$DESKTOP\Play Piano Hero.lnk" "$INSTDIR\Piano Hero.exe" "" "$INSTDIR\Piano Hero.exe" 0
+  CreateShortCut "$DESKTOP\Play ${PROJECT_NAME}.lnk" "$INSTDIR\${PROJECT_NAME}.exe" "" "$INSTDIR\${PROJECT_NAME}.exe" 0
 SectionEnd
 
 
 
-UninstallText "This will uninstall Piano Hero ${VERSION}. Click next to continue."
+UninstallText "This will uninstall ${PROJECT_NAME} ${VERSION}. Click next to continue."
 Section "Uninstall"
 
   ; remove registry keys
@@ -98,54 +99,54 @@ Section "Uninstall"
   ; entry in HKLM\SOFTWARE\[program-name] in the event of
   ; subsequent reinstalls/upgrades
   ;
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PianoHero"
-  DeleteRegKey HKCU "SOFTWARE\Piano Hero"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}"
+  DeleteRegKey HKCU "SOFTWARE\${PROJECT_NAME}"
 
   ; delete program files
   Delete $INSTDIR\readme.txt
   Delete $INSTDIR\license.txt
   Delete $INSTDIR\uninstall.exe
-  Delete "$INSTDIR\Piano Hero.exe"
+  Delete "$INSTDIR\${PROJECT_NAME}.exe"
   RMDir /r "$INSTDIR"
 
   ; delete included music
-  Delete "$DOCUMENTS\Piano Hero Music\Bubble Bobble - Main Theme.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Dragon Warrior - Town Theme.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Sonic the Hedgehog - Green Hill Zone.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Super Mario Bros - Overworld.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Super Mario Bros - Underwater.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Tetris - Theme A.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\The Sims - Buying Theme 1.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Zelda A Link to the Past - Overworld Theme.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Zelda Ocarina of Time - Lost Woods.mid"
-  Delete "$DOCUMENTS\Piano Hero Music\Zelda Ocarina of Time - Zelda's Lullaby.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Bubble Bobble - Main Theme.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Dragon Warrior - Town Theme.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Sonic the Hedgehog - Green Hill Zone.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Super Mario Bros - Overworld.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Super Mario Bros - Underwater.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Tetris - Theme A.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\The Sims - Buying Theme 1.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda A Link to the Past - Overworld Theme.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda Ocarina of Time - Lost Woods.mid"
+  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda Ocarina of Time - Zelda's Lullaby.mid"
 
   ; this won't delete the directory if the user has added anything
-  RMDir  "$DOCUMENTS\Piano Hero Music"
+  RMDir  "$DOCUMENTS\${PROJECT_NAME} Music"
 
   ; remove Start Menu shortcuts
-  Delete "$SMPROGRAMS\Piano Hero\*.*"
-  RMDir "$SMPROGRAMS\Piano Hero"
+  Delete "$SMPROGRAMS\${PROJECT_NAME}\*.*"
+  RMDir "$SMPROGRAMS\${PROJECT_NAME}"
 
   ; remove Desktop shortcut
-  Delete "$DESKTOP\Play Piano Hero.lnk"
+  Delete "$DESKTOP\Play ${PROJECT_NAME}.lnk"
 
   ; remove File Association
-  DeleteRegKey HKCR "MIDFile\shell\Play in Piano Hero"
+  DeleteRegKey HKCR "MIDFile\shell\Play in ${PROJECT_NAME}"
 
 SectionEnd
 
 
 
 
-LangString DESC_PianoHero ${LANG_ENGLISH} "Install the Piano Hero application files (required)."
+LangString DESC_main_application ${LANG_ENGLISH} "Install the ${PROJECT_NAME} application files (required)."
 LangString DESC_MusicSamples ${LANG_ENGLISH} "Install 10 sample video game MIDI songs from Game Music Themes."
-LangString DESC_ShortcutMenu ${LANG_ENGLISH} "Create a Piano Hero Start Menu group on the 'All Programs' section of your Start Menu."
-LangString DESC_Association ${LANG_ENGLISH} "Add a right-click 'Play in Piano Hero' file association to MIDI files."
-LangString DESC_DesktopIcon ${LANG_ENGLISH} "Create a Piano Hero icon on your Windows Desktop."
+LangString DESC_ShortcutMenu ${LANG_ENGLISH} "Create a ${PROJECT_NAME} start menu group on the 'All Programs' section of your start menu."
+LangString DESC_Association ${LANG_ENGLISH} "Add a right-click 'Play in ${PROJECT_NAME}' file association to MIDI files."
+LangString DESC_DesktopIcon ${LANG_ENGLISH} "Create a ${PROJECT_NAME} icon on your Windows Desktop."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${PianoHero} $(DESC_PianoHero)
+  !insertmacro MUI_DESCRIPTION_TEXT ${main_application} $(DESC_main_application)
   !insertmacro MUI_DESCRIPTION_TEXT ${MusicSamples} $(DESC_MusicSamples)
   !insertmacro MUI_DESCRIPTION_TEXT ${ShortcutMenu} $(DESC_ShortcutMenu)
   !insertmacro MUI_DESCRIPTION_TEXT ${Association} $(DESC_Association)

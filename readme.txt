@@ -1,9 +1,9 @@
-Piano Hero teaches you to play piano using any MIDI file.
-Visit http://pianohero.sourceforge.net/ for more information.
+Synthesia teaches you to play piano using any MIDI file.
+Visit http://www.synthesiagame.com/ for more information.
 
 --------------------------------------------------------------------------------
 
-Piano Hero is mostly written by Nicholas Piegdon.
+Synthesia is mostly written by Nicholas Piegdon.
 
 Although, the following people have also contributed:
 - Luis Anton with an early version of the MIDI input code
@@ -14,7 +14,7 @@ Although, the following people have also contributed:
 
 --------------------------------------------------------------------------------
 
-Piano Hero's video game music samples are provided by Game Music Themes.
+Synthesia's video game music samples are provided by Game Music Themes.
 Visit http://www.gamemusicthemes.com/ for high quality piano MIDI and sheets.
 
 Bubble Bobble - Main Theme
@@ -62,7 +62,7 @@ CHG: Made default music folder less imposing.  Now the game will only default
      to the directory the very first run.  Afterwards, it will remember the
      last file you attempted to play (like it used to).
 CHG: Improved exception handling.
-FIX: Don't crash if "Piano Hero MIDI" folder doesn't exist.
+FIX: Don't crash if "Synthesia Music" folder doesn't exist.
 FIX: No more crash sometimes when app regains focus on the title screen.
 
 

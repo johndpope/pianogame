@@ -1,4 +1,4 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 
@@ -20,7 +20,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAIN_ICON           ICON        "..\\Piano Hero Icon.ico"
+IDI_MAIN_ICON           ICON        "..\\app_icon.ico"
 
 TitleLogo               GRAPHICS    "..\\graphics\\title_Logo.tga"
 InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"

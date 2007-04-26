@@ -1,4 +1,4 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 
@@ -12,7 +12,7 @@
 #include "string_util.h"
 #include "file_selector.h"
 
-#include "PianoHeroError.h"
+#include "SynthesiaError.h"
 #include "KeyboardDisplay.h"
 #include "libmidi/Midi.h"
 #include "libmidi/SynthVolume.h"
@@ -60,10 +60,10 @@ void setVSync(int interval=1)
 
 int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
 {
-   const static wstring application_name = L"PianoHero";
-   const static wstring friendly_app_name = WSTRING(L"Piano Hero " << PianoHeroVersionString);
+   const static wstring application_name = L"Synthesia";
+   const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
 
-   const static wstring error_header1 = L"Piano Hero detected a";
+   const static wstring error_header1 = L"Synthesia detected a";
    const static wstring error_header2 = L" problem and must close:\n\n";
    const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
 
@@ -281,7 +281,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       return int(msg.wParam);
    }
 #ifndef _DEBUG
-   catch (const PianoHeroError &e)
+   catch (const SynthesiaError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
       MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
@@ -298,7 +298,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
    }
    catch (...)
    {
-      wstring wrapped_description = WSTRING(L"Piano Hero detected an unknown problem and must close!" << error_footer);
+      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!" << error_footer);
       MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
    }
 

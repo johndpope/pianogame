@@ -1,4 +1,4 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 

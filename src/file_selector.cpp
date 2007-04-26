@@ -19,7 +19,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    // Grab the filename of the last song we played from the
    // registry and pre-load that filename in the open dialog
    wstring last_filename;
-   Registry reg(Registry::CurrentUser, L"Piano Hero");
+   Registry reg(Registry::CurrentUser, L"Synthesia");
    reg.Read(L"Last File", &last_filename, L"");
 
    const static int BufferSize = 512;
@@ -52,7 +52,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
    ofn.lStructSize =     sizeof(OPENFILENAME);
    ofn.hwndOwner =       g_hwnd;
-   ofn.lpstrTitle =      L"Piano Hero: Choose a song to play";
+   ofn.lpstrTitle =      L"Synthesia: Choose a song to play";
    ofn.lpstrFilter =     L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
    ofn.lpstrFile =       filename;
    ofn.nMaxFile =        BufferSize;
@@ -79,7 +79,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
 void SetLastMidiFilename(const std::wstring &filename)
 {
-   Registry reg(Registry::CurrentUser, L"Piano Hero");
+   Registry reg(Registry::CurrentUser, L"Synthesia");
    reg.Write(L"Last File", filename);
 }
 

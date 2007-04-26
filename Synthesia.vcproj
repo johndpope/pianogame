@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Piano Hero"
+	Name="Synthesia"
 	ProjectGUID="{39F61D85-03F7-4874-A767-2675F4CD1545}"
-	RootNamespace="PianoHero"
+	RootNamespace="Synthesia"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -213,11 +213,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PianoHeroError.cpp"
+				RelativePath=".\src\SynthesiaError.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PianoHeroError.h"
+				RelativePath=".\src\SynthesiaError.h"
 				>
 			</File>
 			<File

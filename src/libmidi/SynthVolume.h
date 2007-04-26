@@ -1,4 +1,4 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
@@ -12,7 +12,7 @@
 // Windows Media Player has started changing the MIDI synth
 // volume to 0 after playing a MIDI file and exiting.  Seeing
 // as how that's a common file-preview path just before starting
-// Piano Hero, we have to combat the behavior ourselves.
+// Synthesia, we have to combat the behavior ourselves.
 class ReasonableSynthVolume
 {
 public:

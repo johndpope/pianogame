@@ -1,10 +1,10 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 
 #include "KeyboardDisplay.h"
 #include "TrackProperties.h"
-#include "PianoHeroError.h"
+#include "SynthesiaError.h"
 #include "string_util.h"
 
 #include "Renderer.h"
@@ -115,7 +115,7 @@ int KeyboardDisplay::GetStartingOctave() const
    case KeyboardSize61: return StartingOctaveOn61;
    case KeyboardSize76: return StartingOctaveOn76;
    case KeyboardSize88: return StartingOctaveOn88;
-   default: throw PianoHeroError(Error_BadPianoType);
+   default: throw SynthesiaError(Error_BadPianoType);
    }
 }
 
@@ -135,7 +135,7 @@ char KeyboardDisplay::GetStartingNote() const
    case KeyboardSize61: return StartingKeyOn61;
    case KeyboardSize76: return StartingKeyOn76;
    case KeyboardSize88: return StartingKeyOn88;
-   default: throw PianoHeroError(Error_BadPianoType);
+   default: throw SynthesiaError(Error_BadPianoType);
    }
 }
 
@@ -155,7 +155,7 @@ int KeyboardDisplay::GetWhiteKeyCount() const
    case KeyboardSize61: return WhiteKeysOn61;
    case KeyboardSize76: return WhiteKeysOn76;
    case KeyboardSize88: return WhiteKeysOn88;
-   default: throw PianoHeroError(Error_BadPianoType);
+   default: throw SynthesiaError(Error_BadPianoType);
    }
 }
 
@@ -403,7 +403,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
    case KeyboardSize61: keyboard_type_offset = 7 - WhiteNotesPerOctave; break; // TODO!
    case KeyboardSize76: keyboard_type_offset = 5 - WhiteNotesPerOctave; break; // TODO!
    case KeyboardSize88: keyboard_type_offset = 2 - WhiteNotesPerOctave; break;
-   default: throw PianoHeroError(Error_BadPianoType);
+   default: throw SynthesiaError(Error_BadPianoType);
    }
 
    // This array describes how to "stack" notes in a single place.  The IsBlackNote array
