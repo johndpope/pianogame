@@ -1,4 +1,4 @@
-// Piano Hero
+// Synthesia
 // Copyright (c)2006 Nicholas Piegdon
 // See license.txt for license information
 
@@ -42,7 +42,7 @@ void TitleState::Init()
       GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
       Layout::ButtonWidth, Layout::ButtonHeight);
 
-   Registry reg(Registry::CurrentUser, L"Piano Hero");
+   Registry reg(Registry::CurrentUser, L"Synthesia");
 
    wstring last_output_device;
    reg.Read(OutputDeviceKey, &last_output_device, L"");
@@ -177,7 +177,7 @@ void TitleState::Update()
          }
          catch (const MidiError &e)
          {
-            const static wstring friendly_app_name = WSTRING(L"Piano Hero " << PianoHeroVersionString);
+            const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
             
             wstring wrapped_description = WSTRING(L"Problem while loading file: " << file_title << L"\n") + e.GetErrorDescription();
             MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
@@ -211,7 +211,7 @@ void TitleState::Update()
       m_state.midi_out = 0;
 
       // Write last device to registry
-      Registry reg(Registry::CurrentUser, L"Piano Hero");
+      Registry reg(Registry::CurrentUser, L"Synthesia");
 
       if (output_id >= 0)
       {
@@ -256,7 +256,7 @@ void TitleState::Update()
       m_state.midi_in = 0;
 
       // Write last device to registry 
-      Registry reg(Registry::CurrentUser, L"Piano Hero");
+      Registry reg(Registry::CurrentUser, L"Synthesia");
 
       if (input_id >= 0)
       {
@@ -329,7 +329,7 @@ void TitleState::Update()
 
    m_tooltip = L"";
 
-   if (m_back_button.hovering) m_tooltip = L"Click to exit Piano Hero.";
+   if (m_back_button.hovering) m_tooltip = L"Click to exit Synthesia.";
    if (m_continue_button.hovering) m_tooltip = L"Click to continue on to the track selection screen.";
 
    if (m_file_tile->WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
@@ -383,7 +383,7 @@ void TitleState::Draw(Renderer &renderer) const
    extra = L" debug";
 #endif
 
-   version << Text(WSTRING(L"version " << PianoHeroVersionString << extra), Gray);
+   version << Text(WSTRING(L"version " << SynthesiaVersionString << extra), Gray);
 
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
