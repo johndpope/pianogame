@@ -22,7 +22,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDI_MAIN_ICON           ICON        "..\\Piano Hero Icon.ico"
 
-TitleLogo               GRAPHICS    "..\\graphics\\TitleLogo.tga"
+TitleLogo               GRAPHICS    "..\\graphics\\title_Logo.tga"
 InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"
 
 KeyboardHelp            GRAPHICS    "..\\graphics\\play_Keys.tga"

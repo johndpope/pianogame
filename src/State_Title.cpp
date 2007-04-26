@@ -367,17 +367,16 @@ void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 
 void TitleState::Draw(Renderer &renderer) const
 {
-   const static int TitleWidth = 508;
-   const static int TitleHeight = 69;
+   const static int TitleWidth = 507;
+   const static int TitleY = 100;
 
    int left = GetStateWidth() / 2 - TitleWidth / 2;
 
-   const static int TitleY = 70;
    
    renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
 
-   TextWriter version(left + TitleWidth - 66,
-      TitleY + TitleHeight, renderer, false, Layout::SmallFontSize);
+   TextWriter version(Layout::ScreenMarginX, GetStateHeight() - Layout::ScreenMarginY - Layout::SmallFontSize * 2,
+      renderer, false, Layout::SmallFontSize);
 
    std::wstring extra = L"";
 #ifdef _DEBUG
@@ -414,7 +413,7 @@ void TitleState::Draw(Renderer &renderer) const
       last_note << w(m_last_input_note_name);
    }
 
-   renderer.DrawTga(GetTexture(GameMusicThemes), left, 230);
+   renderer.DrawTga(GetTexture(GameMusicThemes), left, 250);
 
    TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;
