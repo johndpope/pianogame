@@ -35,8 +35,8 @@ const string_type StringLower(string_type s)
    std::locale loc;
 
    std::transform( s.begin(), s.end(), s.begin(),
-      std::bind1st( std::mem_fun( &std::ctype<string_type::value_type>::tolower ),
-      &std::use_facet< std::ctype<string_type::value_type> >( loc ) ) );
+      std::bind1st( std::mem_fun( &std::ctype<typename string_type::value_type>::tolower ),
+      &std::use_facet< std::ctype<typename string_type::value_type> >( loc ) ) );
 
    return s;
 }

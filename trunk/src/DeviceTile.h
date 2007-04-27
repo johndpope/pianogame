@@ -10,8 +10,8 @@
 #include "TrackTile.h"
 #include <vector>
 
-#include "libmidi\Midi.h"
-#include "libmidi\MidiComm.h"
+#include "Midi.h"
+#include "MidiComm.h"
 
 class Renderer;
 class Tga;

@@ -5,23 +5,28 @@
 #ifndef __GAMESTATE_H
 #define __GAMESTATE_H
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 #include <exception>
 #include <string>
 #include <map>
 
+#include "Textures.h"
+#include "CompatibleTime.h"
 #include "FrameCounter.h"
+
 class Renderer;
 class Tga;
-
-enum Texture;
 
 class GameStateError : public std::exception
 {
 public:
    GameStateError(const std::string &error) throw() : m_error(error) { }
    virtual const char *what() const throw() { return m_error.c_str(); }
+
+   ~GameStateError() throw() { }
 
 private:
    const std::string m_error;
@@ -147,7 +152,7 @@ class GameStateManager
 public:
    GameStateManager(int screen_width, int screen_height)
       : m_current_state(0), m_screen_x(screen_width), m_screen_y(screen_height),
-      m_last_milliseconds(timeGetTime()), m_next_state(0), m_key_presses(0), m_last_key_presses(0),
+      m_last_milliseconds(Time::GetMilliseconds()), m_next_state(0), m_key_presses(0), m_last_key_presses(0),
       m_inside_update(false), m_fps(500.0), m_show_fps(false)
    { }
    
