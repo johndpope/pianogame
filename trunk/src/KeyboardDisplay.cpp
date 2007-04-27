@@ -440,7 +440,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
 
          const long long roll_under = static_cast<int>(y_roll_under / scaling_factor);
          const long long adjusted_start = max(i->start - current_time, -roll_under);
-         const long long adjusted_end   = max(i->end   - current_time, 0);
+         const long long adjusted_end   = max(i->end   - current_time, 0LL);
          if (adjusted_end < adjusted_start) continue;
 
          // Convert our times to pixel coordinates

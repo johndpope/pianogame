@@ -8,11 +8,6 @@
 #include <limits>
 #include <gl\gl.h>
 
-// numeric_limits conflicts with "max" macro
-#ifdef max
-#undef max
-#endif
-
 static unsigned int last_texture_id = std::numeric_limits<unsigned int>::max();
 void SelectTexture(unsigned int texture_id)
 {

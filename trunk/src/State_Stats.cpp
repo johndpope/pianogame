@@ -94,9 +94,9 @@ void StatsState::Draw(Renderer &renderer) const
 
    // Choose a dynamic color for the grade
    const double p = hit_percent / 100.0;
-   const double r = max(0, 1 - (p*p*p*p));
-   const double g = max(0, 1 - (((p-  1)*4)*((p-  1)*4)));
-   const double b = max(0, 1 - (((p-.75)*5)*((p-.75)*5)));
+   const double r = std::max(0.0, 1 - (p*p*p*p));
+   const double g = std::max(0.0, 1 - (((p-  1)*4)*((p-  1)*4)));
+   const double b = std::max(0.0, 1 - (((p-.75)*5)*((p-.75)*5)));
 
    const Color c = ToColor(int(r*0xFF), int(g*0xFF), int(b*0xFF));
 

@@ -66,7 +66,7 @@ int TextWriter::get_point_size()
 
 TextWriter& TextWriter::next_line()
 {
-   y += max(last_line_height, get_point_size());
+   y += std::max(last_line_height, get_point_size());
    x = original_x;
 
    last_line_height = 0;

@@ -157,7 +157,7 @@ double PlayingState::CalculateScoreMultiplier() const
    const double combo_addition = m_current_combo / 10.0;
    multiplier += combo_addition;
 
-   return min(MaxMultiplier, multiplier);
+   return std::min(MaxMultiplier, multiplier);
 }
 
 void PlayingState::Listen()
@@ -418,8 +418,8 @@ void PlayingState::Draw(Renderer &renderer) const
 
    double alpha = 0.0;
    unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
-   if (double(ms) < stay_ms) alpha = min(1.0, ms / fade_in_ms);
-   if (double(ms) > stay_ms) alpha = max((fade_ms - (ms - stay_ms)) / fade_ms, 0);
+   if (double(ms) < stay_ms) alpha = std::min(1.0, ms / fade_in_ms);
+   if (double(ms) > stay_ms) alpha = std::max((fade_ms - (ms - stay_ms)) / fade_ms, 0.0);
 
    wstring title_text = m_state.song_title;
    if (m_paused)

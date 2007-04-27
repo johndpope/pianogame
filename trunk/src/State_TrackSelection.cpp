@@ -45,10 +45,10 @@ void TrackSelectionState::Init()
    // horizontally and vertically. Integer division
    // helps us round down here.
    int tiles_across = (GetStateWidth() + Layout::ScreenMarginX) / (TrackTileWidth + Layout::ScreenMarginX);
-   tiles_across = max(tiles_across, 1);
+   tiles_across = std::max(tiles_across, 1);
 
    int tiles_down = (GetStateHeight() - Layout::ScreenMarginX - Layout::ScreenMarginY * 2) / (TrackTileHeight + Layout::ScreenMarginX);
-   tiles_down = max(tiles_down, 1);
+   tiles_down = std::max(tiles_down, 1);
 
    // Calculate how many pages of tracks there will be
    m_tiles_per_page = tiles_across * tiles_down;
@@ -183,7 +183,7 @@ void TrackSelectionState::Update()
 
    // Do hit testing on each tile button on this page
    size_t start = m_current_page * m_tiles_per_page;
-   size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
+   size_t end = std::min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
       TrackTile &t = m_track_tiles[i];
@@ -299,7 +299,7 @@ void TrackSelectionState::Draw(Renderer &renderer) const
 
    // Draw each track tile on the current page
    size_t start = m_current_page * m_tiles_per_page;
-   size_t end = min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
+   size_t end = std::min( static_cast<size_t>((m_current_page+1) * m_tiles_per_page), m_track_tiles.size() );
    for (size_t i = start; i < end; ++i)
    {
       m_track_tiles[i].Draw(renderer, m_state.midi, buttons, box);
