@@ -79,7 +79,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    if (returned_file_title) *returned_file_title = L"";
    if (returned_filename) *returned_filename = L"";
 #else
-   // TODO!
+   // MACTODO!
 #endif
 }
 

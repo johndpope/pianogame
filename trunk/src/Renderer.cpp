@@ -22,9 +22,14 @@ void SelectTexture(unsigned int texture_id)
    last_texture_id = texture_id;
 }
 
+#ifdef WIN32
 Renderer::Renderer(HDC hdc) : m_hdc(hdc), m_xoffset(0), m_yoffset(0)
 {
 }
+#else
+// MACTODO!
+#endif
+
 
 void Renderer::ForceTexture(unsigned int texture_id)
 {

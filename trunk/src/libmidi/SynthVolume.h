@@ -5,7 +5,9 @@
 #ifndef __SYNTH_VOLUME_H
 #define __SYNTH_VOLUME_H
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 #include <vector>
 

@@ -33,6 +33,8 @@ public:
 
 #ifdef WIN32
    Renderer(HDC hdc);
+#else
+   // MACTODO!
 #endif
 
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }

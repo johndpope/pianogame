@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #include "State_TrackSelection.h"
@@ -10,9 +10,9 @@
 #include "Renderer.h"
 #include "Textures.h"
 
-#include "libmidi\Midi.h"
-#include "libmidi\MidiUtil.h"
-#include "libmidi\MidiComm.h"
+#include "libmidi/Midi.h"
+#include "libmidi/MidiUtil.h"
+#include "libmidi/MidiComm.h"
 
 TrackSelectionState::TrackSelectionState(const SharedState &state)
    : m_state(state), m_preview_on(false), m_preview_track_id(0),

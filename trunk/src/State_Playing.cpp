@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #include "State_Playing.h"
@@ -17,12 +17,12 @@ using namespace std;
 #include "MenuLayout.h"
 #include "TextWriter.h"
 
-#include "libmidi\Midi.h"
-#include "libmidi\MidiTrack.h"
-#include "libmidi\MidiEvent.h"
-#include "libmidi\MidiUtil.h"
+#include "libmidi/Midi.h"
+#include "libmidi/MidiTrack.h"
+#include "libmidi/MidiEvent.h"
+#include "libmidi/MidiUtil.h"
 
-#include "libmidi\MidiComm.h"
+#include "libmidi/MidiComm.h"
 
 void PlayingState::SetupNoteState()
 {
