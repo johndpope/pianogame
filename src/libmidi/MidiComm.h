@@ -9,7 +9,9 @@
 #include <vector>
 #include <queue>
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 #include "MidiEvent.h"
 
@@ -55,9 +57,11 @@ private:
 
    MidiEventQueue m_event_buffer;
 
-   // I don't like having Windows-defined data in my header, but...
+#ifdef WIN32
    HMIDIIN m_input_device;
    mutable CRITICAL_SECTION m_buffer_mutex;
+#endif
+
 };
 
 class MidiCommOut
@@ -80,7 +84,10 @@ public:
 private:
    MidiCommDescription m_description;
 
+#ifdef WIN32
    HMIDIOUT m_output_device;
+#endif
+
 };
 
 #endif

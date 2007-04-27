@@ -5,10 +5,17 @@
 #ifndef __TEXTWRITER_H
 #define __TEXTWRITER_H
 
+#ifndef __cdecl
+#define __cdecl
+#endif
+
 #include <vector>
 #include <string>
 #include <iomanip>
+
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 #include "string_util.h"
 #include "TrackProperties.h"

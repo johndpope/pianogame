@@ -5,7 +5,9 @@
 #ifndef __RENDERER_H
 #define __RENDERER_H
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 class Tga;
 
@@ -28,7 +30,10 @@ static Color ToColor(int r, int g, int b, int a = 0xFF)
 class Renderer
 {
 public:
+
+#ifdef WIN32
    Renderer(HDC hdc);
+#endif
 
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
    void ResetOffset() { SetOffset(0,0); }
@@ -45,8 +50,10 @@ public:
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) const;
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const;
 
+#ifdef WIN32
    // TODO: REMOVE!
    HDC GetHdc() { return m_hdc; }
+#endif
 
    // TODO: REMOVE!
    int GetXoffset() const { return m_xoffset; }
@@ -56,7 +63,9 @@ private:
    int m_xoffset;
    int m_yoffset;
 
+#ifdef WIN32
    HDC m_hdc;
+#endif
 };
 
 #endif

@@ -2,14 +2,18 @@
 #include "UserSettings.h"
 #include "string_util.h"
 
+#ifdef WIN32
 #include <Windows.h>
 #include <strsafe.h>
+#endif
 
 #include <set>
 
 using namespace std;
 
+#ifdef WIN32
 extern HWND g_hwnd;
+#endif
 
 namespace FileSelector
 {
@@ -24,6 +28,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    wchar_t filename[BufferSize] = L"";
    wchar_t filetitle[BufferSize] = L"";
 
+#ifdef WIN32
    // Try to populate our "File Open" box with the last file selected
    if (StringCbCopyW(filename, BufferSize, last_filename.c_str()) == STRSAFE_E_INSUFFICIENT_BUFFER)
    {
@@ -73,6 +78,9 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
    if (returned_file_title) *returned_file_title = L"";
    if (returned_filename) *returned_filename = L"";
+#else
+   // TODO!
+#endif
 }
 
 void SetLastMidiFilename(const std::wstring &filename)

@@ -9,9 +9,7 @@
 #include <iostream>
 
 #include "Note.h"
-
-enum MidiEventType;
-enum MidiMetaEventType;
+#include "MidiUtil.h"
 
 struct MidiEventSimple
 {
