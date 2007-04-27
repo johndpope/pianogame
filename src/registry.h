@@ -1,12 +1,15 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #ifndef __REGISTRY_H
 #define __REGISTRY_H
 
 #include <string>
+
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 // Registry simplifies reading/writing the Windows registry
 // (It currently does not support enumerating or deleting)

@@ -1,8 +1,10 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 #include <gl\gl.h>
 #include <gl\glu.h>
@@ -214,7 +216,7 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
       if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
 
-      // TODO: Enable v-sync for releases
+      // Enable v-sync for release versions
       setVSync(1);
 
       // All of this OpenGL stuff only needs to be set once

@@ -252,11 +252,23 @@
 				Name="Support"
 				>
 				<File
+					RelativePath=".\src\CompatibleTime.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\CompatibleTime.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\file_selector.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\src\file_selector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\FrameCounter.h"
 					>
 				</File>
 				<File
@@ -325,10 +337,6 @@
 				</File>
 				<File
 					RelativePath=".\src\DeviceTile.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\FrameCounter.h"
 					>
 				</File>
 				<File

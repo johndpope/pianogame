@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #include "MidiUtil.h"
@@ -8,6 +8,8 @@
 using namespace std;
 
 
+// MACTODO: Figure out if this is actually Windows-only or not.  I might
+// have meant x86 here before the Intel Macs came out.
 #ifdef WIN32
 
 unsigned long swap32(unsigned long x) 

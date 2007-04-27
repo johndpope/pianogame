@@ -6,6 +6,7 @@ Visit http://www.synthesiagame.com/ for more information.
 Synthesia is mostly written by Nicholas Piegdon.
 
 Although, the following people have also contributed:
+- Daniel Lawrence for the name Synthesia
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro

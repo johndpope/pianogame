@@ -1,7 +1,7 @@
 #ifdef WIN32
 #include <Windows.h>
 #else
-// TODO!
+// MACTODO!
 #endif
 
 namespace Time
@@ -13,7 +13,7 @@ namespace Time
       #ifdef WIN32
          timeGetTime();
       #else
-         // TODO!
+         // MACTODO!
       #endif
       
       return milliseconds;

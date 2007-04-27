@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #ifndef __MIDI_EVENT_H

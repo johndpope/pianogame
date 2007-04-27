@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #include "State_Title.h"
@@ -402,7 +402,7 @@ void TitleState::Draw(Renderer &renderer) const
       last_note << w(m_last_input_note_name);
    }
 
-   renderer.DrawTga(GetTexture(GameMusicThemes), left, 250);
+   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, 250);
 
    TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;

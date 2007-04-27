@@ -1,5 +1,5 @@
 // Synthesia
-// Copyright (c)2006 Nicholas Piegdon
+// Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
 #include "MidiEvent.h"
@@ -10,7 +10,9 @@
 #include <sstream>
 using namespace std;
 
+#ifdef WIN32
 #include <Windows.h>
+#endif
 
 void midi_check(MMRESULT ret)
 {
