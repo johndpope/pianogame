@@ -5,9 +5,16 @@
 #include "GameState.h"
 #include "Renderer.h"
 #include "Textures.h"
+#include "CompatibleTime.h"
 #include "Tga.h"
 
-#include <gl\gl.h>
+#ifdef WIN32
+#include <gl/gl.h>
+#else
+#include <OpenGL/OpenGL.h>
+#include <AGL/agl.h>
+#include <AGL/gl.h>
+#endif
 
 // For FPS display
 #include "TextWriter.h"
@@ -162,7 +169,7 @@ void GameStateManager::ChangeState(GameState *new_state)
 void GameStateManager::Update(bool skip_this_update)
 {
    // Manager's timer grows constantly
-   const unsigned long now = timeGetTime();
+   const unsigned long now = Time::GetMilliseconds();
    const unsigned long delta = now - m_last_milliseconds;
    m_last_milliseconds = now;
 
@@ -235,9 +242,17 @@ void GameStateManager::Draw(Renderer &renderer)
    if (m_show_fps)
    {
       TextWriter fps_writer(0, 0, renderer);
-      fps_writer << Text(L"FPS: ", Gray) << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
+      fps_writer
+         << Text(WSTRING(L"FPS: "), Gray)
+         << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
    }
 
    glFlush ();
+   
+#ifdef WIN32
    SwapBuffers (renderer.GetHdc());
+#else
+   // MACTODO
+   //aglSwapBuffers(<#AGLContext ctx#>)
+#endif
 }
