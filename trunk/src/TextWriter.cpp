@@ -131,7 +131,7 @@ TextWriter& TextWriter::next_line()
    return *this;
 }
 
-TextWriter& operator<<(TextWriter& tw, Text& t)
+TextWriter& operator<<(TextWriter& tw, const Text& t)
 {
    return t.operator <<(tw);
 }

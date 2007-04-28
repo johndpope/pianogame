@@ -252,11 +252,11 @@
 				Name="Support"
 				>
 				<File
-					RelativePath=".\src\CompatibleTime.cpp"
+					RelativePath=".\src\CompatibleSystem.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\src\CompatibleTime.h"
+					RelativePath=".\src\CompatibleSystem.h"
 					>
 				</File>
 				<File

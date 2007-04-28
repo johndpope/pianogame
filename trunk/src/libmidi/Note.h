@@ -25,7 +25,7 @@ enum NoteState
 template <class T>
 struct GenericNote
 {
-   bool operator()(const GenericNote<T> &lhs, const GenericNote<T> &rhs)
+   bool operator()(const GenericNote<T> &lhs, const GenericNote<T> &rhs) const
    {
       if (lhs.start < rhs.start) return true;
       if (lhs.start > rhs.start) return false;

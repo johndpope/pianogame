@@ -17,7 +17,7 @@
 #include <map>
 
 #include "Textures.h"
-#include "CompatibleTime.h"
+#include "CompatibleSystem.h"
 #include "FrameCounter.h"
 
 class Renderer;
@@ -155,7 +155,7 @@ class GameStateManager
 public:
    GameStateManager(int screen_width, int screen_height)
       : m_current_state(0), m_screen_x(screen_width), m_screen_y(screen_height),
-      m_last_milliseconds(Time::GetMilliseconds()), m_next_state(0), m_key_presses(0), m_last_key_presses(0),
+      m_last_milliseconds(Compatible::GetMilliseconds()), m_next_state(0), m_key_presses(0), m_last_key_presses(0),
       m_inside_update(false), m_fps(500.0), m_show_fps(false)
    { }
    

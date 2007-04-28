@@ -5,7 +5,7 @@
 #include "GameState.h"
 #include "Renderer.h"
 #include "Textures.h"
-#include "CompatibleTime.h"
+#include "CompatibleSystem.h"
 #include "Tga.h"
 
 #ifdef WIN32
@@ -169,7 +169,7 @@ void GameStateManager::ChangeState(GameState *new_state)
 void GameStateManager::Update(bool skip_this_update)
 {
    // Manager's timer grows constantly
-   const unsigned long now = Time::GetMilliseconds();
+   const unsigned long now = Compatible::GetMilliseconds();
    const unsigned long delta = now - m_last_milliseconds;
    m_last_milliseconds = now;
 
