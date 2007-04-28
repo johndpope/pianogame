@@ -9,14 +9,14 @@ public:
    static Tga *Load(const std::wstring &resource_name);
    static void Release(Tga *tga);
 
-   unsigned int GetId() const { return m_texture_id; }
+   unsigned long GetId() const { return m_texture_id; }
    unsigned int GetWidth() const { return m_width; }
    unsigned int GetHeight() const { return m_height; }
 
    void SetSmooth(bool smooth);
 
 private:
-   unsigned int m_texture_id;
+   unsigned long m_texture_id;
    unsigned int m_width;
    unsigned int m_height;
 

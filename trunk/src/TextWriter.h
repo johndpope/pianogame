@@ -89,7 +89,7 @@ public:
    Text(int i,              Color color) : m_color(color), m_text(WSTRING(i)) { }
    Text(double d, int prec, Color color) : m_color(color), m_text(WSTRING(std::setprecision(prec) << d)) { }
 
-   TextWriter& operator<<(TextWriter& tw);
+   TextWriter& operator<<(TextWriter& tw) const;
 
 private:
    Color m_color;
@@ -99,7 +99,7 @@ private:
 // newline manipulator
 TextWriter& newline(TextWriter& tw);
 
-TextWriter& operator<<(TextWriter& tw, Text& t);
+TextWriter& operator<<(TextWriter& tw, const Text& t);
 TextWriter& operator<<(TextWriter& tw, const std::wstring& s);
 TextWriter& operator<<(TextWriter& tw, const int& i);
 TextWriter& operator<<(TextWriter& tw, const unsigned int& i);

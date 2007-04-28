@@ -14,6 +14,8 @@
 
 #include <map>
 
+#ifdef WIN32
+
 // TODO: These should be deleted at shutdown
 static std::map<int, int> font_size_lookup;
 static std::map<int, HFONT> font_handle_lookup;
@@ -64,31 +66,12 @@ TextWriter::~TextWriter()
 {
 }
 
-int TextWriter::get_point_size()
+int TextWriter::get_point_size() 
 {
    return MulDiv(size, GetDeviceCaps(renderer.GetHdc(), LOGPIXELSY), 72);
 }
 
-TextWriter& TextWriter::next_line()
-{
-   y += std::max(last_line_height, get_point_size());
-   x = original_x;
-
-   last_line_height = 0;
-   return *this;
-}
-
-TextWriter& operator<<(TextWriter& tw, Text& t)
-{
-   return t.operator <<(tw);
-}
-
-TextWriter& newline(TextWriter& tw)
-{
-   return tw.next_line();
-}
-
-TextWriter& Text::operator<<(TextWriter& tw)
+TextWriter& Text::operator<<(TextWriter& tw) const
 {
    const long options = DT_LEFT | DT_NOPREFIX;
 
@@ -131,6 +114,31 @@ TextWriter& Text::operator<<(TextWriter& tw)
    SetMapMode(tw.renderer.GetHdc(), previous_map_mode);
 
    return tw;
+}
+
+#else
+
+// MACTODO: Platform dependent TextWriter code
+
+#endif
+
+TextWriter& TextWriter::next_line()
+{
+   y += std::max(last_line_height, get_point_size());
+   x = original_x;
+
+   last_line_height = 0;
+   return *this;
+}
+
+TextWriter& operator<<(TextWriter& tw, Text& t)
+{
+   return t.operator <<(tw);
+}
+
+TextWriter& newline(TextWriter& tw)
+{
+   return tw.next_line();
 }
 
 TextWriter& operator<<(TextWriter& tw, const std::wstring& s)  { return tw << Text(s, White); }
