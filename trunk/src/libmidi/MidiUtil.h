@@ -8,19 +8,11 @@
 #include <iostream>
 #include <string>
 
-// Endian swapping functions
+// Cross-platform Endian conversion functions
 //
-// MIDI is big endian.  Windows is little endian.
-//
-// MACTODO: Figure out if this is actually Windows-only or not.  I might
-// have meant x86 here before the Intel Macs came out.
-#ifdef WIN32
-   unsigned long swap32(unsigned long x);
-   unsigned short swap16(unsigned short x);
-#else
-   #define swap32(x) (x)
-   #define swap16(x) (x)
-#endif
+// MIDI is big endian.  Some platforms aren't
+unsigned long BigToSystem32(unsigned long x);
+unsigned short BigToSystem16(unsigned short x);
 
 // MIDI contains these wacky variable length numbers where
 // the value is stored only in the first 7 bits of each
