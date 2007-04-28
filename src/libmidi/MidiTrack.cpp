@@ -36,7 +36,7 @@ MidiTrack MidiTrack::ReadFromStream(std::istream &stream)
    // Pull the full track out of the file all at once -- there is an
    // End-Of-Track event, but this allows us handle malformed MIDI a
    // little more gracefully.
-   track_length = swap32(track_length);
+   track_length = BigToSystem32(track_length);
    char *buffer = new char[track_length + 1];
    buffer[track_length] = 0;
 

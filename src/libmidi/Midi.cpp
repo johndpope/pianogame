@@ -80,7 +80,7 @@ Midi Midi::ReadFromStream(istream &stream)
    // Chunk Size is always 6 by definition
    const static unsigned int MidiFileHeaderChunkLength = 6;
 
-   header_length = swap32(header_length);
+   header_length = BigToSystem32(header_length);
    if (header_length != MidiFileHeaderChunkLength)
    {
       throw MidiError(MidiError_BadHeaderSize);
@@ -90,7 +90,7 @@ Midi Midi::ReadFromStream(istream &stream)
    const static int MidiFormat1 = 1;
    const static int MidiFormat2 = 2;
 
-   format = swap16(format);
+   format = BigToSystem16(format);
    if (format == MidiFormat2)
    {
       // MIDI 0: All information in 1 track
@@ -101,7 +101,7 @@ Midi Midi::ReadFromStream(istream &stream)
       throw MidiError(MidiError_Type2MidiNotSupported);
    }
 
-   track_count = swap16(track_count);
+   track_count = BigToSystem16(track_count);
    if (format == 0 && track_count != 1)
    {
       // MIDI 0 has only 1 track by definition
@@ -111,7 +111,7 @@ Midi Midi::ReadFromStream(istream &stream)
    // Time division can be encoded two ways based on a bit-flag:
    // - pulses per quarter note (15-bits)
    // - SMTPE frames per second (7-bits for SMPTE frame count and 8-bits for clock ticks per frame)
-   time_division = swap16(time_division);
+   time_division = BigToSystem16(time_division);
    bool in_smpte = ((time_division & 0x8000) != 0);
 
    if (in_smpte)
