@@ -1,10 +1,18 @@
-#include "registry.h"
 #include "string_util.h"
+
+#ifdef WIN32
+#include "registry.h"
+#else
+// MACTODO: headers for UserProperties
+#endif
 
 using namespace std;
 
 namespace UserSetting
 {
+
+#ifdef WIN32
+
    static bool g_initialized(false);
    static std::wstring g_app_name(L"");
 
@@ -34,5 +42,11 @@ namespace UserSetting
       Registry reg(Registry::CurrentUser, g_app_name);
       reg.Write(setting, value);
    }
+
+#else
+
+   // MACTODO: UserSettings implementation
+   
+#endif
 
 }; // End namespace

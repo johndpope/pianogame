@@ -25,10 +25,15 @@
 #include "file_selector.h"
 #include "UserSettings.h"
 
+#include "CompatibleSystem.h"
 #include "SynthesiaError.h"
 #include "KeyboardDisplay.h"
 #include "libmidi/Midi.h"
+
+#ifdef WIN32
+// The problem this bit of code solves is only in Windows
 #include "libmidi/SynthVolume.h"
+#endif
 
 #include "Tga.h"
 #include "Renderer.h"
@@ -37,7 +42,6 @@
 #include "State_Title.h"
 
 #include "resource.h"
-#include "version.h"
 
 using namespace std;
 
@@ -56,7 +60,7 @@ PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
 #else
 
-// MACTODO
+// MACTODO: Window/screen dimensions
 static const int WindowWidth = 1024;
 static const int WindowHeight = 768;
 
@@ -87,7 +91,6 @@ void setVSync(int interval=1)
 }
 
 const static wstring application_name = L"Synthesia";
-const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
 
 const static wstring error_header1 = L"Synthesia detected a";
 const static wstring error_header2 = L" problem and must close:\n\n";
@@ -123,7 +126,7 @@ int main(int argc, char *argv[])
    
 #else
 
-   // MACTODO
+   // MACTODO: Set up the window
    
 #endif
 
@@ -134,6 +137,7 @@ int main(int argc, char *argv[])
    {
       wstring command_line;
 
+#ifdef WIN32
       // CommandLineToArgvW is only available in Windows XP or later.  So,
       // rather than maintain separate binaries for Win2K, I do a runtime
       // library load and check to see if the function I need is available.
@@ -161,6 +165,9 @@ int main(int argc, char *argv[])
 
          FreeLibrary(shell32);
       }
+#else
+      // MACTODO: concat the command line?
+#endif
 
       // Strip any leading or trailing quotes from the filename
       // argument (to match the format returned by the open-file
@@ -182,7 +189,7 @@ int main(int argc, char *argv[])
          catch (const MidiError &e)
          {
             wstring wrapped_description = WSTRING(L"Problem while loading file: " << command_line << L"\n") + e.GetErrorDescription();
-            MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
+            Compatible::ShowError(wrapped_description);
 
             command_line = L"";
             midi = 0;
@@ -207,7 +214,7 @@ int main(int argc, char *argv[])
                catch (const MidiError &e)
                {
                   wstring wrapped_description = WSTRING(L"Problem while loading file: " << file_title << L"\n") + e.GetErrorDescription();
-                  MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
+                  Compatible::ShowError(wrapped_description);
 
                   midi = 0;
                }
@@ -225,11 +232,13 @@ int main(int argc, char *argv[])
       // seek the "Open" dialog to the right folder.
       FileSelector::SetLastMidiFilename(command_line);
 
+#ifdef WIN32
       // This does what is necessary in construction and
       // resets what it does during its destruction
       ReasonableSynthVolume volume_correct;
+#endif
 
-
+#ifdef WIN32
       HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
          WS_POPUP, 0, 0, WindowWidth, WindowHeight, HWND_DESKTOP, 0, instance, 0);
       g_hwnd = hwnd;
@@ -255,6 +264,9 @@ int main(int argc, char *argv[])
       HGLRC glrc = wglCreateContext(dc);
       if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
       if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
+#else
+      // MACTODO: Set up the window and initialize OpenGL
+#endif
 
       // Enable v-sync for release versions
       setVSync(1);
@@ -276,8 +288,9 @@ int main(int argc, char *argv[])
       glLoadIdentity();
       gluOrtho2D(0, WindowWidth, 0, WindowHeight);
 
+      int return_value = 1;
 
-
+#ifdef WIN32
       ShowWindow (hwnd, iCmdShow);
       UpdateWindow (hwnd);
 
@@ -323,34 +336,42 @@ int main(int argc, char *argv[])
 
       UnregisterClass(application_name.c_str(), instance);
 
-      return int(msg.wParam);
+      return_value = int(msg.wParam);
+#else
+      // MACTODO: Program loop
+#endif
+
+      return return_value;
    }
 #ifndef _DEBUG
    catch (const SynthesiaError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
-      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+      Compatible::ShowError(wrapped_description);
    }
    catch (const MidiError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
-      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+      Compatible::ShowError(wrapped_description);
    }
    catch (const std::exception &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.what() << error_footer);
-      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+      Compatible::ShowError(wrapped_description);
    }
    catch (...)
    {
       wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!" << error_footer);
-      MessageBox(0, wrapped_description.c_str(), (WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+      Compatible::ShowError(wrapped_description);
    }
 
    return 1;
 
 #endif
 }
+
+
+#ifdef WIN32
 
 // Windows message callback function
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -430,4 +451,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
    }
    return DefWindowProc (hwnd, message, wParam, lParam);
 }
+
+#else
+
+// MACTODO: Keyboard/Mouse events
+
+#endif
 

@@ -1,15 +1,26 @@
 #include "Tga.h"
-#include "Windows.h"
+
+#ifdef WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
 
 #ifdef WIN32
 #include <gl/gl.h>
 #else
+
+#define OutputDebugString(x)
 #include <OpenGL/OpenGL.h>
 #include <AGL/gl.h>
+
 #endif
 
 Tga* Tga::Load(const std::wstring &resource_name)
 {
+
+#ifdef WIN32
    // This is for future use.  For now, we're limiting
    // ourselves to the current executable only.
    const HMODULE module = 0;
@@ -41,6 +52,13 @@ Tga* Tga::Load(const std::wstring &resource_name)
    ret->SetSmooth(false);
 
    return ret;
+   
+#else
+
+   // MACTODO: Resource loading
+   return 0;
+   
+#endif
 }
 
 void Tga::Release(Tga *tga)
@@ -219,7 +237,7 @@ Tga *Tga::BuildFromParameters(const unsigned char *raw, unsigned int width, unsi
    if (bpp == 24) pixel_format = GL_RGB;
    if (bpp == 32) pixel_format = GL_RGBA;
 
-   unsigned int id;
+   unsigned long id;
    glGenTextures(1, &id);
    if (!id) return 0;
 

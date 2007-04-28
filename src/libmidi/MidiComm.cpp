@@ -226,6 +226,6 @@ void MidiCommOut::Reset()
 
 #else
 
-// MACTODO
+// MACTODO: Entire Midi Comm Class!
 
 #endif

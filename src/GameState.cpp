@@ -242,12 +242,7 @@ void GameStateManager::Draw(Renderer &renderer)
    if (m_show_fps)
    {
       TextWriter fps_writer(0, 0, renderer);
-      
-      #ifdef WIN32
       fps_writer << Text(WSTRING(L"FPS: "), Gray) << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
-      #else
-      // MACTODO
-      #endif
    }
 
    glFlush ();
@@ -255,7 +250,7 @@ void GameStateManager::Draw(Renderer &renderer)
 #ifdef WIN32
    SwapBuffers (renderer.GetHdc());
 #else
-   // MACTODO
+   // MACTODO: OpenGL buffer swap (need context)
    //aglSwapBuffers(<#AGLContext ctx#>)
 #endif
 }

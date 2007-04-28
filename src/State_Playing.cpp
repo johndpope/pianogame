@@ -7,7 +7,7 @@
 #include "State_Stats.h"
 #include "Renderer.h"
 #include "Textures.h"
-#include "version.h"
+#include "CompatibleSystem.h"
 
 #include <string>
 #include <iomanip>
@@ -26,10 +26,17 @@ using namespace std;
 
 void PlayingState::SetupNoteState()
 {
-   for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i)
+   TranslatedNoteSet old = m_notes;
+   m_notes.clear();
+
+   for (TranslatedNoteSet::const_iterator i = old.begin(); i != old.end(); ++i)
    {
-      i->state = AutoPlayed;
-      if (m_state.track_properties[i->track_id].mode == ModeYouPlay) i->state = UserPlayable;
+      TranslatedNote n = *i;
+
+      n.state = AutoPlayed;
+      if (m_state.track_properties[n.track_id].mode == ModeYouPlay) n.state = UserPlayable;
+      
+      m_notes.insert(n);
    }
 }
 
@@ -84,14 +91,14 @@ void PlayingState::Init()
    m_keyboard = new KeyboardDisplay(KeyboardSize88, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
    // Hide the mouse cursor while we're playing
-   ShowCursor(false);
+   Compatible::HideMouseCursor();
 
    ResetSong();
 }
 
 PlayingState::~PlayingState()
 {
-   ShowCursor(true);
+   Compatible::ShowMouseCursor();
 }
 
 int PlayingState::CalcKeyboardHeight() const
@@ -267,7 +274,11 @@ void PlayingState::Listen()
          m_current_combo++;
          m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
 
-         closest_match->state = UserHit;
+         TranslatedNote replacement = *closest_match;
+         replacement.state = UserHit;
+         
+         m_notes.erase(closest_match);
+         m_notes.insert(replacement);
       }
       else
       {
@@ -312,7 +323,14 @@ void PlayingState::Update()
 
       if (m_state.midi_in && note->state == UserPlayable && window_end <= cur_time)
       {
-         note->state = UserMissed;
+         TranslatedNote note_copy = *note;
+         note_copy.state = UserMissed;
+         
+         m_notes.erase(note);
+         m_notes.insert(note_copy);
+         
+         // Re-connect the (now-invalid) iterator to the replacement
+         note = m_notes.find(note_copy);
       }
 
       if (note->start > cur_time) break;

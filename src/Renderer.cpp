@@ -28,7 +28,7 @@ Renderer::Renderer(HDC hdc) : m_hdc(hdc), m_xoffset(0), m_yoffset(0)
 {
 }
 #else
-// MACTODO!
+// MACTODO: Renderer constructor
 #endif
 
 

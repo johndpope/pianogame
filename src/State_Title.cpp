@@ -6,6 +6,7 @@
 #include "State_TrackSelection.h"
 
 #include "version.h"
+#include "CompatibleSystem.h"
 
 #include "MenuLayout.h"
 #include "UserSettings.h"
@@ -172,11 +173,9 @@ void TitleState::Update()
          }
          catch (const MidiError &e)
          {
-            const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
-            
             wstring wrapped_description = WSTRING(L"Problem while loading file: " << file_title << L"\n") + e.GetErrorDescription();
-            MessageBox(0, wrapped_description.c_str(), (friendly_app_name + WSTRING(L" Error")).c_str(), MB_ICONERROR);
-
+            Compatible::ShowError(wrapped_description);
+            
             new_midi = 0;
          }
 
@@ -303,7 +302,7 @@ void TitleState::Update()
       delete m_state.midi;
       m_state.midi = 0;
 
-      PostQuitMessage(0);
+      Compatible::GracefulShutdown();
       return;
    }
 
