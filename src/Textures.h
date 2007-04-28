@@ -23,7 +23,7 @@ enum Texture
    OutputBox,
    SongBox,
 
-   TrackBox,
+   TrackPanel,
 
    StatsText,
 

@@ -9,6 +9,8 @@
 #include <vector>
 #include <string>
 
+#include "TrackTile.h"
+
 #include "libmidi/Note.h"
 #include "libmidi/MidiTypes.h"
 
@@ -20,8 +22,6 @@ enum KeyboardSize
    KeyboardSize76,
    KeyboardSize88
 };
-
-enum TrackColor;
 
 typedef std::map<std::string, TrackColor> KeyNames;
 struct TrackProperties;

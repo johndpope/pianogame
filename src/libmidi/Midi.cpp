@@ -14,7 +14,13 @@ using namespace std;
 
 Midi Midi::ReadFromFile(const wstring &filename)
 {
+#if defined WIN32
    fstream file(reinterpret_cast<const wchar_t*>((filename).c_str()), ios::in|ios::binary);
+#else
+   // MACTODO
+   fstream file("MACTODO", ios::in | ios::binary);
+#endif
+
    if (!file.good()) throw MidiError(MidiError_BadFilename);
 
    Midi m;
@@ -86,9 +92,7 @@ Midi Midi::ReadFromStream(istream &stream)
       throw MidiError(MidiError_BadHeaderSize);
    }
 
-   const static int MidiFormat0 = 0;
-   const static int MidiFormat1 = 1;
-   const static int MidiFormat2 = 2;
+   enum MidiFormat { MidiFormat0 = 0, MidiFormat1, MidiFormat2 };
 
    format = BigToSystem16(format);
    if (format == MidiFormat2)

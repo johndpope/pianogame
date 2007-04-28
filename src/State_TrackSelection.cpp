@@ -295,7 +295,7 @@ void TrackSelectionState::Draw(Renderer &renderer) const
    tooltip << m_tooltip;
 
    Tga *buttons = GetTexture(InterfaceButtons);
-   Tga *box = GetTexture(TrackBox);
+   Tga *box = GetTexture(TrackPanel);
 
    // Draw each track tile on the current page
    size_t start = m_current_page * m_tiles_per_page;

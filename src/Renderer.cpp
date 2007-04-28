@@ -6,7 +6,13 @@
 #include "Tga.h"
 
 #include <limits>
-#include <gl\gl.h>
+
+#ifdef WIN32
+#include <gl/gl.h>
+#else
+#include <OpenGL/OpenGL.h>
+#include <AGL/gl.h>
+#endif
 
 static unsigned int last_texture_id = std::numeric_limits<unsigned int>::max();
 void SelectTexture(unsigned int texture_id)

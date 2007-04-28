@@ -1,7 +1,12 @@
 #include "Tga.h"
 #include "Windows.h"
 
-#include <gl\gl.h>
+#ifdef WIN32
+#include <gl/gl.h>
+#else
+#include <OpenGL/OpenGL.h>
+#include <AGL/gl.h>
+#endif
 
 Tga* Tga::Load(const std::wstring &resource_name)
 {

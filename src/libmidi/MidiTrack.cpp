@@ -212,9 +212,15 @@ void MidiTrack::DiscoverInstrument()
 
 void MidiTrack::SetTrackId(size_t track_id)
 {
-   for (NoteSet::iterator i = m_note_set.begin(); i != m_note_set.end(); ++i)
+   NoteSet old = m_note_set;
+   
+   m_note_set.clear();
+   for (NoteSet::const_iterator i = old.begin(); i != old.end(); ++i)
    {
-      i->track_id = track_id;
+      Note n = *i;
+      n.track_id = track_id;
+      
+      m_note_set.insert(n);
    }
 }
 

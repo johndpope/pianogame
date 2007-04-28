@@ -450,7 +450,10 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
          const int start_x = (octave_offset + inner_octave_offset + keyboard_type_offset) * (white_width + key_space)
             + generalized_black_offset + x_offset;
 
-         RECT outline_rect = { start_x - 1, y_start, start_x + (is_black?black_width:white_width) + 1, y_end };
+         const int left = start_x - 1;
+         const int top = y_start;
+         const int width = (is_black?black_width:white_width) + 2;
+         int height = y_end - y_start;
 
          // Force a note to be a minimum height at all times
          // except when scrolling off underneath the keyboard and
@@ -459,22 +462,13 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
          const bool hitting_top    = (adjusted_end   + current_time != i->end);
          if (!hitting_bottom && !hitting_top)
          {
-            while ( (outline_rect.bottom - outline_rect.top) < MinNoteHeight) outline_rect.bottom++;
+            while ( (height) < MinNoteHeight) height++;
          }
 
          const TrackColor color = track_properties[i->track_id].color;
          const int &brush_id = (i->state == UserMissed ? MissedNote : color);
 
-         if (drawing_black)
-         {
-            DrawNote(renderer, tex_black, BlackNoteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
-               outline_rect.bottom - outline_rect.top, brush_id);
-         }
-         else
-         {
-            DrawNote(renderer, tex_white, WhiteNoteDimensions, outline_rect.left, outline_rect.top, outline_rect.right - outline_rect.left,
-               outline_rect.bottom - outline_rect.top, brush_id);
-         }
+         DrawNote(renderer, (drawing_black ? tex_black : tex_white), BlackNoteDimensions, left, top, width, height, brush_id);
       }
 
       drawing_black = !drawing_black;
