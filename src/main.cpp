@@ -24,6 +24,8 @@
 #include "string_util.h"
 #include "file_selector.h"
 #include "UserSettings.h"
+#include "version.h"
+#include "resource.h"
 
 #include "CompatibleSystem.h"
 #include "SynthesiaError.h"
@@ -40,8 +42,6 @@
 #include "SharedState.h"
 #include "GameState.h"
 #include "State_Title.h"
-
-#include "resource.h"
 
 using namespace std;
 
@@ -91,6 +91,7 @@ void setVSync(int interval=1)
 }
 
 const static wstring application_name = L"Synthesia";
+const static std::wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
 
 const static wstring error_header1 = L"Synthesia detected a";
 const static wstring error_header2 = L" problem and must close:\n\n";

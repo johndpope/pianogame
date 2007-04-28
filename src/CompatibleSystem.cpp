@@ -37,7 +37,7 @@ namespace Compatible
    void ShowError(const std::wstring &err)
    {
 #ifdef WIN32
-      MessageBox(0, err.c_str(), WSTRING(friendly_app_name << L" Error")).c_str(), MB_ICONERROR);
+      MessageBox(0, err.c_str(), WSTRING(friendly_app_name << L" Error").c_str(), MB_ICONERROR);
 #else
       // MACTODO: some kind of message box
 #endif

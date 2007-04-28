@@ -237,7 +237,7 @@ Tga *Tga::BuildFromParameters(const unsigned char *raw, unsigned int width, unsi
    if (bpp == 24) pixel_format = GL_RGB;
    if (bpp == 32) pixel_format = GL_RGBA;
 
-   unsigned long id;
+   TextureId id;
    glGenTextures(1, &id);
    if (!id) return 0;
 
