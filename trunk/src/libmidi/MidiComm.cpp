@@ -17,6 +17,8 @@ using namespace std;
 #include <Windows.h>
 #endif
 
+#ifdef WIN32
+
 void midi_check(MMRESULT ret)
 {
    if (ret == MMSYSERR_NOERROR) return;
@@ -221,3 +223,9 @@ void MidiCommOut::Reset()
    midi_check(midiOutClose(m_output_device));
    midi_check(midiOutOpen(&m_output_device, m_description.id, 0, 0, CALLBACK_NULL));
 }
+
+#else
+
+// MACTODO
+
+#endif

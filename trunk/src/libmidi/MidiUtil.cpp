@@ -5,6 +5,10 @@
 #include "MidiUtil.h"
 #include "../string_util.h"
 
+#ifndef WIN32
+#include <CoreFoundation/CFByteOrder.h>
+#endif
+
 using namespace std;
 
 unsigned long BigToSystem32(unsigned long x) 

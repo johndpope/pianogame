@@ -9,8 +9,15 @@
 #include <Windows.h>
 #endif
 
-#include <gl\gl.h>
-#include <gl\glu.h>
+#ifdef WIN32
+#include <gl/gl.h>
+#include <gl/glu.h>
+#else
+#include <OpenGL/OpenGL.h>
+#include <AGL/gl.h>
+#include <AGL/glu.h>
+#endif
+
 
 #include <set>
 #include <string>
@@ -34,23 +41,35 @@
 
 using namespace std;
 
+#ifdef WIN32
+
 static const int WindowWidth  = GetSystemMetrics(SM_CXSCREEN);
 static const int WindowHeight = GetSystemMetrics(SM_CYSCREEN);
-
-GameStateManager state_manager(WindowWidth, WindowHeight);
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 // TODO: Make this better
 HWND g_hwnd;
 
-static bool WindowActive = true;
-
 typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
 PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
+#else
+
+// MACTODO
+static const int WindowWidth = 1024;
+static const int WindowHeight = 768;
+
+#endif
+
+GameStateManager state_manager(WindowWidth, WindowHeight);
+
+static bool WindowActive = true;
+
+
 void setVSync(int interval=1)
 {
+#ifdef WIN32
   const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
 
   if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
@@ -62,17 +81,28 @@ void setVSync(int interval=1)
     if( wglSwapIntervalEXT )
       wglSwapIntervalEXT(interval);
   }
+#else
+   // MACNOTE: Don't do anything for now.  Investigate further some other time.
+#endif
 }
 
+const static wstring application_name = L"Synthesia";
+const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
+
+const static wstring error_header1 = L"Synthesia detected a";
+const static wstring error_header2 = L" problem and must close:\n\n";
+const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+
+#ifdef WIN32
+// Windows
 int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
+#else
+// Mac
+int main(int argc, char *argv[])
+#endif
 {
-   const static wstring application_name = L"Synthesia";
-   const static wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
 
-   const static wstring error_header1 = L"Synthesia detected a";
-   const static wstring error_header2 = L" problem and must close:\n\n";
-   const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
-
+#ifdef WIN32
    WNDCLASS wndclass;
    wndclass.style         = CS_HREDRAW | CS_VREDRAW;
    wndclass.lpfnWndProc   = WndProc;
@@ -90,13 +120,18 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       MessageBox(NULL, L"There was a problem registering the Window class!", application_name.c_str(), MB_ICONERROR);
       return 0;
    }
+   
+#else
+
+   // MACTODO
+   
+#endif
+
 
 #ifndef _DEBUG
    try
 #endif
    {
-      UserSetting::Initialize(application_name);
-
       wstring command_line;
 
       // CommandLineToArgvW is only available in Windows XP or later.  So,
@@ -132,6 +167,8 @@ int WINAPI WinMain (HINSTANCE instance, HINSTANCE, PSTR, int iCmdShow)
       // dialog later).
       if (command_line.length() > 0 && command_line[0] == L'\"') command_line = command_line.substr(1, command_line.length() - 1);
       if (command_line.length() > 0 && command_line[command_line.length()-1] == L'\"') command_line = command_line.substr(0, command_line.length() - 1);
+
+      UserSetting::Initialize(application_name);
 
       Midi *midi = 0;
 

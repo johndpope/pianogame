@@ -242,9 +242,12 @@ void GameStateManager::Draw(Renderer &renderer)
    if (m_show_fps)
    {
       TextWriter fps_writer(0, 0, renderer);
-      fps_writer
-         << Text(WSTRING(L"FPS: "), Gray)
-         << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
+      
+      #ifdef WIN32
+      fps_writer << Text(WSTRING(L"FPS: "), Gray) << Text(WSTRING(std::setprecision(6) << m_fps.GetFramesPerSecond()), White);
+      #else
+      // MACTODO
+      #endif
    }
 
    glFlush ();

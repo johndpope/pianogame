@@ -5,7 +5,12 @@
 #include "TextWriter.h"
 #include "Renderer.h"
 
-#include <gl\gl.h>
+#ifdef WIN32
+#include <gl/gl.h>
+#else
+#include <OpenGL/OpenGL.h>
+#include <AGL/gl.h>
+#endif
 
 #include <map>
 

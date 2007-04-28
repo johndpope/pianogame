@@ -6,12 +6,12 @@
 #define __SYNTH_VOLUME_H
 
 #ifdef WIN32
+
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <Windows.h>
-#endif
 
+#include <Windows.h>
 #include <vector>
 
 // Windows Media Player has started changing the MIDI synth
@@ -41,5 +41,17 @@ private:
 
    std::vector<SynthVolumeState> m_states;
 };
+
+#else
+
+// Don't do anything on the Mac side
+
+class ReasonableSynthVolume()
+{
+   ReasonableSynthVolume() { }
+};
+
+#endif
+
 
 #endif
