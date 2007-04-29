@@ -198,6 +198,9 @@ int main(int argc, char *argv[])
       }
 #else
       // MACTODO: concat the command line?
+      // MACTODO: Remove hard-coded command line!
+      command_line = L"/Users/npiegdon/Synthesia/music/Tetris - Theme A.mid";
+
 #endif
 
       // Strip any leading or trailing quotes from the filename
@@ -209,9 +212,6 @@ int main(int argc, char *argv[])
       UserSetting::Initialize(application_name);
 
       Midi *midi = 0;
-
-      // MACTODO: Remove hard-coded command line!
-      command_line = L"/Users/npiegdon/Synthesia/music/Tetris - Theme A.mid";
 
       // Attempt to open the midi file given on the command line first
       if (command_line != L"")
@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
          }
          else
          {
-            if (window_state.Active())
+            if (window_state.IsActive())
             {
                state_manager.Update(window_state.JustActivated());
 
@@ -505,8 +505,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
    case WM_ACTIVATE:
       {
-         if (LOWORD(wParam) != WA_INACTIVE) Activate();
-         else Deactivate();
+         if (LOWORD(wParam) != WA_INACTIVE) window_state.Activate();
+         else window_state.Deactivate();
          
          return 0;
       }
