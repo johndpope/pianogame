@@ -120,6 +120,25 @@ TextWriter& Text::operator<<(TextWriter& tw) const
 
 // MACTODO: Platform dependent TextWriter code
 
+TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered, int in_size, std::wstring fontname) :
+x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered(in_centered), renderer(in_renderer)
+{
+}
+
+TextWriter::~TextWriter()
+{
+}
+
+int TextWriter::get_point_size() 
+{
+   return 0;
+}
+
+TextWriter& Text::operator<<(TextWriter& tw) const
+{
+   return tw;
+}
+
 #endif
 
 TextWriter& TextWriter::next_line()

@@ -28,7 +28,9 @@ Renderer::Renderer(HDC hdc) : m_hdc(hdc), m_xoffset(0), m_yoffset(0)
 {
 }
 #else
-// MACTODO: Renderer constructor
+Renderer::Renderer(AGLContext context) : m_context(context), m_xoffset(0), m_yoffset(0)
+{
+}
 #endif
 
 

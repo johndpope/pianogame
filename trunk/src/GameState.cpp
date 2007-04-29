@@ -248,9 +248,8 @@ void GameStateManager::Draw(Renderer &renderer)
    glFlush ();
    
 #ifdef WIN32
-   SwapBuffers (renderer.GetHdc());
+   SwapBuffers(renderer.GetHdc());
 #else
-   // MACTODO: OpenGL buffer swap (need context)
-   //aglSwapBuffers(<#AGLContext ctx#>)
+   aglSwapBuffers(renderer.GetContext());
 #endif
 }
