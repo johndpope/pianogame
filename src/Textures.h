@@ -9,8 +9,6 @@ enum Texture
 {
    TitleLogo,
    InterfaceButtons,
-
-   KeyboardHelp,
    GameMusicThemes,
 
    ButtonRetrySong,
@@ -47,8 +45,6 @@ const static wchar_t* TextureResourceNames[_TextureEnumCount] =
 {
    L"title_Logo",
    L"InterfaceButtons",
-
-   L"play_Keys",
    L"title_GameMusicThemes",
 
    L"score_RetrySong",

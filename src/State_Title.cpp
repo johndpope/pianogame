@@ -111,13 +111,17 @@ void TitleState::Init()
       m_state.midi_in->Reset();
    }
 
-   m_file_tile = new StringTile((GetStateWidth() - StringTileWidth) / 2, 360, GetTexture(SongBox));
+   const bool compress_height = (GetStateHeight() < 750);
+   const int initial_y = (compress_height ? 230 : 360);
+   const int each_y = (compress_height ? 94 : 100);
+
+   m_file_tile = new StringTile((GetStateWidth() - StringTileWidth) / 2, initial_y + each_y*0, GetTexture(SongBox));
    m_file_tile->SetString(m_state.song_title);
 
    const MidiCommDescriptionList output_devices = MidiCommOut::GetDeviceList();
    const MidiCommDescriptionList input_devices = MidiCommIn::GetDeviceList();
-   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 460, output_device_id, DeviceTileOutput, output_devices, GetTexture(InterfaceButtons), GetTexture(OutputBox));
-   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, 560, input_device_id, DeviceTileInput, input_devices, GetTexture(InterfaceButtons), GetTexture(InputBox));
+   m_output_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, initial_y + each_y*1, output_device_id, DeviceTileOutput, output_devices, GetTexture(InterfaceButtons), GetTexture(OutputBox));
+   m_input_tile = new DeviceTile((GetStateWidth() - DeviceTileWidth) / 2, initial_y + each_y*2, input_device_id, DeviceTileInput, input_devices, GetTexture(InterfaceButtons), GetTexture(InputBox));
 }
 
 void TitleState::Update()
@@ -355,14 +359,17 @@ void TitleState::PlayDevicePreview(microseconds_t delta_microseconds)
 
 void TitleState::Draw(Renderer &renderer) const
 {
+   const bool compress_height = (GetStateHeight() < 750);
+   const bool compress_width = (GetStateWidth() < 850);
+
    const static int TitleWidth = 507;
-   const static int TitleY = 100;
+   const static int TitleY = (compress_height ? 20 : 100);
 
    int left = GetStateWidth() / 2 - TitleWidth / 2;
 
    renderer.SetColor(White);
    renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
-   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, 250);
+   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, TitleY + (compress_height ? 120 : 150) );
 
    TextWriter version(Layout::ScreenMarginX, GetStateHeight() - Layout::ScreenMarginY - Layout::SmallFontSize * 2,
       renderer, false, Layout::SmallFontSize);
@@ -402,6 +409,7 @@ void TitleState::Draw(Renderer &renderer) const
       last_note << w(m_last_input_note_name);
    }
 
-   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
+   const int tooltip_font_size = (compress_width ? Layout::ButtonFontSize : Layout::TitleFontSize);
+   TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - tooltip_font_size/2, renderer, true, tooltip_font_size);
    tooltip << m_tooltip;
 }
