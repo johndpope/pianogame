@@ -360,8 +360,9 @@ void TitleState::Draw(Renderer &renderer) const
 
    int left = GetStateWidth() / 2 - TitleWidth / 2;
 
-   
+   renderer.SetColor(White);
    renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
+   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, 250);
 
    TextWriter version(Layout::ScreenMarginX, GetStateHeight() - Layout::ScreenMarginY - Layout::SmallFontSize * 2,
       renderer, false, Layout::SmallFontSize);
@@ -400,8 +401,6 @@ void TitleState::Draw(Renderer &renderer) const
       Widen<wchar_t> w;
       last_note << w(m_last_input_note_name);
    }
-
-   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, 250);
 
    TextWriter tooltip(GetStateWidth() / 2, GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2, renderer, true, Layout::TitleFontSize);
    tooltip << m_tooltip;

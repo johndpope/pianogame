@@ -10,6 +10,7 @@
 #include <string>
 
 #include "TrackTile.h"
+#include "TrackProperties.h"
 
 #include "libmidi/Note.h"
 #include "libmidi/MidiTypes.h"
@@ -23,8 +24,8 @@ enum KeyboardSize
    KeyboardSize88
 };
 
-typedef std::map<std::string, TrackColor> KeyNames;
-struct TrackProperties;
+
+typedef std::map<std::string, Track::TrackColor> KeyNames;
 
 class Renderer;
 class Tga;
@@ -38,9 +39,9 @@ public:
 
    void Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4], int x, int y,
       const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
-      const std::vector<TrackProperties> &track_properties);
+      const std::vector<Track::Properties> &track_properties);
 
-   void SetKeyActive(const std::string &key_name, bool active, TrackColor color);
+   void SetKeyActive(const std::string &key_name, bool active, Track::TrackColor color);
 
    void ResetActiveKeys() { m_active_keys.clear(); }
 
@@ -92,7 +93,7 @@ private:
    void DrawNotePass(Renderer &renderer, const Tga *tex_white, const Tga *tex_black, int white_width,
       int key_space, int black_width, int black_offset, int x_offset, int y, int y_offset, int y_roll_under,
       const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
-      const std::vector<TrackProperties> &track_properties) const;
+      const std::vector<Track::Properties> &track_properties) const;
 
    // This takes the rectangle where the actual note block should appear and transforms
    // it to the multi-quad (with relatively complicated texture coordinates) using the
@@ -100,7 +101,7 @@ private:
    void DrawNote(Renderer &renderer, const Tga *tex, const NoteTexDimensions &tex_dimensions, int x, int y, int w, int h, int color_id) const;
 
    // This works very much like DrawNote
-   void DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions, int x, int y, int w, int h, TrackColor color) const;
+   void DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions, int x, int y, int w, int h, Track::TrackColor color) const;
 
    // Retrieves which white-key a piano with the given key count
    // will start with on the far left side

@@ -22,38 +22,38 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDI_MAIN_ICON           ICON        "..\\app_icon.ico"
 
-TitleLogo               GRAPHICS    "..\\graphics\\title_Logo.tga"
+title_Logo              GRAPHICS    "..\\graphics\\title_Logo.tga"
 InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"
 
-KeyboardHelp            GRAPHICS    "..\\graphics\\play_Keys.tga"
-GameMusicThemes         GRAPHICS    "..\\graphics\\title_GameMusicThemes.tga"
+play_Keys               GRAPHICS    "..\\graphics\\play_Keys.tga"
+title_GameMusicThemes   GRAPHICS    "..\\graphics\\title_GameMusicThemes.tga"
 
-ButtonRetrySong         GRAPHICS    "..\\graphics\\score_RetrySong.tga"
-ButtonChooseTracks      GRAPHICS    "..\\graphics\\title_ChooseTracks.tga"
-ButtonExit              GRAPHICS    "..\\graphics\\title_Exit.tga"
-ButtonBackToTitle       GRAPHICS    "..\\graphics\\tracks_BackToTitle.tga"
-ButtonPlaySong          GRAPHICS    "..\\graphics\\tracks_PlaySong.tga"
+score_RetrySong         GRAPHICS    "..\\graphics\\score_RetrySong.tga"
+title_ChooseTracks      GRAPHICS    "..\\graphics\\title_ChooseTracks.tga"
+title_Exit              GRAPHICS    "..\\graphics\\title_Exit.tga"
+tracks_BackToTitle      GRAPHICS    "..\\graphics\\tracks_BackToTitle.tga"
+tracks_PlaySong         GRAPHICS    "..\\graphics\\tracks_PlaySong.tga"
 
-InputBox                GRAPHICS    "..\\graphics\\title_InputBox.tga"
-OutputBox               GRAPHICS    "..\\graphics\\title_OutputBox.tga"
-SongBox                 GRAPHICS    "..\\graphics\\title_SongBox.tga"
+title_InputBox          GRAPHICS    "..\\graphics\\title_InputBox.tga"
+title_OutputBox         GRAPHICS    "..\\graphics\\title_OutputBox.tga"
+title_SongBox           GRAPHICS    "..\\graphics\\title_SongBox.tga"
 
-TrackBox                GRAPHICS    "..\\graphics\\trackbox.tga"
+trackbox                GRAPHICS    "..\\graphics\\trackbox.tga"
 
-StatsText               GRAPHICS    "..\\graphics\\stats_text.tga"
+stats_text              GRAPHICS    "..\\graphics\\stats_text.tga"
 
-PlayStatus              GRAPHICS    "..\\graphics\\play_Status.tga"
-PlayStatus2             GRAPHICS    "..\\graphics\\play_Status2.tga"
-PlayKeys                GRAPHICS    "..\\graphics\\play_Keys.tga"
+play_Status             GRAPHICS    "..\\graphics\\play_Status.tga"
+play_Status2            GRAPHICS    "..\\graphics\\play_Status2.tga"
+play_Keys               GRAPHICS    "..\\graphics\\play_Keys.tga"
 
-PlayNotesBlackColor     GRAPHICS    "..\\graphics\\play_NotesBlackColor.tga"
-PlayNotesBlackShadow    GRAPHICS    "..\\graphics\\play_NotesBlackShadow.tga"
-PlayNotesWhiteColor     GRAPHICS    "..\\graphics\\play_NotesWhiteColor.tga"
-PlayNotesWhiteShadow    GRAPHICS    "..\\graphics\\play_NotesWhiteShadow.tga"
+play_NotesBlackColor    GRAPHICS    "..\\graphics\\play_NotesBlackColor.tga"
+play_NotesBlackShadow   GRAPHICS    "..\\graphics\\play_NotesBlackShadow.tga"
+play_NotesWhiteColor    GRAPHICS    "..\\graphics\\play_NotesWhiteColor.tga"
+play_NotesWhiteShadow   GRAPHICS    "..\\graphics\\play_NotesWhiteShadow.tga"
 
-PlayKeyRail             GRAPHICS    "..\\graphics\\play_KeyRail.tga"
-PlayKeyShadow           GRAPHICS    "..\\graphics\\play_KeyShadow.tga"
-PlayKeysBlack           GRAPHICS    "..\\graphics\\play_KeysBlack.tga"
+play_KeyRail            GRAPHICS    "..\\graphics\\play_KeyRail.tga"
+play_KeyShadow          GRAPHICS    "..\\graphics\\play_KeyShadow.tga"
+play_KeysBlack          GRAPHICS    "..\\graphics\\play_KeysBlack.tga"
 
 #ifdef APSTUDIO_INVOKED
 

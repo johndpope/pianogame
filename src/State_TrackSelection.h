@@ -26,7 +26,7 @@ protected:
 
 private:
    void PlayTrackPreview(microseconds_t additional_time);
-   std::vector<TrackProperties> BuildTrackProperties() const;
+   std::vector<Track::Properties> BuildTrackProperties() const;
 
    int m_page_count;
    int m_current_page;

@@ -38,7 +38,7 @@ KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHei
 
 void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4], int x, int y,
                            const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
-                           const std::vector<TrackProperties> &track_properties)
+                           const std::vector<Track::Properties> &track_properties)
 {
    // Source: Measured from Yamaha P-70
    const static double WhiteWidthHeightRatio = 6.8181818;
@@ -89,6 +89,7 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
    renderer.SetColor(ToColor(0, 0, 0));
    renderer.DrawQuad(x + x_offset, y+y_offset, ActualKeyboardWidth, white_height);
 
+   DrawShadow(renderer, key_tex[Shadow], x+x_offset, y+y_offset+white_height - 10, ActualKeyboardWidth);
    DrawWhiteKeys(renderer, false, white_key_count, white_width, white_height, white_space, x+x_offset, y+y_offset);
    DrawBlackKeys(renderer, key_tex[BlackKey], false, white_key_count, white_width, black_width, black_height, white_space, x+x_offset, y+y_offset, black_offset);
    DrawShadow(renderer, key_tex[Shadow], x+x_offset, y+y_offset, ActualKeyboardWidth);
@@ -103,7 +104,7 @@ int KeyboardDisplay::GetStartingOctave() const
 {
    // Source: Various "Specification" pages at Yamaha's website
    const static int StartingOctaveOn37 = 2;
-   const static int StartingOctaveOn49 = 2; // TODO!
+   const static int StartingOctaveOn49 = 1;
    const static int StartingOctaveOn61 = 1; // TODO!
    const static int StartingOctaveOn76 = 0; // TODO!
    const static int StartingOctaveOn88 = 0;
@@ -123,7 +124,7 @@ char KeyboardDisplay::GetStartingNote() const
 {
    // Source: Various "Specification" pages at Yamaha's website
    const static char StartingKeyOn37 = 'F'; // F3-F6
-   const static char StartingKeyOn49 = 'C'; // C3-C6 // TODO!
+   const static char StartingKeyOn49 = 'C'; // C3-C6
    const static char StartingKeyOn61 = 'C'; // C1-C6 // TODO!
    const static char StartingKeyOn76 = 'E'; // E0-G6 // TODO!
    const static char StartingKeyOn88 = 'A'; // A0-C6
@@ -175,7 +176,7 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
       bool active = (find_result != m_active_keys.end());
 
       Color c = white;
-      if (active) c = TrackColorNoteWhite[find_result->second];
+      if (active) c = Track::ColorNoteWhite[find_result->second];
 
       if ((active_only && active) || !active_only)
       {
@@ -192,7 +193,7 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
 }
 
 void KeyboardDisplay::DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions,
-                                   int x, int y, int w, int h, TrackColor color) const
+                                   int x, int y, int w, int h, Track::TrackColor color) const
 {
    const KeyTexDimensions &d = tex_dimensions;
 
@@ -245,7 +246,7 @@ void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, const Tga *tex, bool act
             // In this case, MissedNote isn't actually MissedNote.  In the black key
             // texture we use this value (which doesn't make any sense in this context)
             // as the default "Black" color.
-            TrackColor c = MissedNote;
+            Track::TrackColor c = Track::MissedNote;
             if (active) c = find_result->second;
 
             if (!active_only || (active_only && active))
@@ -286,11 +287,14 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
    int keyboard_width = key_width*key_count + key_space*(key_count-1);
 
    // Fill the background of the note-falling area
+   renderer.ForceTexture(0);
    renderer.SetColor(0x60, 0x60, 0x60);
    renderer.DrawQuad(x_offset, y, keyboard_width, y_offset - PixelsOffKeyboard);
 
-   const static Color thick(ToColor(0x48,0x48,0x48));
-   const static Color thin(ToColor(0x50,0x50,0x50));
+   // MACNOTE: Having 'static' keyword on these two makes the guide NOT appear
+   // in Release mode.  (Debug mode works either way.)
+   const Color thick(ToColor(0x48,0x48,0x48));
+   const Color thin(ToColor(0x50,0x50,0x50));
 
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
@@ -385,7 +389,7 @@ void KeyboardDisplay::DrawNote(Renderer &renderer, const Tga *tex, const NoteTex
 void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, const Tga *tex_black, int white_width,
    int key_space, int black_width, int black_offset, int x_offset, int y, int y_offset, int y_roll_under, 
    const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
-   const std::vector<TrackProperties> &track_properties) const
+   const std::vector<Track::Properties> &track_properties) const
 {
    // Shiny music domain knowledge
    const static unsigned int NotesPerOctave = 12;
@@ -421,9 +425,9 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
          // a note scrolled off the window, we're done drawing
          if (i->start > current_time + show_duration) break;
 
-         const TrackMode mode = track_properties[i->track_id].mode;
-         if (mode == ModeNotPlayed) continue;
-         if (mode == ModePlayedButHidden) continue;
+         const Track::Mode mode = track_properties[i->track_id].mode;
+         if (mode == Track::ModeNotPlayed) continue;
+         if (mode == Track::ModePlayedButHidden) continue;
 
          const int octave = (i->note_id / NotesPerOctave) - GetStartingOctave();
          const int octave_base = i->note_id % NotesPerOctave;
@@ -465,8 +469,8 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
             while ( (height) < MinNoteHeight) height++;
          }
 
-         const TrackColor color = track_properties[i->track_id].color;
-         const int &brush_id = (i->state == UserMissed ? MissedNote : color);
+         const Track::TrackColor color = track_properties[i->track_id].color;
+         const int &brush_id = (i->state == UserMissed ? Track::MissedNote : color);
 
          DrawNote(renderer, (drawing_black ? tex_black : tex_white), (drawing_black ? BlackNoteDimensions : WhiteNoteDimensions), left, top, width, height, brush_id);
       }
@@ -475,7 +479,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
    }
 }
 
-void KeyboardDisplay::SetKeyActive(const string &key_name, bool active, TrackColor color)
+void KeyboardDisplay::SetKeyActive(const string &key_name, bool active, Track::TrackColor color)
 {
    if (active) m_active_keys[key_name] = color;
    else m_active_keys.erase(key_name);
