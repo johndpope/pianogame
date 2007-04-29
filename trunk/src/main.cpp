@@ -197,7 +197,12 @@ int main(int argc, char *argv[])
          FreeLibrary(shell32);
       }
 #else
-      // MACTODO: concat the command line?
+
+      // Apparently the command-line isn't useful in Mac applications.  There
+      // is just a weird system command-line argument and you can't drag files
+      // onto the icon anyway.  Ignore.
+      command_line = L"";
+      
       // MACTODO: Remove hard-coded command line!
       command_line = L"/Users/npiegdon/Synthesia/music/Tetris - Theme A.mid";
 
@@ -312,9 +317,6 @@ int main(int argc, char *argv[])
       status = CreateNewWindow(kOverlayWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
       if (status != noErr) throw SynthesiaError(L"Unable to create window.");
       
-      //status = SetWindowGroupLevel(GetWindowGroupOfClass(kOverlayWindowClass), kCGMaximumWindowLevel);
-      //if (status != noErr) throw SynthesiaError(L"Unable to set window group level.");
-   
       static const EventTypeSpec windowControlEvents[] = 
       {
       { kEventClassWindow, kEventWindowUpdate },
@@ -328,10 +330,6 @@ int main(int argc, char *argv[])
       { kEventClassWindow, kEventWindowShowing },
       { kEventClassWindow, kEventWindowHidden },
       { kEventClassWindow, kEventWindowHiding },
-      { kEventClassWindow, kEventWindowResizeStarted },
-      { kEventClassWindow, kEventWindowResizeCompleted },
-      { kEventClassWindow, kEventWindowDragStarted },
-      { kEventClassWindow, kEventWindowDragCompleted },
       { kEventClassWindow, kEventWindowCursorChange },
       { kEventClassWindow, kEventWindowClosed }
       };
@@ -341,16 +339,12 @@ int main(int argc, char *argv[])
       status = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
       if (status != noErr) throw SynthesiaError(L"Unable to install window event handler.");
    
-      // MACTODO: After I get the string issue sorted out, set the window title
-      std::string narrow_app_name(friendly_app_name.begin(), friendly_app_name.end());
-      CFStringRef cf_app_name = CFStringCreateWithCString(0, narrow_app_name.c_str(), kCFStringEncodingMacRoman);
-      SetWindowTitleWithCFString(window, cf_app_name);
-      CFRelease(cf_app_name);
+      SetWindowTitleWithCFString(window, MacStringFromWide(friendly_app_name).get());
    
       RGBColor windowColor;
-      windowColor.red   = 65535 * 0.5;
-      windowColor.green = 65535 * 0.5;
-      windowColor.blue  = 65535 * 0.5;
+      windowColor.red   = 65535 * 0.25;
+      windowColor.green = 65535 * 0.25;
+      windowColor.blue  = 65535 * 0.25;
       SetWindowContentColor(window, &windowColor);
 
       // TODO: The fade effect is way cooler
@@ -573,7 +567,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void InitEvents()
 {
-   InstallEventLoopTimer( GetCurrentEventLoop(), 0, kEventDurationSecond / 1000.0, NewEventLoopTimerUPP(GameLoop), 0, &GameLoopTimerRef);
+   // Update as fast as possible
+   InstallEventLoopTimer( GetCurrentEventLoop(), 0, kEventDurationSecond / 10000.0, NewEventLoopTimerUPP(GameLoop), 0, &GameLoopTimerRef);
    
    OSStatus ret;
    
@@ -604,6 +599,7 @@ void InitEvents()
    static const EventTypeSpec keyControlEvents[] =
    {
    { kEventClassKeyboard, kEventRawKeyDown },
+   { kEventClassKeyboard, kEventRawKeyRepeat },
    { kEventClassKeyboard, kEventRawKeyUp }
    };
    
@@ -758,8 +754,13 @@ static pascal OSStatus KeyEventHandlerProc(EventHandlerCallRef callRef, EventRef
    bool is_down = false;   
    switch(GetEventKind(event))
    {
-      case kEventRawKeyDown: is_down = true; break;
-      case kEventRawKeyUp: break;
+      case kEventRawKeyDown:
+      case kEventRawKeyRepeat:
+         is_down = true;
+         break;
+
+      case kEventRawKeyUp:
+         break;
    };
    
    if (is_down)

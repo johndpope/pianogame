@@ -226,7 +226,7 @@ void GameStateManager::Draw(Renderer &renderer)
    // the previous state *and* the current state during some transition
    // would be really easy.
 
-   const static float gray = 0.25f;
+   const static float gray = 64.0f / 255.0f;
    glClearColor(gray, gray, gray, 1.0f);
 
    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -10,7 +10,7 @@
 const static int GraphicWidth = 36;
 const static int GraphicHeight = 36;
 
-TrackTile::TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode mode)
+TrackTile::TrackTile(int x, int y, size_t track_id, Track::TrackColor color, Track::Mode mode)
    : m_x(x), m_y(y), m_track_id(track_id), m_color(color), m_mode(mode), m_preview_on(false)
 {
    // Initialize the size and position of each button
@@ -35,7 +35,7 @@ void TrackTile::Update(const MouseInfo &translated_mouse)
       int mode = static_cast<int>(m_mode) - 1;
       if (mode < 0) mode = 3;
 
-      m_mode = static_cast<TrackMode>(mode);
+      m_mode = static_cast<Track::Mode>(mode);
    }
 
    if (button_mode_right.hit)
@@ -43,7 +43,7 @@ void TrackTile::Update(const MouseInfo &translated_mouse)
       int mode = static_cast<int>(m_mode) + 1;
       if (mode > 3) mode = 0;
 
-      m_mode = static_cast<TrackMode>(mode);
+      m_mode = static_cast<Track::Mode>(mode);
    }
 
    if (button_preview.hit)
@@ -51,12 +51,12 @@ void TrackTile::Update(const MouseInfo &translated_mouse)
       m_preview_on = !m_preview_on;
    }
 
-   if (button_color.hit && m_mode != ModeNotPlayed && m_mode != ModePlayedButHidden)
+   if (button_color.hit && m_mode != Track::ModeNotPlayed && m_mode != Track::ModePlayedButHidden)
    {
       int color = static_cast<int>(m_color) + 1;
-      if (color >= UserSelectableColorCount) color = 0;
+      if (color >= Track::UserSelectableColorCount) color = 0;
 
-      m_color = static_cast<TrackColor>(color);
+      m_color = static_cast<Track::TrackColor>(color);
    }
 
 }
@@ -82,10 +82,10 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *bo
    const MidiTrack &track = midi->Tracks()[m_track_id];
 
    bool gray_out_buttons = false;
-   Color light  = TrackColorNoteWhite[m_color];
-   Color medium = TrackColorNoteBlack[m_color];
+   Color light  = Track::ColorNoteWhite[m_color];
+   Color medium = Track::ColorNoteBlack[m_color];
 
-   if (m_mode == ModePlayedButHidden || m_mode == ModeNotPlayed)
+   if (m_mode == Track::ModePlayedButHidden || m_mode == Track::ModeNotPlayed)
    {
       gray_out_buttons = true;
       light  = ToColor(0xB0,0xB0,0xB0);
@@ -109,7 +109,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *bo
    note_count << static_cast<const unsigned int>(track.Notes().size());
 
    int color_offset = GraphicHeight * static_cast<int>(m_color);
-   if (gray_out_buttons) color_offset = GraphicHeight * UserSelectableColorCount;
+   if (gray_out_buttons) color_offset = GraphicHeight * Track::UserSelectableColorCount;
 
    renderer.DrawTga(buttons, BUTTON_RECT(button_mode_left),  LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
    renderer.DrawTga(buttons, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);
@@ -121,7 +121,7 @@ void TrackTile::Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *bo
 
    // Draw mode text
    TextWriter mode(42, 76, renderer, false, 14);
-   mode << TrackModeText[m_mode];
+   mode << Track::ModeText[m_mode];
 
    renderer.ResetOffset();
 }

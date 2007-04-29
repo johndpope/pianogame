@@ -5,13 +5,16 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#else
+#include <Carbon/Carbon.h>
 #endif
+
+#include "string_util.h"
+#include "SynthesiaError.h"
 
 #ifdef WIN32
 #include <gl/gl.h>
 #else
-
-#define OutputDebugString(x)
 #include <OpenGL/OpenGL.h>
 #include <AGL/gl.h>
 
@@ -26,36 +29,34 @@ Tga* Tga::Load(const std::wstring &resource_name)
    const HMODULE module = 0;
 
    HRSRC resource_id = FindResource(module, resource_name.c_str(), L"GRAPHICS");
-   if (!resource_id)
-   {
-      OutputDebugString(L"Couldn't find TGA resource.");
-      return 0;
-   }
-
+   if (!resource_id) throw SynthesiaError(L"Couldn't find TGA resource.");
+   
    HGLOBAL resource = LoadResource(module, resource_id);
-   if (!resource)
-   {
-      OutputDebugString(L"Couldn't load TGA resource.");
-      return 0;
-   }
+   if (!resource) throw SynthesiaError(L"Couldn't load TGA resource.");
 
    const unsigned char *bytes = reinterpret_cast<unsigned char*>(LockResource(resource));
-   if (!bytes)
-   {
-      OutputDebugString(L"Couldn't lock TGA resource.");
-      return 0;
-   }
+   if (!bytes) throw SynthesiaError(L"Couldn't lock TGA resource.");
 
    Tga *ret = LoadFromData(bytes);
    FreeResource(resource);
 
 #else
 
-   // MACTODO: Resource loading
+   // Append extension on the Mac
+   std::wstring full_name = WSTRING(resource_name << L".tga");
+   
+   CFURLRef url = CFBundleCopyResourceURL(CFBundleGetMainBundle(), MacStringFromWide(full_name).get(), 0, 0);
+   if (!url) throw SynthesiaError(L"Couldn't find TGA resource.");
 
-   const unsigned char bytes[] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0x18, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 };
+   OSStatus status;
+   CFDataRef data;
+   Boolean success = CFURLCreateDataAndPropertiesFromResource(0, url, &data, 0, 0, &status);
+   if (!success || status != 0) throw SynthesiaError(L"Couldn't load TGA resource.");
+   
+   const UInt8 *bytes = CFDataGetBytePtr(data);   
 
    Tga *ret = LoadFromData(bytes);
+   CFRelease(data);
    
 #endif
 
@@ -106,8 +107,7 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
 
    if (type == TgaUnknown)
    {
-      OutputDebugString(L"Unsupported TGA type.");
-      return 0;
+      throw SynthesiaError(L"Unsupported TGA type.");
    }
 
    // We're done with the type header
@@ -123,14 +123,12 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
 
    if (width <= 0 || height <= 0)
    {
-      OutputDebugString(L"Invalid TGA dimensions.");
-      return 0;
+      throw SynthesiaError(L"Invalid TGA dimensions.");
    }
 
    if (bpp != 24 && bpp != 32)
    {
-      OutputDebugString(L"Unsupported TGA BPP.");
-      return 0;
+      throw SynthesiaError(L"Unsupported TGA BPP.");
    }
 
    const unsigned int data_size = width * height * bpp/8;
@@ -193,7 +191,7 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
 
             if (pixel > PixelCount)
             {
-               OutputDebugString(L"Too many pixels in TGA.");
+               throw SynthesiaError(L"Too many pixels in TGA.");
 
                free(pixel_buffer);
                return 0;
@@ -219,7 +217,7 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
 
             if (pixel > PixelCount)
             {
-               OutputDebugString(L"Too many pixels in TGA.");
+               throw SynthesiaError(L"Too many pixels in TGA.");
 
                free(pixel_buffer);
                return 0;

@@ -34,7 +34,7 @@ void PlayingState::SetupNoteState()
       TranslatedNote n = *i;
 
       n.state = AutoPlayed;
-      if (m_state.track_properties[n.track_id].mode == ModeYouPlay) n.state = UserPlayable;
+      if (m_state.track_properties[n.track_id].mode == Track::ModeYouPlay) n.state = UserPlayable;
       
       m_notes.insert(n);
    }
@@ -76,7 +76,7 @@ void PlayingState::Init()
    m_look_ahead_you_play_note_count = 0;
    for (size_t i = 0; i < m_state.track_properties.size(); ++i)
    {
-      if (m_state.track_properties[i].mode == ModeYouPlay)
+      if (m_state.track_properties[i].mode == Track::ModeYouPlay)
       {
          m_look_ahead_you_play_note_count += m_state.midi->Tracks()[i].Notes().size();
          m_any_you_play_tracks = true;
@@ -129,10 +129,10 @@ void PlayingState::Play(microseconds_t delta_microseconds)
       bool play = false;
       switch (m_state.track_properties[track_id].mode)
       {
-      case ModeNotPlayed:           draw = false;  play = false;  break;
-      case ModePlayedButHidden:     draw = false;  play = true;   break;
-      case ModeYouPlay:             draw = false;  play = false;  break;
-      case ModePlayedAutomatically: draw = true;   play = true;   break;
+      case Track::ModeNotPlayed:           draw = false;  play = false;  break;
+      case Track::ModePlayedButHidden:     draw = false;  play = true;   break;
+      case Track::ModeYouPlay:             draw = false;  play = false;  break;
+      case Track::ModePlayedAutomatically: draw = true;   play = true;   break;
       }
 
       // Even in "You Play" tracks, we have to play the non-note
@@ -207,7 +207,7 @@ void PlayingState::Listen()
             break;
          }
 
-         m_keyboard->SetKeyActive(note_name, false, FlatGray);
+         m_keyboard->SetKeyActive(note_name, false, Track::FlatGray);
          continue;
       }
 
@@ -243,7 +243,7 @@ void PlayingState::Listen()
          }
       }
 
-      TrackColor note_color = FlatGray;
+      Track::TrackColor note_color = Track::FlatGray;
 
       if (closest_match != m_notes.end())
       {
@@ -436,8 +436,8 @@ void PlayingState::Draw(Renderer &renderer) const
 
    double alpha = 0.0;
    unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
-   if (double(ms) < stay_ms) alpha = std::min(1.0, ms / fade_in_ms);
-   if (double(ms) > stay_ms) alpha = std::max((fade_ms - (ms - stay_ms)) / fade_ms, 0.0);
+   if (double(ms) <= stay_ms) alpha = std::min(1.0, ms / fade_in_ms);
+   if (double(ms) >= stay_ms) alpha = std::min(std::max((fade_ms - (ms - stay_ms)) / fade_ms, 0.0), 1.0);
 
    wstring title_text = m_state.song_title;
    if (m_paused)

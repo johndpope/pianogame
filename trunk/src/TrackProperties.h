@@ -7,17 +7,20 @@
 
 #include "Renderer.h"
 
-enum TrackMode
+namespace Track
+{
+
+enum Mode
 {
    ModePlayedAutomatically,
    ModeYouPlay,
    ModePlayedButHidden,
    ModeNotPlayed,
 
-   TrackModeCount
+   ModeCount
 };
 
-const static wchar_t* TrackModeText[TrackModeCount] =
+const static wchar_t* ModeText[ModeCount] =
 {
    L"Played Automatically",
    L"You Play",
@@ -29,8 +32,8 @@ const static wchar_t* TrackModeText[TrackModeCount] =
 // with a few changes.  (e.g. Chameleon NoteBlack is a little
 // darker to distinguish it from NoteWhite, ScarletRed is a
 // little brighter to make it easier on the eyes, etc.)
-const static int TrackColorCount = 8;
-const static int UserSelectableColorCount = TrackColorCount - 2;
+const static int ColorCount = 8;
+const static int UserSelectableColorCount = ColorCount - 2;
 enum TrackColor
 {
    TangoSkyBlue = 0,
@@ -44,7 +47,7 @@ enum TrackColor
    MissedNote
 };
 
-const static Color TrackColorNoteWhite[TrackColorCount] = {
+const static Color ColorNoteWhite[ColorCount] = {
    { 114, 159, 207, 0xFF },
    { 138, 226,  52, 0xFF },
    { 252, 175,  62, 0xFF },
@@ -56,7 +59,7 @@ const static Color TrackColorNoteWhite[TrackColorCount] = {
    {  60,  60,  60, 0xFF }
 };
 
-const static Color TrackColorNoteHit[TrackColorCount] = {
+const static Color ColorNoteHit[ColorCount] = {
    { 192, 222, 255, 0xFF },
    { 203, 255, 152, 0xFF },
    { 255, 216, 152, 0xFF },
@@ -68,7 +71,7 @@ const static Color TrackColorNoteHit[TrackColorCount] = {
    {  60,  60,  60, 0xFF }
 };
 
-const static Color TrackColorNoteBlack[TrackColorCount] = {
+const static Color ColorNoteBlack[ColorCount] = {
    {  52, 101, 164, 0xFF },
    {  86, 157,  17, 0xFF },
    { 245, 121,   0, 0xFF },
@@ -80,12 +83,14 @@ const static Color TrackColorNoteBlack[TrackColorCount] = {
    {  60,  60,  60, 0xFF }
 };
 
-struct TrackProperties
+struct Properties
 {
-   TrackProperties() : mode(ModeNotPlayed), color(TangoSkyBlue) { }
+   Properties() : mode(ModeNotPlayed), color(TangoSkyBlue) { }
 
-   TrackMode mode;
+   Mode mode;
    TrackColor color;
 };
+
+}; // end namespace
 
 #endif

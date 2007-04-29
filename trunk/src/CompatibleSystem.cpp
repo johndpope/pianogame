@@ -46,27 +46,18 @@ namespace Compatible
       
       DialogRef dialog;
       DialogItemIndex item;
-      
-      // TODO: Not Unicode!
-      std::string narrow_err(err.begin(), err.end());
-      std::string narrow_title(message_box_title.begin(), message_box_title.end());
-      
-      CFStringRef cf_err = CFStringCreateWithCString(0, narrow_err.c_str(), kCFStringEncodingMacRoman);      
-      CFStringRef cf_title = CFStringCreateWithCString(0, narrow_title.c_str(), kCFStringEncodingMacRoman);
 
+      // We need to hide the window else the dialog is drawn *under* the main window
       WindowRef window = FrontWindow();
       HideWindow(window);
       
       // The cursor might have been hidden.
       ShowMouseCursor();
 
-      CreateStandardAlert(kAlertStopAlert, cf_title, cf_err, 0, &dialog);
+      CreateStandardAlert(kAlertStopAlert, MacStringFromWide(message_box_title).get(), MacStringFromWide(err).get(), 0, &dialog);
       RunStandardAlert(dialog, 0, &item);
       
       // We don't need to re-show the window.  This was an error.  The app is closing.
-      
-      CFRelease(cf_title);
-      CFRelease(cf_err);
 
 #endif
    }

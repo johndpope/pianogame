@@ -79,10 +79,10 @@ void TrackSelectionState::Init()
       int x = global_x_offset + (TrackTileWidth + Layout::ScreenMarginX)*tiles_on_this_line;
       int y = current_y;
 
-      TrackMode mode = ModePlayedAutomatically;
-      if (t.IsPercussion()) mode = ModePlayedButHidden;
+      Track::Mode mode = Track::ModePlayedAutomatically;
+      if (t.IsPercussion()) mode = Track::ModePlayedButHidden;
 
-      TrackColor color = static_cast<TrackColor>((m_track_tiles.size()) % UserSelectableColorCount);
+      Track::TrackColor color = static_cast<Track::TrackColor>((m_track_tiles.size()) % Track::UserSelectableColorCount);
 
       // If we came back here from StatePlaying, reload all our preferences
       if (m_state.track_properties.size() > i)
@@ -113,12 +113,12 @@ void TrackSelectionState::Init()
    }
 }
 
-std::vector<TrackProperties> TrackSelectionState::BuildTrackProperties() const
+std::vector<Track::Properties> TrackSelectionState::BuildTrackProperties() const
 {
-   std::vector<TrackProperties> props;
+   std::vector<Track::Properties> props;
    for (size_t i = 0; i < m_state.midi->Tracks().size(); ++i)
    {
-      props.push_back(TrackProperties());
+      props.push_back(Track::Properties());
    }
 
    // Populate it with the tracks that have notes
@@ -198,10 +198,10 @@ void TrackSelectionState::Update()
       {
          switch (t.GetMode())
          {
-         case ModeNotPlayed: m_tooltip = L"Track won't be played or shown during the game."; break;
-         case ModePlayedAutomatically: m_tooltip = L"Track will be played automatically by the game."; break;
-         case ModePlayedButHidden: m_tooltip = L"Track will be played automatically by the game, but also hidden from view."; break;
-         case ModeYouPlay: m_tooltip = L"'You Play' means you want to play this track yourself."; break;
+         case Track::ModeNotPlayed: m_tooltip = L"Track won't be played or shown during the game."; break;
+         case Track::ModePlayedAutomatically: m_tooltip = L"Track will be played automatically by the game."; break;
+         case Track::ModePlayedButHidden: m_tooltip = L"Track will be played automatically by the game, but also hidden from view."; break;
+         case Track::ModeYouPlay: m_tooltip = L"'You Play' means you want to play this track yourself."; break;
          }
       }
 

@@ -49,7 +49,7 @@ struct SharedState
 
    int song_speed;
 
-   std::vector<TrackProperties> track_properties;
+   std::vector<Track::Properties> track_properties;
    std::wstring song_title;
 };
 

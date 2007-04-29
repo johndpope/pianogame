@@ -45,39 +45,38 @@ enum Texture
 
 const static wchar_t* TextureResourceNames[_TextureEnumCount] =
 {
-   L"TitleLogo",
+   L"title_Logo",
    L"InterfaceButtons",
 
-   L"KeyboardHelp",
-   L"GameMusicThemes",
+   L"play_Keys",
+   L"title_GameMusicThemes",
 
-   L"ButtonRetrySong",
-   L"ButtonChooseTracks",
-   L"ButtonExit",
-   L"ButtonBackToTitle",
-   L"ButtonPlaySong",
+   L"score_RetrySong",
+   L"title_ChooseTracks",
+   L"title_Exit",
+   L"tracks_BackToTitle",
+   L"tracks_PlaySong",
 
-   L"InputBox",
-   L"OutputBox",
-   L"SongBox",
+   L"title_InputBox",
+   L"title_OutputBox",
+   L"title_SongBox",
 
-   L"TrackBox",
+   L"trackbox",
 
-   L"StatsText",
+   L"stats_text",
 
-   L"PlayStatus",
-   L"PlayStatus2",
-   L"PlayKeys",
+   L"play_Status",
+   L"play_Status2",
+   L"play_Keys",
 
-   L"PlayNotesBlackColor",
-   L"PlayNotesBlackShadow",
-   L"PlayNotesWhiteColor",
-   L"PlayNotesWhiteShadow",
+   L"play_NotesBlackColor",
+   L"play_NotesBlackShadow",
+   L"play_NotesWhiteColor",
+   L"play_NotesWhiteShadow",
 
-   L"PlayKeyRail",
-   L"PlayKeyShadow",
-   L"PlayKeysBlack"
-
+   L"play_KeyRail",
+   L"play_KeyShadow",
+   L"play_KeysBlack"
 };
 
 #endif

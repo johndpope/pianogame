@@ -32,7 +32,7 @@ enum TrackTileGraphic
 class TrackTile
 {
 public:
-   TrackTile(int x, int y, size_t track_id, TrackColor color, TrackMode mode);
+   TrackTile(int x, int y, size_t track_id, Track::TrackColor color, Track::Mode mode);
 
    void Update(const MouseInfo &translated_mouse);
    void Draw(Renderer &renderer, const Midi *midi, Tga *buttons, Tga *box) const;
@@ -40,8 +40,8 @@ public:
    int GetX() { return m_x; }
    int GetY() { return m_y; }
 
-   TrackMode GetMode() const { return m_mode; }
-   TrackColor GetColor() const { return m_color; }
+   Track::Mode GetMode() const { return m_mode; }
+   Track::TrackColor GetColor() const { return m_color; }
 
    bool HitPreviewButton() const { return button_preview.hit; }
    bool IsPreviewOn() const { return m_preview_on; }
@@ -59,8 +59,8 @@ private:
    int m_x;
    int m_y;
 
-   TrackMode m_mode;
-   TrackColor m_color;
+   Track::Mode m_mode;
+   Track::TrackColor m_color;
 
    bool m_preview_on;
 

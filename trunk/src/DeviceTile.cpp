@@ -82,7 +82,7 @@ void DeviceTile::Draw(Renderer &renderer) const
    renderer.DrawTga(m_frame_graphics, 0, 0);
 
    // Choose the last (gray) color in the TrackTile bitmap
-   int color_offset = GraphicHeight * UserSelectableColorCount;
+   int color_offset = GraphicHeight * Track::UserSelectableColorCount;
 
    renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_mode_left), LookupGraphic(GraphicLeftArrow,  button_mode_left.hovering), color_offset);
    renderer.DrawTga(m_button_graphics, BUTTON_RECT(button_mode_right), LookupGraphic(GraphicRightArrow, button_mode_right.hovering), color_offset);

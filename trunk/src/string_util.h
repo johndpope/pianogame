@@ -25,8 +25,47 @@
 #include <iostream>
 
 
+
+#ifndef WIN32
+
+#include <Carbon/Carbon.h>
+
+// Helper class to avoid all the CFRelease nonsense
+class MacStringFromWide
+{
+public:
+   MacStringFromWide(const std::wstring &wide) : cf(0)
+   {
+      // TODO: Not Unicode
+      std::string narrow(wide.begin(), wide.end());
+      
+      cf = CFStringCreateWithCString(0, narrow.c_str(), kCFStringEncodingMacRoman);      
+   }
+
+   CFStringRef get() const
+   {
+      return cf;
+   }
+   
+   ~MacStringFromWide()
+   {
+      CFRelease(cf);
+   }
+   
+private:
+   CFStringRef cf;
+   
+
+};
+
+#endif
+
+
+
 // Apparently "widen" is deprecated
+#ifdef WIN32
 #pragma warning(disable : 4996)
+#endif
 
 // string_type here can be things like std::string or std::wstring
 template<class string_type>
