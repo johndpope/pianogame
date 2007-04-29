@@ -46,7 +46,21 @@ namespace UserSetting
 #else
 
    // MACTODO: UserSettings implementation
+
+   void Initialize(const std::wstring &app_name)
+   {
+   }
+
+   std::wstring Get(const std::wstring &setting, const std::wstring &default_value)
+   {
+      return default_value;
+   }
    
+   void Set(const std::wstring &setting, const std::wstring &value)
+   {
+   }
+
+
 #endif
 
 }; // End namespace

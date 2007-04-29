@@ -16,6 +16,9 @@ namespace Compatible
    // Shows an error box with an OK button
    void ShowError(const std::wstring &err);
    
+   int GetDisplayWidth();
+   int GetDisplayHeight();
+   
    void HideMouseCursor();
    void ShowMouseCursor();
    

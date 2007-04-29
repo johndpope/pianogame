@@ -17,8 +17,9 @@ Midi Midi::ReadFromFile(const wstring &filename)
 #if defined WIN32
    fstream file(reinterpret_cast<const wchar_t*>((filename).c_str()), ios::in|ios::binary);
 #else
-   // MACTODO: Non-wstring fstream constructor (after I deal with the string issue...)
-   fstream file("MACTODO", ios::in | ios::binary);
+   // TODO: This isn't Unicode!
+   std::string narrow(filename.begin(), filename.end());
+   fstream file(narrow.c_str(), ios::in | ios::binary);
 #endif
 
    if (!file.good()) throw MidiError(MidiError_BadFilename);

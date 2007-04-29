@@ -10,6 +10,8 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#else
+#include <AGL/agl.h>
 #endif
 
 class Tga;
@@ -34,10 +36,12 @@ class Renderer
 {
 public:
 
+// TODO: Use a typedef to switch between HDC and AGLContext.  That
+// single #ifdef set will clean up like 6 others.
 #ifdef WIN32
    Renderer(HDC hdc);
 #else
-   // MACTODO: Renderer constructor
+   Renderer(AGLContext context);
 #endif
 
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
@@ -58,6 +62,9 @@ public:
 #ifdef WIN32
    // TODO: REMOVE!
    HDC GetHdc() { return m_hdc; }
+#else
+   // TODO: REMOVE!
+   AGLContext GetContext() { return m_context; }
 #endif
 
    // TODO: REMOVE!
@@ -70,6 +77,8 @@ private:
 
 #ifdef WIN32
    HDC m_hdc;
+#else
+   AGLContext m_context;
 #endif
 };
 

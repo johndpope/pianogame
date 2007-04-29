@@ -7,6 +7,8 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#else
+#include <Carbon/Carbon.h>
 #endif
 
 #ifdef WIN32
@@ -14,6 +16,7 @@
 #include <gl/glu.h>
 #else
 #include <OpenGL/OpenGL.h>
+#include <AGL/agl.h>
 #include <AGL/gl.h>
 #include <AGL/glu.h>
 #endif
@@ -47,9 +50,6 @@ using namespace std;
 
 #ifdef WIN32
 
-static const int WindowWidth  = GetSystemMetrics(SM_CXSCREEN);
-static const int WindowHeight = GetSystemMetrics(SM_CYSCREEN);
-
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 // TODO: Make this better
@@ -60,31 +60,45 @@ PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
 #else
 
-// MACTODO: Window/screen dimensions
-static const int WindowWidth = 1024;
-static const int WindowHeight = 768;
+static AGLContext aglContext;
+static WindowRef window(0);
+
+static void InitEvents();
+static pascal void GameLoop(EventLoopTimerRef inTimer, void *);
+
+static EventLoopTimerRef GameLoopTimerRef;
+static EventHandlerRef MouseEventHandlerRef(0);
+static EventHandlerRef KeyEventHandlerRef(0);
+static EventHandlerRef AppEventHandlerRef(0);
+static EventHandlerRef MainWindowEventHandlerRef(0);
+static EventHandlerRef OtherWindowEventHandlerRef(0);
+
+static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
+static pascal OSStatus MouseEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
+static pascal OSStatus KeyEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
+static pascal OSStatus WindowEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
 
 #endif
 
+
+
+
+static const int WindowWidth  = Compatible::GetDisplayWidth();
+static const int WindowHeight = Compatible::GetDisplayHeight();
+
 GameStateManager state_manager(WindowWidth, WindowHeight);
-
-static bool WindowActive = true;
-
 
 void setVSync(int interval=1)
 {
 #ifdef WIN32
   const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
 
-  if( strstr( extensions, "WGL_EXT_swap_control" ) == 0 )
-    return; // Error: WGL_EXT_swap_control extension not supported on your computer.\n");
-  else
-  {
-    wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+  // Check if the WGL_EXT_swap_control extension is supported.
+  if (strstr(extensions, "WGL_EXT_swap_control") == 0) return; 
+  
+  wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+  if (wglSwapIntervalEXT) wglSwapIntervalEXT(interval);
 
-    if( wglSwapIntervalEXT )
-      wglSwapIntervalEXT(interval);
-  }
 #else
    // MACNOTE: Don't do anything for now.  Investigate further some other time.
 #endif
@@ -96,6 +110,29 @@ const static std::wstring friendly_app_name = WSTRING(L"Synthesia " << Synthesia
 const static wstring error_header1 = L"Synthesia detected a";
 const static wstring error_header2 = L" problem and must close:\n\n";
 const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+
+class EdgeTracker
+{
+public:
+   EdgeTracker() : active(true), just_active(true) { }
+
+   void Activate() { just_active = true; active = true; }
+   void Deactivate() { just_active = false; active = false; }
+   
+   bool IsActive() { return active; }
+   bool JustActivated()
+   {
+      bool was_active = just_active;
+      just_active = false;
+      return was_active;
+   }
+
+private:
+   bool active;
+   bool just_active;
+};
+static EdgeTracker window_state;
+
 
 #ifdef WIN32
 // Windows
@@ -124,17 +161,10 @@ int main(int argc, char *argv[])
       MessageBox(NULL, L"There was a problem registering the Window class!", application_name.c_str(), MB_ICONERROR);
       return 0;
    }
-   
-#else
 
-   // MACTODO: Set up the window
-   
 #endif
 
-
-#ifndef _DEBUG
    try
-#endif
    {
       wstring command_line;
 
@@ -179,6 +209,9 @@ int main(int argc, char *argv[])
       UserSetting::Initialize(application_name);
 
       Midi *midi = 0;
+
+      // MACTODO: Remove hard-coded command line!
+      command_line = L"/Users/npiegdon/Synthesia/music/Tetris - Theme A.mid";
 
       // Attempt to open the midi file given on the command line first
       if (command_line != L"")
@@ -266,7 +299,84 @@ int main(int argc, char *argv[])
       if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
       if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
 #else
-      // MACTODO: Set up the window and initialize OpenGL
+
+      InitEvents();
+      
+      Rect windowRect;
+      windowRect.top = 0;
+      windowRect.left = 0;
+      windowRect.right = (short)Compatible::GetDisplayWidth();
+      windowRect.bottom = (short)Compatible::GetDisplayHeight();
+
+      OSStatus status;
+      status = CreateNewWindow(kOverlayWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
+      if (status != noErr) throw SynthesiaError(L"Unable to create window.");
+      
+      //status = SetWindowGroupLevel(GetWindowGroupOfClass(kOverlayWindowClass), kCGMaximumWindowLevel);
+      //if (status != noErr) throw SynthesiaError(L"Unable to set window group level.");
+   
+      static const EventTypeSpec windowControlEvents[] = 
+      {
+      { kEventClassWindow, kEventWindowUpdate },
+      { kEventClassWindow, kEventWindowDrawContent },
+      { kEventClassWindow, kEventWindowActivated },
+      { kEventClassWindow, kEventWindowDeactivated },
+      { kEventClassWindow, kEventWindowGetClickActivation },
+      { kEventClassWindow, kEventWindowBoundsChanging },
+      { kEventClassWindow, kEventWindowBoundsChanged },
+      { kEventClassWindow, kEventWindowShown },
+      { kEventClassWindow, kEventWindowShowing },
+      { kEventClassWindow, kEventWindowHidden },
+      { kEventClassWindow, kEventWindowHiding },
+      { kEventClassWindow, kEventWindowResizeStarted },
+      { kEventClassWindow, kEventWindowResizeCompleted },
+      { kEventClassWindow, kEventWindowDragStarted },
+      { kEventClassWindow, kEventWindowDragCompleted },
+      { kEventClassWindow, kEventWindowCursorChange },
+      { kEventClassWindow, kEventWindowClosed }
+      };
+      
+      if (OtherWindowEventHandlerRef != 0) RemoveEventHandler(OtherWindowEventHandlerRef);
+         
+      status = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
+      if (status != noErr) throw SynthesiaError(L"Unable to install window event handler.");
+   
+      // MACTODO: After I get the string issue sorted out, set the window title
+      std::string narrow_app_name(friendly_app_name.begin(), friendly_app_name.end());
+      CFStringRef cf_app_name = CFStringCreateWithCString(0, narrow_app_name.c_str(), kCFStringEncodingMacRoman);
+      SetWindowTitleWithCFString(window, cf_app_name);
+      CFRelease(cf_app_name);
+   
+      RGBColor windowColor;
+      windowColor.red   = 65535 * 0.5;
+      windowColor.green = 65535 * 0.5;
+      windowColor.blue  = 65535 * 0.5;
+      SetWindowContentColor(window, &windowColor);
+
+      // TODO: The fade effect is way cooler
+      status = TransitionWindow(window, kWindowZoomTransitionEffect, kWindowShowTransitionAction, 0);
+      if (status != noErr) throw SynthesiaError(L"Unable to transition the window.");
+      
+      SetPortWindowPort(window);
+      GrafPtr cgrafSave = 0;
+      GetPort(&cgrafSave);
+      
+      GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_NONE };
+      AGLPixelFormat aglPixelFormat = aglChoosePixelFormat(NULL, 0, attrib);
+      if (!aglPixelFormat) throw SynthesiaError(L"Couldn't set AGL pixel format.");
+      
+      aglContext = aglCreateContext(aglPixelFormat, (aglGetCurrentContext() != 0) ? aglGetCurrentContext() : 0);
+      aglSetDrawable(aglContext, GetWindowPort(window));
+      if (!aglSetCurrentContext(aglContext)) throw SynthesiaError(L"Error in SetupAppleGLContext(): Could not set current AGL context.");
+
+      SetPort(cgrafSave);
+      
+      aglSetCurrentContext(aglContext);
+      aglUpdateContext(aglContext);
+      
+      
+      
+      
 #endif
 
       // Enable v-sync for release versions
@@ -291,20 +401,20 @@ int main(int argc, char *argv[])
 
       int return_value = 1;
 
-#ifdef WIN32
-      ShowWindow (hwnd, iCmdShow);
-      UpdateWindow (hwnd);
-
       SharedState state;
       state.song_title = FileSelector::TrimFilename(command_line);
       state.midi = midi;
 
       state_manager.SetInitialState(new TitleState(state));
 
+
+#ifdef WIN32
+      ShowWindow (hwnd, iCmdShow);
+      UpdateWindow (hwnd);
+
       MSG msg;
       ZeroMemory(&msg, sizeof(MSG));
 
-      bool was_inactive = true;
       bool running = true;
       while (running)
       {
@@ -315,17 +425,12 @@ int main(int argc, char *argv[])
          }
          else
          {
-            if (WindowActive)
+            if (window_state.Active())
             {
-               state_manager.Update(was_inactive);
-               was_inactive = false;
+               state_manager.Update(window_state.JustActivated());
 
                Renderer renderer(dc);
                state_manager.Draw(renderer);
-            }
-            else
-            {
-               was_inactive = true;
             }
          }
       }
@@ -338,13 +443,23 @@ int main(int argc, char *argv[])
       UnregisterClass(application_name.c_str(), instance);
 
       return_value = int(msg.wParam);
+      
 #else
-      // MACTODO: Program loop
+
+      RunApplicationEventLoop();
+      DisposeWindow(window);
+
+      
+      aglDestroyPixelFormat(aglPixelFormat);
+      aglSetCurrentContext(0);
+      aglSetDrawable(aglContext, 0);
+      aglDestroyContext(aglContext);
+      
+      return_value = 0;
 #endif
 
       return return_value;
    }
-#ifndef _DEBUG
    catch (const SynthesiaError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
@@ -367,8 +482,6 @@ int main(int argc, char *argv[])
    }
 
    return 1;
-
-#endif
 }
 
 
@@ -392,7 +505,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
    case WM_ACTIVATE:
       {
-         WindowActive = (LOWORD(wParam) != WA_INACTIVE);
+         if (LOWORD(wParam) != WA_INACTIVE) Activate();
+         else Deactivate();
+         
          return 0;
       }
 
@@ -455,7 +570,228 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 #else
 
-// MACTODO: Keyboard/Mouse events
+
+void InitEvents()
+{
+   InstallEventLoopTimer( GetCurrentEventLoop(), 0, kEventDurationSecond / 1000.0, NewEventLoopTimerUPP(GameLoop), 0, &GameLoopTimerRef);
+   
+   OSStatus ret;
+   
+   static const EventTypeSpec appControlEvents[] =
+   {
+   { kEventClassApplication, kEventAppLaunchNotification },
+   { kEventClassApplication, kEventAppActivated },
+   { kEventClassApplication, kEventAppDeactivated },
+   { kEventClassApplication, kEventAppHidden },
+   { kEventClassApplication, kEventAppShown },
+   { kEventClassApplication, kEventAppTerminated },
+   { kEventClassApplication, kEventAppQuit }
+   };
+   
+   ret = InstallEventHandler(GetApplicationEventTarget(), NewEventHandlerUPP(AppEventHandlerProc), GetEventTypeCount(appControlEvents), appControlEvents, 0, &AppEventHandlerRef);
+   if (ret != noErr) throw SynthesiaError(L"Unable to install app event handler.");
+   
+   static const EventTypeSpec mouseControlEvents[] =
+   {
+   { kEventClassMouse, kEventMouseDown },
+   { kEventClassMouse, kEventMouseUp },
+   { kEventClassMouse, kEventMouseMoved }
+   };
+   
+   ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( MouseEventHandlerProc ), GetEventTypeCount(mouseControlEvents), mouseControlEvents, 0, &MouseEventHandlerRef );
+   if (ret != noErr) throw SynthesiaError(L"Unable to install mouse event handler.");
+   
+   static const EventTypeSpec keyControlEvents[] =
+   {
+   { kEventClassKeyboard, kEventRawKeyDown },
+   { kEventClassKeyboard, kEventRawKeyUp }
+   };
+   
+   ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( KeyEventHandlerProc ), GetEventTypeCount(keyControlEvents), keyControlEvents, 0, &KeyEventHandlerRef );
+   if (ret != noErr) throw SynthesiaError(L"Unable to install key event handler.");
+}
+
+
+
+static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
+{
+   if (!window_state.IsActive()) return;
+
+   try
+   {
+      state_manager.Update(window_state.JustActivated());
+
+      Renderer renderer(aglContext);
+      state_manager.Draw(renderer);
+   }
+   catch (const SynthesiaError &e)
+   {
+      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
+      Compatible::ShowError(wrapped_description);
+      Compatible::GracefulShutdown();
+   }
+   catch (const MidiError &e)
+   {
+      wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
+      Compatible::ShowError(wrapped_description);
+      Compatible::GracefulShutdown();
+   }
+   catch (const std::exception &e)
+   {
+      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.what() << error_footer);
+      Compatible::ShowError(wrapped_description);
+      Compatible::GracefulShutdown();
+   }
+   catch (...)
+   {
+      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!" << error_footer);
+      Compatible::ShowError(wrapped_description);
+      Compatible::GracefulShutdown();
+   }
+
+}
+
+
+static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *)
+{
+   UInt32 eventKind = GetEventKind(event);
+   switch(eventKind)
+   {
+      case kEventAppLaunchNotification:
+         break;
+         
+      case kEventAppShown:
+      case kEventAppActivated:
+         window_state.Activate();
+         ShowWindow(window);
+         break;
+         
+      case kEventAppHidden:
+      case kEventAppDeactivated:
+         window_state.Deactivate();
+         HideWindow(window);
+         break;
+         
+      case kEventAppQuit:
+      
+         RemoveEventLoopTimer(GameLoopTimerRef);
+         
+         RemoveEventHandler(MouseEventHandlerRef);
+         RemoveEventHandler(KeyEventHandlerRef);
+         RemoveEventHandler(AppEventHandlerRef);
+         RemoveEventHandler(MainWindowEventHandlerRef);
+         break;
+         
+      case kEventAppTerminated:
+         break;
+   };
+   
+   return eventNotHandledErr;
+}
+
+
+
+static pascal OSStatus WindowEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *)
+{
+   WindowRef window;
+   GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
+   
+   switch(GetEventKind(event))
+   {
+      case kEventWindowClosed:
+         QuitApplicationEventLoop();
+         break;
+   };
+   
+   return eventNotHandledErr;
+}
+
+
+static pascal OSStatus MouseEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *)
+{
+   switch (GetEventKind(event))
+   {
+      case kEventMouseDown:
+      {
+         EventMouseButton button;
+         GetEventParameter(event, kEventParamMouseButton, typeMouseButton, NULL, sizeof(EventMouseButton), NULL, &button );
+         
+         switch (button)
+         {
+         case kEventMouseButtonPrimary: state_manager.MousePress(MouseLeft); break;
+         case kEventMouseButtonSecondary: state_manager.MousePress(MouseRight); break;
+         }
+         
+         break;
+      }
+         
+      case kEventMouseUp:
+      {
+         EventMouseButton button;
+         GetEventParameter(event, kEventParamMouseButton, typeMouseButton, NULL, sizeof(EventMouseButton), NULL, &button );
+         
+         switch (button)
+         {
+         case kEventMouseButtonPrimary: state_manager.MouseRelease(MouseLeft); break;
+         case kEventMouseButtonSecondary: state_manager.MouseRelease(MouseRight); break;
+         }
+         
+         break;
+      }
+         
+      case kEventMouseMoved:
+      {
+         HIPoint loc;
+         GetEventParameter(event, kEventParamMouseLocation, typeHIPoint, NULL, sizeof(HIPoint), NULL, &loc);
+         
+         state_manager.MouseMove((int)loc.x, (int)loc.y);
+            
+         break;
+      }
+   };
+   
+   return eventNotHandledErr;
+}
+
+static pascal OSStatus KeyEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *inUserData )
+{
+   bool is_down = false;   
+   switch(GetEventKind(event))
+   {
+      case kEventRawKeyDown: is_down = true; break;
+      case kEventRawKeyUp: break;
+   };
+   
+   if (is_down)
+   {
+      UInt32 keyCode;
+      GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(keyCode), NULL, &keyCode);
+   
+      // Worst thing ever: I couldn't find a list of these
+      // keycodes, so they're determined experimentally.
+      switch (keyCode)
+      {
+      case 126: state_manager.KeyPress(KeyUp);     break;
+      case 125: state_manager.KeyPress(KeyDown);   break;
+      case 123: state_manager.KeyPress(KeyLeft);   break;
+      case 124: state_manager.KeyPress(KeyRight);  break;
+      case 49:  state_manager.KeyPress(KeySpace);  break;
+      case 36:  state_manager.KeyPress(KeyEnter);  break;
+      case 53:  state_manager.KeyPress(KeyEscape); break;
+
+      case 97:  state_manager.KeyPress(KeyF6);     break;
+
+      case 24:  state_manager.KeyPress(KeyPlus);   break;
+      case 27:  state_manager.KeyPress(KeyMinus);  break;
+      }
+   }
+   
+   return eventNotHandledErr;
+}
+
+
+
+
 
 #endif
 

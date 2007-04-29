@@ -10,6 +10,8 @@
 
 enum SynthesiaErrorCode
 {
+   Error_StringSpecified,
+   
    Error_BadPianoType,
    Error_BadGameState
 };
@@ -17,12 +19,16 @@ enum SynthesiaErrorCode
 class SynthesiaError : public std::exception
 {
 public:
-   SynthesiaError(SynthesiaErrorCode error) : m_error(error) { }
+   SynthesiaError(SynthesiaErrorCode error) : m_error(error), m_optional_string(L"") { }
+   SynthesiaError(const std::wstring error) : m_error(Error_StringSpecified), m_optional_string(error) { }
    std::wstring GetErrorDescription() const;
+
+   ~SynthesiaError() throw() { }
 
    const SynthesiaErrorCode m_error;
 
 private:
+   const std::wstring m_optional_string;
    SynthesiaError operator=(const SynthesiaError&);
 };
 

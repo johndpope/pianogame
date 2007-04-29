@@ -228,4 +228,66 @@ void MidiCommOut::Reset()
 
 // MACTODO: Entire Midi Comm Class!
 
+MidiCommDescriptionList MidiCommIn::GetDeviceList()
+{
+   MidiCommDescriptionList devices;
+
+   return devices;
+}
+
+MidiCommIn::MidiCommIn(unsigned int device_id)
+{
+}
+
+MidiCommIn::~MidiCommIn()
+{
+}
+
+void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long)
+{
+}
+
+void MidiCommIn::Reset()
+{
+}
+
+bool MidiCommIn::KeepReading() const
+{
+   return false;
+}
+
+MidiEvent MidiCommIn::Read()
+{
+   MidiEvent ev(MidiEvent::NullEvent());
+
+   return ev;
+}
+
+MidiCommDescriptionList MidiCommOut::GetDeviceList()
+{
+   MidiCommDescriptionList devices;
+
+   return devices;
+}
+
+MidiCommOut::MidiCommOut(unsigned int device_id)
+{
+}
+
+MidiCommOut::~MidiCommOut()
+{
+}
+
+void MidiCommOut::Write(const MidiEvent &out)
+{
+}
+
+void MidiCommOut::Reset()
+{
+}
+
+
+
+
+
 #endif

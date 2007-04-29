@@ -11,6 +11,8 @@ std::wstring SynthesiaError::GetErrorDescription() const
 {
    switch (m_error)
    {
+   case Error_StringSpecified:             return m_optional_string;
+   
    case Error_BadPianoType:                return L"Bad piano type specified.";
    case Error_BadGameState:                return L"Internal Error: Synthesia entered bad game state!";
 

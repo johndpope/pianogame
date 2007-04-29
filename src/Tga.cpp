@@ -49,16 +49,19 @@ Tga* Tga::Load(const std::wstring &resource_name)
    Tga *ret = LoadFromData(bytes);
    FreeResource(resource);
 
-   ret->SetSmooth(false);
-
-   return ret;
-   
 #else
 
    // MACTODO: Resource loading
-   return 0;
+
+   const unsigned char bytes[] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0x18, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+   Tga *ret = LoadFromData(bytes);
    
 #endif
+
+   ret->SetSmooth(false);
+
+   return ret;
 }
 
 void Tga::Release(Tga *tga)
