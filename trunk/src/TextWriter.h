@@ -45,8 +45,9 @@ public:
       return (*this);
    }
 
-   int TextWriter::get_point_size();
+   int get_point_size();
 
+   int point_size;
    int x, y, size, original_x;
    int last_line_height;
    bool centered;

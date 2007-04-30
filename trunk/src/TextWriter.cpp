@@ -4,6 +4,7 @@
 
 #include "TextWriter.h"
 #include "Renderer.h"
+#include "SynthesiaError.h"
 
 #ifdef WIN32
 #include <gl/gl.h>
@@ -14,10 +15,12 @@
 
 #include <map>
 
+// TODO: This should be deleted at shutdown
+static std::map<int, int> font_size_lookup;
+
 #ifdef WIN32
 
-// TODO: These should be deleted at shutdown
-static std::map<int, int> font_size_lookup;
+// TODO: This should be deleted at shutdown
 static std::map<int, HFONT> font_handle_lookup;
 static int next_call_list_start = 1;
 
@@ -28,6 +31,8 @@ x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered
    original_x = x;
 
    y += renderer.GetYoffset();
+
+   point_size = MulDiv(size, GetDeviceCaps(renderer.GetHdc(), LOGPIXELSY), 72);
 
    HFONT font = 0;
    if (font_size_lookup[in_size] == 0)
@@ -68,7 +73,7 @@ TextWriter::~TextWriter()
 
 int TextWriter::get_point_size() 
 {
-   return MulDiv(size, GetDeviceCaps(renderer.GetHdc(), LOGPIXELSY), 72);
+   return point_size;
 }
 
 TextWriter& Text::operator<<(TextWriter& tw) const
@@ -118,11 +123,32 @@ TextWriter& Text::operator<<(TextWriter& tw) const
 
 #else
 
-// MACTODO: Platform dependent TextWriter code
+// MACTODO: VERY LAST STEP: Find and replace tab characters
 
 TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered, int in_size, std::wstring fontname) :
 x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered(in_centered), renderer(in_renderer)
 {
+   x += renderer.GetXoffset();
+   original_x = x;
+   
+   y += renderer.GetYoffset();
+   
+   if (font_size_lookup[size] == 0)
+   {
+      int list_start = glGenLists(255);
+
+      // MACNOTE: We ignore font on the Mac for now
+      ATSFontFamilyRef font = ATSFontFamilyFindFromName(CFSTR("Palatino"), kATSOptionFlagsDefault);
+      
+      GLboolean ret = aglUseFont(aglGetCurrentContext(), font, normal, size, 0, 255, list_start);
+      if (ret == GL_FALSE)
+      {
+         GLenum err = aglGetError();
+         throw SynthesiaError(L"Couldn't create font.");
+      }
+      
+      font_size_lookup[size] = list_start;
+   }
 }
 
 TextWriter::~TextWriter()
@@ -131,11 +157,34 @@ TextWriter::~TextWriter()
 
 int TextWriter::get_point_size() 
 {
-   return 0;
+   return size;
 }
 
 TextWriter& Text::operator<<(TextWriter& tw) const
 {
+   Rect drawing_rect;
+   drawing_rect.left = tw.x;
+   drawing_rect.top = tw.y;
+
+   // TODO: Get the actual size of the text here
+   drawing_rect.right = drawing_rect.left + int(m_text.length() * tw.get_point_size() * 0.475);
+   drawing_rect.bottom = drawing_rect.top + tw.get_point_size();
+
+   if (tw.centered) drawing_rect.left -= (drawing_rect.right - drawing_rect.left) / 2;
+   if (!tw.centered) tw.x += drawing_rect.right - drawing_rect.left;
+
+   glBindTexture(GL_TEXTURE_2D, 0);
+   
+   glPushMatrix();
+   tw.renderer.SetColor(m_color);
+   glListBase(font_size_lookup[tw.size]); 
+   glRasterPos2i(drawing_rect.left, drawing_rect.top + tw.size);
+   
+   std::string narrow(m_text.begin(), m_text.end());
+   glCallLists(static_cast<int>(narrow.length()), GL_UNSIGNED_BYTE, narrow.c_str());
+
+   glPopMatrix();
+
    return tw;
 }
 
