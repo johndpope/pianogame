@@ -15,18 +15,18 @@ using namespace std;
 
 const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::WhiteNoteDimensions = { 32, 128, 4, 25, 22, 28, 93, 100 };
 const KeyboardDisplay::NoteTexDimensions KeyboardDisplay::BlackNoteDimensions = { 32,  64, 8, 20,  3,  8, 49,  55 };
-   struct KeyTexDimensions
-   {
-      int tex_width;
-      int tex_height;
-
-      int left;
-      int right;
-
-      int top;
-      int bottom;
-   };
-   const KeyboardDisplay::KeyTexDimensions KeyboardDisplay::BlackKeyDimensions = { 32, 128, 8, 20, 15, 109 };
+struct KeyTexDimensions
+{
+   int tex_width;
+   int tex_height;
+   
+   int left;
+   int right;
+   
+   int top;
+   int bottom;
+};
+const KeyboardDisplay::KeyTexDimensions KeyboardDisplay::BlackKeyDimensions = { 32, 128, 8, 20, 15, 109 };
 
 
 KeyboardDisplay::KeyboardDisplay(KeyboardSize size, int pixelWidth, int pixelHeight)
