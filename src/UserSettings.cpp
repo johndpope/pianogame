@@ -55,24 +55,12 @@ namespace UserSetting
    std::wstring Get(const std::wstring &setting, const std::wstring &default_value)
    {
       CFStringRef val = (CFStringRef)CFPreferencesCopyAppValue(MacStringFromWide(setting).get(), kCFPreferencesCurrentApplication );
-      
       if (!val) return default_value;
-
-      // NOTE: This is quite a bit of hassle seeing as how there is
-      // really only one line in here that is doing any work.  I would
-      // imagine some helper functions would make this shorter.
-      const static int BufferSize = 512;
-      char buffer[BufferSize];
-      for (int i = 0; i < BufferSize; ++i) buffer[i] = 0;
       
-      Boolean ret = CFStringGetCString(val, buffer, BufferSize, 0);
-      if (!ret) return default_value;
-      
+      std::wstring ret = WideFromMacString(val);
       CFRelease(val);
-      std::string narrow_result(buffer);
-      
-      std::wstring return_value(narrow_result.begin(), narrow_result.end());         
-      return return_value;
+
+      return ret;
    }
       
    void Set(const std::wstring &setting, const std::wstring &value)

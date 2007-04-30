@@ -1,3 +1,8 @@
+// Synthesia
+// Copyright (c)2007 Nicholas Piegdon
+// See license.txt for license information
+
+#include "SynthesiaError.h"
 #include "file_selector.h"
 #include "UserSettings.h"
 #include "string_util.h"
@@ -11,6 +16,9 @@
 #endif
 #include <Windows.h>
 #include <strsafe.h>
+#else
+#include "Carbon/Carbon.h"
+#include "ApplicationServices/ApplicationServices.h"
 #endif
 
 #include <set>
@@ -23,6 +31,41 @@ extern HWND g_hwnd;
 
 namespace FileSelector
 {
+
+#ifndef WIN32
+
+static pascal Boolean NavOpenFilterProc(AEDesc *item, void *info, NavCallBackUserData callBackUD, NavFilterModes filterMode)
+{
+   OSStatus status;
+   Boolean outCanOpenAsMovie;
+   Boolean canViewItem = false;
+
+   if (!item->descriptorType == typeFSRef) return false;
+   if (((NavFileOrFolderInfo*)info)->isFolder == true) return true;
+
+   FSRef fsRef;
+   status = AEGetDescData(item, &fsRef, sizeof(fsRef));
+   if (status != noErr) throw SynthesiaError(L"Couldn't get item description.");
+
+   const static int BufferSize(1024);
+   char path_buffer[BufferSize];
+   status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
+   if (status != noErr) throw SynthesiaError(L"Couldn't get file path.");
+
+   std::string path(path_buffer);
+   if (path.length() < 5) return false;
+   
+   bool allowed = false;
+   const static std::string allowed1(".mid");
+   const static std::string allowed2(".midi");
+   allowed = allowed || (path.substr(path.length() - allowed1.length()) == allowed1);
+   allowed = allowed || (path.substr(path.length() - allowed2.length()) == allowed2);
+
+   return allowed;
+}
+
+#endif
+
 
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
@@ -61,7 +104,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
    ofn.lStructSize =     sizeof(OPENFILENAME);
    ofn.hwndOwner =       g_hwnd;
-   ofn.lpstrTitle =      L"Synthesia: Choose a song to play";
+   ofn.lpstrTitle =      L"Synthesia: Choose a MIDI song to play";
    ofn.lpstrFilter =     L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
    ofn.lpstrFile =       filename;
    ofn.nMaxFile =        BufferSize;
@@ -84,8 +127,72 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
    if (returned_file_title) *returned_file_title = L"";
    if (returned_filename) *returned_filename = L"";
+
 #else
-   // MACTODO: OpenPanel
+   
+   OSStatus status;
+   
+   NavDialogCreationOptions options;
+   status  = NavGetDefaultDialogCreationOptions(&options);
+   if (status != noErr) throw SynthesiaError(L"Couldn't create dialog options.");
+   
+   options.windowTitle = CFSTR("Synthesia: Choose a MIDI song to play");
+   
+   static NavObjectFilterUPP navFilterUPP(0);
+   if (navFilterUPP == 0) navFilterUPP = NewNavObjectFilterUPP(NavOpenFilterProc);
+   
+   NavDialogRef navDialog(0);
+   status = NavCreateChooseFileDialog(&options, 0, 0, 0, navFilterUPP, 0, &navDialog);
+   if (status != noErr) throw SynthesiaError(L"Couldn't create open dialog.");
+   
+   WindowRef window = FrontWindow();
+   if (window) HideWindow(window);
+   
+   status = NavDialogRun(navDialog);
+   if (status != noErr) throw SynthesiaError(L"Couldn't run open dialog.");
+
+   if (window) ShowWindow(window);
+   
+   NavReplyRecord navReply;
+   status = NavDialogGetReply(navDialog, &navReply);
+
+   if (status == userCanceledErr || !navReply.validRecord)
+   {
+      NavDisposeReply(&navReply);
+
+      if (returned_file_title) *returned_file_title = L"";
+      if (returned_filename) *returned_filename = L"";
+      return;
+   }
+   
+   long item_count = 0;
+   status = AECountItems(&navReply.selection, &item_count);
+   if (status != noErr) throw SynthesiaError(L"Couldn't count resulting items from open dialog.");
+      
+   for (long i = 1; i <= item_count; i++)
+   {
+      FSRef fsRef;
+      if (AEGetNthPtr(&navReply.selection, i, typeFSRef, 0, 0, &fsRef, sizeof(FSRef), 0) == noErr)
+      {         
+         CFStringRef file_title;
+         status = LSCopyDisplayNameForRef( &fsRef, &file_title );
+         if (status != noErr) throw SynthesiaError(L"Couldn't get file title.");
+
+         const static int BufferSize(1024);
+         char path_buffer[BufferSize];
+         status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
+         if (status != noErr) throw SynthesiaError(L"Couldn't get file path.");
+
+         std::string narrow_path(path_buffer);
+         std::wstring filepath(narrow_path.begin(), narrow_path.end());
+         
+         if (returned_file_title) *returned_file_title = WideFromMacString(file_title);
+         if (returned_filename) *returned_filename = filepath;
+      }
+   }
+   
+   NavDisposeReply(&navReply);
+   
 #endif
 }
 
@@ -116,7 +223,13 @@ std::wstring TrimFilename(const std::wstring &filename)
    // Strip off path
    for (wstring::size_type i = song_title.length(); i != 0; --i)
    {
-      if (song_title[i-1] == L'\\')
+#ifdef WIN32
+      const static wchar_t PathDelimiter = L'\\';
+#else
+      const static wchar_t PathDelimiter = L'/';
+#endif
+   
+      if (song_title[i-1] == PathDelimiter)
       {
          song_title = song_title.substr(i, song_title.length());
          break;
