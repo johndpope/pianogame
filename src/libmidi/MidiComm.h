@@ -14,6 +14,9 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#else
+#include <AudioUnit/AudioUnit.h>
+#include <CoreMIDI/CoreMIDI.h>
 #endif
 
 #include "MidiEvent.h"
@@ -63,6 +66,11 @@ private:
 #ifdef WIN32
    HMIDIIN m_input_device;
    mutable CRITICAL_SECTION m_buffer_mutex;
+#else
+   MIDIClientRef m_client;
+   MIDIPortRef m_port;
+
+   mutable pthread_mutex_t m_mutex;
 #endif
 
 };
@@ -89,6 +97,9 @@ private:
 
 #ifdef WIN32
    HMIDIOUT m_output_device;
+#else
+   AudioUnit m_device;
+	AudioUnit m_output;
 #endif
 
 };

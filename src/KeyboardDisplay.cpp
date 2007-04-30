@@ -190,6 +190,8 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
       if (current_white == 'H') current_white = 'A';
       if (current_white == 'C') current_octave++;
    }
+   
+   renderer.SetColor(white);
 }
 
 void KeyboardDisplay::DrawBlackKey(Renderer &renderer, const Tga *tex, const KeyTexDimensions &tex_dimensions,
