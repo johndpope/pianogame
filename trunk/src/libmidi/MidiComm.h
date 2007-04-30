@@ -99,7 +99,7 @@ private:
    HMIDIOUT m_output_device;
 #else
    AudioUnit m_device;
-	AudioUnit m_output;
+   AudioUnit m_output;
 #endif
 
 };

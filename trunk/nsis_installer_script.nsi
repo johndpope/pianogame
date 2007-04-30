@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 
-!define VERSION 0.5.1
+!define VERSION 0.6.0
 !define PROJECT_NAME Synthesia
 
 Name "${PROJECT_NAME} ${VERSION}"
