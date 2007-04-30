@@ -203,9 +203,6 @@ int main(int argc, char *argv[])
       // onto the icon anyway.  Ignore.
       command_line = L"";
       
-      // MACTODO: Remove hard-coded command line!
-      command_line = L"/Users/npiegdon/Synthesia/music/Tetris - Theme A.mid";
-
 #endif
 
       // Strip any leading or trailing quotes from the filename

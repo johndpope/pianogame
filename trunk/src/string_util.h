@@ -54,9 +54,19 @@ public:
    
 private:
    CFStringRef cf;
-   
-
 };
+
+static std::wstring WideFromMacString(CFStringRef cf)
+{
+   size_t length = CFStringGetLength(cf) + 1;
+   char *buffer = (char*)malloc(length);
+   
+   Boolean ret = CFStringGetCString(cf, buffer, length, 0);
+   if (!ret) return std::wstring();
+
+   std::string narrow(buffer);
+   return std::wstring(narrow.begin(), narrow.end());         
+}
 
 #endif
 
