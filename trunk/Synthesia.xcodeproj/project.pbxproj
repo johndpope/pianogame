@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4340D6B00BE5973D00D9C1FA /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4340D6AF0BE5973D00D9C1FA /* CoreAudio.framework */; };
+		4340D6C00BE597F400D9C1FA /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4340D6BF0BE597F400D9C1FA /* AudioUnit.framework */; };
+		4340D6FB0BE59C6100D9C1FA /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4340D6FA0BE59C6100D9C1FA /* CoreMIDI.framework */; };
 		435766030BE2F9020067AA80 /* CompatibleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 435766020BE2F9020067AA80 /* CompatibleSystem.cpp */; };
 		435766720BE301A30067AA80 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 435766710BE301A30067AA80 /* OpenGL.framework */; };
 		436842A90BE5510A00CB879E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436842A80BE5510A00CB879E /* ApplicationServices.framework */; };
@@ -66,6 +69,9 @@
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		4340D6AF0BE5973D00D9C1FA /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		4340D6BF0BE597F400D9C1FA /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		4340D6FA0BE59C6100D9C1FA /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		435766010BE2F9020067AA80 /* CompatibleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CompatibleSystem.h; path = src/CompatibleSystem.h; sourceTree = "<group>"; };
 		435766020BE2F9020067AA80 /* CompatibleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CompatibleSystem.cpp; path = src/CompatibleSystem.cpp; sourceTree = "<group>"; };
 		435766710BE301A30067AA80 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
@@ -162,6 +168,9 @@
 				435766720BE301A30067AA80 /* OpenGL.framework in Frameworks */,
 				43B168900BE3ECAC00EB2CB5 /* Carbon.framework in Frameworks */,
 				436842A90BE5510A00CB879E /* ApplicationServices.framework in Frameworks */,
+				4340D6B00BE5973D00D9C1FA /* CoreAudio.framework in Frameworks */,
+				4340D6C00BE597F400D9C1FA /* AudioUnit.framework in Frameworks */,
+				4340D6FB0BE59C6100D9C1FA /* CoreMIDI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +180,9 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4340D6AF0BE5973D00D9C1FA /* CoreAudio.framework */,
+				4340D6FA0BE59C6100D9C1FA /* CoreMIDI.framework */,
+				4340D6BF0BE597F400D9C1FA /* AudioUnit.framework */,
 				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
 				43B99E870BE1AE5500246293 /* AGL.framework */,

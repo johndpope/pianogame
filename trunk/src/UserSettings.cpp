@@ -45,8 +45,6 @@ namespace UserSetting
 
 #else
 
-   // MACTODOTEST: UserSettings implementation
-
    void Initialize(const std::wstring &app_name)
    {
       // Do nothing.  Mac side doesn't need this.
