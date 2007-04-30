@@ -54,6 +54,7 @@ Changes
 
 Release 0.6.0
 -------------
+NEW: Mac Version!
 NEW: All new note and keyboard graphics!
 NEW: All new menu graphics.
 NEW: Right-click association option in installer.

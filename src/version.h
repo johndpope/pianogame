@@ -8,6 +8,6 @@
 #include <string>
 
 // See readme.txt for a list of what has changed between versions
-static const std::wstring SynthesiaVersionString = L"0.5.1";
+static const std::wstring SynthesiaVersionString = L"0.6.0";
 
 #endif

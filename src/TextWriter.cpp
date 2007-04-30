@@ -123,8 +123,6 @@ TextWriter& Text::operator<<(TextWriter& tw) const
 
 #else
 
-// MACTODO: VERY LAST STEP: Find and replace tab characters
-
 TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer, bool in_centered, int in_size, std::wstring fontname) :
 x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered(in_centered), renderer(in_renderer)
 {

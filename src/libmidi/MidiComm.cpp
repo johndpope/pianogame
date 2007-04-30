@@ -10,7 +10,7 @@
 #include <sstream>
 using namespace std;
 
-#include "string_util.h"
+#include "../string_util.h"
 
 #ifdef WIN32
 #ifndef NOMINMAX
@@ -438,10 +438,10 @@ MidiCommOut::MidiCommOut(unsigned int device_id)
 
    Component compid = FindNextComponent(NULL, &compdesc);
    m_device = static_cast<AudioUnit>(OpenComponent(compid));
-	
+
    // open the output unit
    m_output = static_cast<AudioUnit>(OpenDefaultComponent(kAudioUnitComponentType, kAudioUnitSubType_Output));
-	
+
    // connect the units
    AudioUnitConnection auconnect;
    auconnect.sourceAudioUnit = m_device;
@@ -449,11 +449,11 @@ MidiCommOut::MidiCommOut(unsigned int device_id)
    auconnect.destInputNumber = 0;
    AudioUnitSetProperty(m_output, kAudioUnitProperty_MakeConnection, kAudioUnitScope_Input, 0,
                            static_cast<void*>(&auconnect), sizeof(AudioUnitConnection));
-	
+
    // initialize the units
    AudioUnitInitialize(m_device);
    AudioUnitInitialize(m_output);
-	
+
    // start the output
    AudioOutputUnitStart(m_output);
 }
@@ -461,7 +461,7 @@ MidiCommOut::MidiCommOut(unsigned int device_id)
 MidiCommOut::~MidiCommOut()
 {
    AudioOutputUnitStop(m_output);
-	
+
    CloseComponent(m_output);
    CloseComponent(m_device);
 }
