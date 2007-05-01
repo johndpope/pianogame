@@ -133,17 +133,19 @@ x(in_x), y(in_y), size(in_size), original_x(in_x), last_line_height(0), centered
    
    if (font_size_lookup[size] == 0)
    {
-      int list_start = glGenLists(255);
+      int list_start = glGenLists(128);
 
-      // MACNOTE: We ignore font on the Mac for now
-      ATSFontFamilyRef font = ATSFontFamilyFindFromName(CFSTR("Palatino"), kATSOptionFlagsDefault);
+      // MACNOTE: We ignore the passed-in font on the Mac for now
+      const CFStringRef font_name = CFSTR("Palatino");
       
-      GLboolean ret = aglUseFont(aglGetCurrentContext(), font, normal, size, 0, 255, list_start);
-      if (ret == GL_FALSE)
-      {
-         GLenum err = aglGetError();
-         throw SynthesiaError(L"Couldn't create font.");
-      }
+      ATSFontFamilyRef font = ATSFontFamilyFindFromName(font_name, kATSOptionFlagsDefault);
+      if (!font) throw SynthesiaError(WSTRING(L"Couldn't get ATSFontFamilyRef for font '" << WideFromMacString(font_name) << L"'."));         
+      
+      AGLContext context = aglGetCurrentContext();
+      if (!context) throw SynthesiaError(L"Couldn't retrieve OpenGL context while creating font.");         
+      
+      GLboolean ret = aglUseFont(context, font, normal, size, 0, 128, list_start);
+      if (ret == GL_FALSE) throw SynthesiaError(WSTRING(L"aglUseFont() call failed with error code: " << aglGetError()));
       
       font_size_lookup[size] = list_start;
    }
