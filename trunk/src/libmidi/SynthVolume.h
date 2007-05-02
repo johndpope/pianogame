@@ -47,8 +47,9 @@ private:
 
 // Don't do anything on the Mac side
 
-class ReasonableSynthVolume()
+class ReasonableSynthVolume
 {
+public:
    ReasonableSynthVolume() { }
 };
 

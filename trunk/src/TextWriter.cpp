@@ -72,9 +72,9 @@ x(in_x), y(in_y), size(in_size), original_x(0), last_line_height(0), centered(in
    {
       int list_start = glGenLists(128);
 
-      // MACNOTE: We ignore the passed-in font on the Mac for now
-      // MACTODO: Apparently this font isn't a built-in system font
-      const CFStringRef font_name = CFSTR("Palatino");
+      // MACNOTE: Force Trebuchet MS.  It's what we mostly use anyway, but
+      // I want to be sure they have it.
+      const CFStringRef font_name = CFSTR("Trebuchet MS");
       
       ATSFontFamilyRef font = ATSFontFamilyFindFromName(font_name, kATSOptionFlagsDefault);
       if (!font) throw SynthesiaError(WSTRING(L"Couldn't get ATSFontFamilyRef for font '" << WideFromMacString(font_name) << L"'."));         
