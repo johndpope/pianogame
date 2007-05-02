@@ -5,13 +5,12 @@
 #ifndef __RENDERER_H
 #define __RENDERER_H
 
+#include "os_graphics.h"
+
 #ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
+typedef HDC Context;
 #else
-#include <AGL/agl.h>
+typedef AGLContext Context;
 #endif
 
 class Tga;
@@ -21,28 +20,16 @@ struct Color
    int r, g, b, a;
 };
 
-static Color ToColor(int r, int g, int b, int a = 0xFF)
-{
-   Color c;
-   c.r = r;
-   c.g = g;
-   c.b = b;
-   c.a = a;
-
-   return c;
-}
-
 class Renderer
 {
 public:
 
-// TODO: Use a typedef to switch between HDC and AGLContext.  That
-// single #ifdef set will clean up like 6 others.
-#ifdef WIN32
-   Renderer(HDC hdc);
-#else
-   Renderer(AGLContext context);
-#endif
+   static void SetVSyncInterval(int interval = 1);
+   static Color ToColor(int r, int g, int b, int a = 0xFF);
+
+   Renderer(Context context);
+
+   void SwapBuffers();
 
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
    void ResetOffset() { SetOffset(0,0); }
@@ -59,13 +46,8 @@ public:
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) const;
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const;
 
-#ifdef WIN32
    // TODO: REMOVE!
-   HDC GetHdc() { return m_hdc; }
-#else
-   // TODO: REMOVE!
-   AGLContext GetContext() { return m_context; }
-#endif
+   Context GetContext() { return m_context; }
 
    // TODO: REMOVE!
    int GetXoffset() const { return m_xoffset; }
@@ -75,11 +57,7 @@ private:
    int m_xoffset;
    int m_yoffset;
 
-#ifdef WIN32
-   HDC m_hdc;
-#else
-   AGLContext m_context;
-#endif
+   Context m_context;
 };
 
 #endif

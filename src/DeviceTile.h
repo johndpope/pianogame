@@ -51,6 +51,8 @@ public:
    const ButtonState ButtonRight() const { return button_mode_right; }
 
 private:
+   DeviceTile operator=(const DeviceTile &);
+
    int m_x;
    int m_y;
 

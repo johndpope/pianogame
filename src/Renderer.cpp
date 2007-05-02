@@ -4,16 +4,12 @@
 
 #include "Renderer.h"
 #include "Tga.h"
+#include "os_graphics.h"
 
 #include <limits>
 
-#ifdef WIN32
-#include <gl/gl.h>
-#else
-#include <OpenGL/OpenGL.h>
-#include <AGL/gl.h>
-#endif
 
+// These are static because OpenGL is (essentially) static
 static unsigned int last_texture_id = std::numeric_limits<unsigned int>::max();
 void SelectTexture(unsigned int texture_id)
 {
@@ -23,16 +19,47 @@ void SelectTexture(unsigned int texture_id)
    last_texture_id = texture_id;
 }
 
-#ifdef WIN32
-Renderer::Renderer(HDC hdc) : m_hdc(hdc), m_xoffset(0), m_yoffset(0)
-{
-}
-#else
-Renderer::Renderer(AGLContext context) : m_context(context), m_xoffset(0), m_yoffset(0)
-{
-}
-#endif
 
+Renderer::Renderer(Context context) : m_context(context), m_xoffset(0), m_yoffset(0)
+{
+}
+
+Color Renderer::ToColor(int r, int g, int b, int a)
+{
+   Color c;
+   c.r = r;
+   c.g = g;
+   c.b = b;
+   c.a = a;
+
+   return c;
+}
+
+void Renderer::SetVSyncInterval(int interval)
+{
+#ifdef WIN32
+   const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
+
+   // Check if the WGL_EXT_swap_control extension is supported.
+   if (strstr(extensions, "WGL_EXT_swap_control") == 0) return; 
+
+   typedef BOOL (APIENTRY *SWAP_INTERVAL_PROC)( int );
+   SWAP_INTERVAL_PROC wglSwapIntervalEXT = (SWAP_INTERVAL_PROC)wglGetProcAddress( "wglSwapIntervalEXT" );
+   if (wglSwapIntervalEXT) wglSwapIntervalEXT(interval);
+
+#else
+   // MACNOTE: Don't do anything for now.  Investigate V-Sync some other time.
+#endif
+}
+
+void Renderer::SwapBuffers()
+{
+#ifdef WIN32
+   ::SwapBuffers(m_context);
+#else
+   aglSwapBuffers(m_context);
+#endif
+}
 
 void Renderer::ForceTexture(unsigned int texture_id)
 {
@@ -69,8 +96,8 @@ void Renderer::DrawTga(const Tga *tga, int x, int y) const
 
 void Renderer::DrawTga(const Tga *tga, int in_x, int in_y, int width, int height, int src_x, int src_y) const
 {
-   const int x = in_x + GetXoffset();
-   const int y = in_y + GetYoffset();
+   const int x = in_x + m_xoffset;
+   const int y = in_y + m_yoffset;
 
    const double tx = static_cast<double>(src_x) / static_cast<double>(tga->GetWidth());
    const double ty = -static_cast<double>(src_y) / static_cast<double>(tga->GetHeight());
@@ -94,8 +121,8 @@ void Renderer::DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) cons
 
 void Renderer::DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const
 {
-   const int sx = x + GetXoffset();
-   const int sy = y + GetYoffset();
+   const int sx = x + m_xoffset;
+   const int sy = y + m_yoffset;
 
    const double tx =  static_cast<double>(src_x) / static_cast<double>(tga->GetWidth());
    const double ty = -static_cast<double>(src_y) / static_cast<double>(tga->GetHeight());

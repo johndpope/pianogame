@@ -36,7 +36,7 @@ class MacStringFromWide
 public:
    MacStringFromWide(const std::wstring &wide) : cf(0)
    {
-      // TODO: Not Unicode
+      // TODO: This isn't Unicode!
       std::string narrow(wide.begin(), wide.end());
       
       cf = CFStringCreateWithCString(0, narrow.c_str(), kCFStringEncodingMacRoman);      

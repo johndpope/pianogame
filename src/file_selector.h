@@ -13,6 +13,9 @@ namespace FileSelector
    // if user presses cancel.  Also, remembers last filename
    void RequestMidiFilename(std::wstring *filename, std::wstring *file_title);
 
+   // Is the "File Open" dialog currently open?
+   bool IsRequestOpen();
+
    // If a filename was passed in on the command line, we
    // can remember it for future file-open dialogs
    void SetLastMidiFilename(const std::wstring &filename);

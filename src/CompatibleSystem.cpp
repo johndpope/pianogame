@@ -5,33 +5,20 @@
 #include "CompatibleSystem.h"
 #include "string_util.h"
 #include "version.h"
-
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#else
-#include <Carbon/Carbon.h>
-#endif
+#include "os.h"
 
 
 namespace Compatible
 {
    unsigned long GetMilliseconds()
    {
-      unsigned long milliseconds = 0;
-
 #ifdef WIN32
-      milliseconds = timeGetTime();
+      return timeGetTime();
 #else
       timeval tv;
       gettimeofday(&tv, 0);
-      
-      milliseconds = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+      return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 #endif
-
-      return milliseconds;
    }
 
 

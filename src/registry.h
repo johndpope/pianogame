@@ -6,13 +6,7 @@
 #define __REGISTRY_H
 
 #include <string>
-
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#endif
+#include "os.h"
 
 // Registry simplifies reading/writing the Windows registry
 // (It currently does not support enumerating or deleting)

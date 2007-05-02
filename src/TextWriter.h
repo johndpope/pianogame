@@ -13,13 +13,7 @@
 #include <string>
 #include <iomanip>
 
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#endif
-
+#include "os.h"
 #include "string_util.h"
 #include "TrackProperties.h"
 
@@ -45,6 +39,10 @@ public:
       return (*this);
    }
 
+private:
+   TextWriter operator=(const TextWriter&);
+   TextWriter(const TextWriter&);
+
    int get_point_size();
 
    int point_size;
@@ -54,10 +52,6 @@ public:
    Renderer renderer;
 
    friend class Text;
-
-private:
-   TextWriter operator=(const TextWriter&);
-   TextWriter(const TextWriter&);
 };
 
 // Some colors to choose from, for convenience
@@ -93,6 +87,13 @@ public:
    TextWriter& operator<<(TextWriter& tw) const;
 
 private:
+
+   // This will return where the text should be drawn on
+   // the screen (determined in an OS dependent way) and
+   // advance the TextWriter's position by the width and/or
+   // height of the text.
+   void calculate_position_and_advance_cursor(TextWriter &tw, int *out_x, int *out_y) const;
+   
    Color m_color;
    std::wstring m_text;
 };

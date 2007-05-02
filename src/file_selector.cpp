@@ -6,27 +6,15 @@
 #include "file_selector.h"
 #include "UserSettings.h"
 #include "string_util.h"
-
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#include <strsafe.h>
-#else
-#include "Carbon/Carbon.h"
-#include "ApplicationServices/ApplicationServices.h"
-#endif
+#include "os.h"
 
 #include <set>
-
 using namespace std;
 
 #ifdef WIN32
-extern HWND g_hwnd;
+#include <strsafe.h>
+#else
+#include "ApplicationServices/ApplicationServices.h"
 #endif
 
 namespace FileSelector
@@ -67,6 +55,13 @@ static pascal Boolean NavOpenFilterProc(AEDesc *item, void *info, NavCallBackUse
 #endif
 
 
+static bool request_open = false;
+bool IsRequestOpen()
+{
+   return request_open;
+}
+
+
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
    // Grab the filename of the last song we played
@@ -103,7 +98,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    OPENFILENAME ofn;
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
    ofn.lStructSize =     sizeof(OPENFILENAME);
-   ofn.hwndOwner =       g_hwnd;
+   ofn.hwndOwner =       0;
    ofn.lpstrTitle =      L"Synthesia: Choose a MIDI song to play";
    ofn.lpstrFilter =     L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
    ofn.lpstrFile =       filename;
@@ -114,6 +109,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ofn.lpstrDefExt =     L"mid";
    ofn.Flags =           OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
+   request_open = true;
    if (GetOpenFileName(&ofn))
    {
       std::wstring filename = WSTRING(ofn.lpstrFile);
@@ -124,6 +120,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
       if (returned_filename) *returned_filename = filename;
       return;
    }
+   request_open = false;
 
    if (returned_file_title) *returned_file_title = L"";
    if (returned_filename) *returned_filename = L"";
@@ -148,8 +145,10 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    WindowRef window = FrontWindow();
    if (window) HideWindow(window);
    
+   request_open = true;
    status = NavDialogRun(navDialog);
    if (status != noErr) throw SynthesiaError(L"Couldn't run open dialog.");
+   request_open = false;
 
    if (window) ShowWindow(window);
    

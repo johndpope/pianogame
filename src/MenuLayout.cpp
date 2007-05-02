@@ -23,8 +23,8 @@ void DrawHorizontalRule(Renderer &renderer, int state_width, int y)
 
 void DrawButton(Renderer &renderer, const ButtonState &button, const Tga *tga)
 {
-   const static Color color = ToColor(0xE0,0xE0,0xE0);
-   const static Color color_hover = ToColor(0xFF,0xFF,0xFF);
+   const static Color color = Renderer::ToColor(0xE0,0xE0,0xE0);
+   const static Color color_hover = Renderer::ToColor(0xFF,0xFF,0xFF);
 
    renderer.SetColor(button.hovering ? color_hover : color);
    renderer.DrawTga(tga, button.x, button.y);

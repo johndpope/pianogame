@@ -10,14 +10,8 @@
 #include <sstream>
 using namespace std;
 
+#include "../os.h"
 #include "../string_util.h"
-
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#endif
 
 #ifdef WIN32
 
@@ -228,45 +222,64 @@ void MidiCommOut::Reset()
 
 #else
 
-// TODO: Clean up this function.  It was grabbed from
-// some place online and needs tending.
-static CFStringRef EndpointName(MIDIEndpointRef endpoint)
+
+static CFStringRef BuildEndpointName(MIDIEndpointRef endpoint)
 {
-   CFMutableStringRef result = CFStringCreateMutable(NULL, 0);
-   CFStringRef str;
-   
-   // begin with the endpoint's name
-   str = NULL;
+   CFMutableStringRef result = CFStringCreateMutable(0, 0);
+
+   // Start with the endpoint's name
+   CFStringRef str = 0;
    MIDIObjectGetStringProperty(endpoint, kMIDIPropertyName, &str);
-   if (str != NULL) {
+   if (str)
+   {
       CFStringAppend(result, str);
       CFRelease(str);
    }
-   
-   MIDIEntityRef entity = NULL;
+
+   MIDIEntityRef entity(0);
    MIDIEndpointGetEntity(endpoint, &entity);
-   if (entity == NULL)
-      // probably virtual
+   if (!entity)
+   {
+      // This endpoint probably belongs to a virtual entity, so
+      // there is no further information available.
       return result;
-   
-   if (CFStringGetLength(result) == 0) {
-      // endpoint name has zero length -- try the entity
-      str = NULL;
+   }
+
+   if (CFStringGetLength(result) == 0)
+   {
+      // Endpoint is unnamed, so look one level up at the entity
+      str = 0;
       MIDIObjectGetStringProperty(entity, kMIDIPropertyName, &str);
-      if (str != NULL) {
+      if (str)
+      {
          CFStringAppend(result, str);
          CFRelease(str);
       }
    }
-   // now consider the device's name
-   MIDIDeviceRef device = NULL;
+
+   // Try to find the top-level device's name that this
+   // entity belongs to
+   MIDIDeviceRef device = 0;
    MIDIEntityGetDevice(entity, &device);
-   if (device == NULL)
+   if (!device)
+   {
+      if (CFStringGetLength(result) == 0)
+      {
+         // No device name, entity name, or endpoint name,
+         // so this is pretty much the best we can do.
+         CFStringAppend(result, CFSTR("Unknown Endpoint"));
+         return result;
+      }
+
+      // While we don't have a device name, we at least have
+      // an entity or endpoint name at this point.
       return result;
-   
-   str = NULL;
+   }
+
+   str = 0;
    MIDIObjectGetStringProperty(device, kMIDIPropertyName, &str);
-   if (str != NULL) {
+   if (str)
+   {
       // if an external device has only one entity, throw away
       // the endpoint name and just use the device name
       if (MIDIDeviceGetNumberOfEntities(device) < 2)
@@ -274,23 +287,20 @@ static CFStringRef EndpointName(MIDIEndpointRef endpoint)
          CFRelease(result);
          return str;
       }
-      else
+
+      // Check if the entity name already start with the device name
+      // (some drivers do this though they shouldn't)
+      if (CFStringCompareWithOptions(str,    // Device name
+                                     result, // Endpoint name
+                                     CFRangeMake(0, CFStringGetLength(str)), 0) != kCFCompareEqualTo)
       {
-         // does the entity name already start with the device name?
-         // (some drivers do this though they shouldn't)
-         // if so, do not prepend
-            if (CFStringCompareWithOptions(str /* device name */,
-            result /* endpoint name */,
-            CFRangeMake(0, CFStringGetLength(str)), 0) != kCFCompareEqualTo) {
-            // prepend the device name to the entity name
-            if (CFStringGetLength(result) > 0)
-               CFStringInsert(result, 0, CFSTR(" "));
-            CFStringInsert(result, 0, str);
-         }
-CFRelease(str);
+         // If it doesn't, prepend the device name to the entity name
+         if (CFStringGetLength(result) > 0) CFStringInsert(result, 0, CFSTR(" "));
+         CFStringInsert(result, 0, str);
       }
+      CFRelease(str);
    }
-return result;
+   return result;
 }
 
 
@@ -309,7 +319,7 @@ MidiCommDescriptionList MidiCommIn::GetDeviceList()
    {
       MIDIEndpointRef endpoint = MIDIGetSource(i);
       
-      CFStringRef cf_name = EndpointName(endpoint);
+      CFStringRef cf_name = BuildEndpointName(endpoint);
       
       MidiCommDescription d;
       d.id = i;
