@@ -7,14 +7,7 @@
 #include "Textures.h"
 #include "CompatibleSystem.h"
 #include "Tga.h"
-
-#ifdef WIN32
-#include <gl/gl.h>
-#else
-#include <OpenGL/OpenGL.h>
-#include <AGL/agl.h>
-#include <AGL/gl.h>
-#endif
+#include "os_graphics.h"
 
 // For FPS display
 #include "TextWriter.h"
@@ -246,10 +239,5 @@ void GameStateManager::Draw(Renderer &renderer)
    }
 
    glFlush ();
-   
-#ifdef WIN32
-   SwapBuffers(renderer.GetHdc());
-#else
-   aglSwapBuffers(renderer.GetContext());
-#endif
+   renderer.SwapBuffers();
 }

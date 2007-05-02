@@ -7,17 +7,18 @@
 
 #ifdef WIN32
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
 #include <Windows.h>
 #include <vector>
 
-// Windows Media Player has started changing the MIDI synth
-// volume to 0 after playing a MIDI file and exiting.  Seeing
-// as how that's a common file-preview path just before starting
+// Windows Media Player (starting in version 11) has started changing
+// the MIDI synth volume to 0 after playing a MIDI file and exiting.
+// Seeing as how that's a common file-preview path just before starting
 // Synthesia, we have to combat the behavior ourselves.
+//
+// Once initialized, it checks to see if the system MIDI synth volume
+// is "reasonable" (above 33% or so volume), and if not, it will set
+// it to something like 75%.  On object destruction, it sets the volume
+// back to its previous volume.
 class ReasonableSynthVolume
 {
 public:

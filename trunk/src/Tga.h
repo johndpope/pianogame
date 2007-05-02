@@ -35,7 +35,7 @@ private:
 
    static Tga *LoadFromData(const unsigned char *bytes);
 
-   static Tga *LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned int size, unsigned int width, unsigned int height, unsigned int bpp);
+   static Tga *LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height, unsigned int bpp);
    static Tga *LoadUncompressed(const unsigned char *src, unsigned char *dest, unsigned int size, unsigned int width, unsigned int height, unsigned int bpp);
 
    static Tga *BuildFromParameters(const unsigned char *data, unsigned int width, unsigned int height, unsigned int bpp);

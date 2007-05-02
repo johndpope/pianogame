@@ -20,8 +20,8 @@ void StringTile::Draw(Renderer &renderer) const
 {
    renderer.SetOffset(m_x, m_y);
 
-   const Color hover = ToColor(0xFF,0xFF,0xFF);
-   const Color no_hover = ToColor(0xE0,0xE0,0xE0);
+   const Color hover = Renderer::ToColor(0xFF,0xFF,0xFF);
+   const Color no_hover = Renderer::ToColor(0xE0,0xE0,0xE0);
    renderer.SetColor(whole_tile.hovering ? hover : no_hover);
    renderer.DrawTga(m_graphics, 0, 0);
 

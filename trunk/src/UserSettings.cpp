@@ -1,9 +1,8 @@
 #include "string_util.h"
+#include "os.h"
 
 #ifdef WIN32
 #include "registry.h"
-#else
-#include <Carbon/Carbon.h>
 #endif
 
 using namespace std;

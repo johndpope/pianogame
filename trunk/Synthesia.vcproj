@@ -128,7 +128,7 @@
 				RuntimeLibrary="0"
 				DisableLanguageExtensions="false"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="0"
 			/>
@@ -202,6 +202,14 @@
 			</File>
 			<File
 				RelativePath=".\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\os.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\os_graphics.h"
 				>
 			</File>
 			<File

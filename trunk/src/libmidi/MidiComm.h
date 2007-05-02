@@ -9,12 +9,9 @@
 #include <vector>
 #include <queue>
 
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#else
+#include "../os.h"
+
+#ifndef WIN32
 #include <AudioUnit/AudioUnit.h>
 #include <CoreMIDI/CoreMIDI.h>
 #endif
@@ -55,7 +52,13 @@ public:
    // Returns whether the input device has more buffered events.
    bool KeepReading() const;
 
-   // Do Not Use
+   // Internal callback, do not use!
+   //
+   // NOTE: The Mac implementation of this class uses this callback
+   // in a different way than Windows.  Windows calls this function
+   // with a variety of Windows data (error messages, structs, and
+   // whatnot).  The Mac side uses the three parameters as the usual
+   // MIDI event triple.  (SysEx is filtered out in both cases.)
    void InputCallback(unsigned int msg, unsigned long p1, unsigned long p2);
 
 private:
@@ -69,7 +72,6 @@ private:
 #else
    MIDIClientRef m_client;
    MIDIPortRef m_port;
-
    mutable pthread_mutex_t m_mutex;
 #endif
 

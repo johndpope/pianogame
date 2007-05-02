@@ -2,25 +2,8 @@
 // Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#else
-#include <Carbon/Carbon.h>
-#endif
-
-#ifdef WIN32
-#include <gl/gl.h>
-#include <gl/glu.h>
-#else
-#include <OpenGL/OpenGL.h>
-#include <AGL/agl.h>
-#include <AGL/gl.h>
-#include <AGL/glu.h>
-#endif
-
+#include "os.h"
+#include "os_graphics.h"
 
 #include <set>
 #include <string>
@@ -32,13 +15,8 @@
 
 #include "CompatibleSystem.h"
 #include "SynthesiaError.h"
-#include "KeyboardDisplay.h"
 #include "libmidi/Midi.h"
-
-#ifdef WIN32
-// The problem this bit of code solves is only in Windows
 #include "libmidi/SynthVolume.h"
-#endif
 
 #include "Tga.h"
 #include "Renderer.h"
@@ -51,12 +29,6 @@ using namespace std;
 #ifdef WIN32
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-// TODO: Make this better
-HWND g_hwnd;
-
-typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
-PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 
 #else
 
@@ -87,22 +59,6 @@ static const int WindowWidth  = Compatible::GetDisplayWidth();
 static const int WindowHeight = Compatible::GetDisplayHeight();
 
 GameStateManager state_manager(WindowWidth, WindowHeight);
-
-void setVSync(int interval=1)
-{
-#ifdef WIN32
-  const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
-
-  // Check if the WGL_EXT_swap_control extension is supported.
-  if (strstr(extensions, "WGL_EXT_swap_control") == 0) return; 
-  
-  wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
-  if (wglSwapIntervalEXT) wglSwapIntervalEXT(interval);
-
-#else
-   // MACNOTE: Don't do anything for now.  Investigate further some other time.
-#endif
-}
 
 const static wstring application_name = L"Synthesia";
 const static std::wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
@@ -201,6 +157,8 @@ int main(int argc, char *argv[])
       // Apparently the command-line isn't useful in Mac applications.  There
       // is just a weird system command-line argument and you can't drag files
       // onto the icon anyway.  Ignore.
+      //
+      // MACTODO: Ask if this is actually the case!
       command_line = L"";
       
 #endif
@@ -268,16 +226,14 @@ int main(int argc, char *argv[])
       // seek the "Open" dialog to the right folder.
       FileSelector::SetLastMidiFilename(command_line);
 
-#ifdef WIN32
       // This does what is necessary in construction and
-      // resets what it does during its destruction
-      ReasonableSynthVolume volume_correct;
-#endif
+      // resets what it does during its destruction.  We
+      // never actually have to reference it.
+      ReasonableSynthVolume volume_correction;
 
 #ifdef WIN32
       HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
          WS_POPUP, 0, 0, WindowWidth, WindowHeight, HWND_DESKTOP, 0, instance, 0);
-      g_hwnd = hwnd;
 
       HDC dc = GetDC(hwnd);
       if (!dc) throw std::exception("Couldn't get window device context.");
@@ -344,10 +300,11 @@ int main(int argc, char *argv[])
       windowColor.blue  = 65535 * 0.25;
       SetWindowContentColor(window, &windowColor);
 
-      // TODO: The fade effect is way cooler
+      // MACTODO: The fade effect is way cooler
       status = TransitionWindow(window, kWindowZoomTransitionEffect, kWindowShowTransitionAction, 0);
       if (status != noErr) throw SynthesiaError(L"Unable to transition the window.");
       
+      // MACTODO: Find out about these deprecated port things
       SetPortWindowPort(window);
       GrafPtr cgrafSave = 0;
       GetPort(&cgrafSave);
@@ -366,12 +323,10 @@ int main(int argc, char *argv[])
       aglUpdateContext(aglContext);
       
       
-      
-      
 #endif
 
       // Enable v-sync for release versions
-      setVSync(1);
+      Renderer::SetVSyncInterval(1);
 
       // All of this OpenGL stuff only needs to be set once
       glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
@@ -390,8 +345,6 @@ int main(int argc, char *argv[])
       glLoadIdentity();
       gluOrtho2D(0, WindowWidth, 0, WindowHeight);
 
-      int return_value = 1;
-
       SharedState state;
       state.song_title = FileSelector::TrimFilename(command_line);
       state.midi = midi;
@@ -400,8 +353,8 @@ int main(int argc, char *argv[])
 
 
 #ifdef WIN32
-      ShowWindow (hwnd, iCmdShow);
-      UpdateWindow (hwnd);
+      ShowWindow(hwnd, iCmdShow);
+      UpdateWindow(hwnd);
 
       MSG msg;
       ZeroMemory(&msg, sizeof(MSG));
@@ -433,23 +386,20 @@ int main(int argc, char *argv[])
 
       UnregisterClass(application_name.c_str(), instance);
 
-      return_value = int(msg.wParam);
+      return int(msg.wParam);
       
 #else
 
       RunApplicationEventLoop();
       DisposeWindow(window);
-
       
       aglDestroyPixelFormat(aglPixelFormat);
       aglSetCurrentContext(0);
       aglSetDrawable(aglContext, 0);
       aglDestroyContext(aglContext);
       
-      return_value = 0;
+      return 0;
 #endif
-
-      return return_value;
    }
    catch (const SynthesiaError &e)
    {
@@ -504,8 +454,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
    case WM_SYSCOMMAND:
       {
-         // TODO: I'm not convinced this (NeHe code) is the appropriate behavior!
-
          // Prevent the screensaver or monitor power-save from kicking in.
          switch (wParam)
          {
@@ -655,8 +603,13 @@ static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef
          
       case kEventAppShown:
       case kEventAppActivated:
+
+         // MACTODO: Test
          window_state.Activate();
-         ShowWindow(window);
+         if (!FileSelector::IsRequestOpen())
+         {
+            ShowWindow(window);
+         }
          break;
          
       case kEventAppHidden:

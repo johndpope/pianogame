@@ -79,14 +79,14 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
    // Do two passes on the notes, the first for note shadows and the second
    // for the note blocks themselves.  This is to avoid shadows being drawn
    // on top of notes.
-   renderer.SetColor(ToColor(255, 255, 255));
+   renderer.SetColor(Renderer::ToColor(255, 255, 255));
    DrawNotePass(renderer, note_tex[0], note_tex[1], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
    DrawNotePass(renderer, note_tex[2], note_tex[3], white_width, white_space, black_width, black_offset, x + x_offset, y, y_offset, y_roll_under, notes, show_duration, current_time, track_properties);
 
    const int ActualKeyboardWidth = white_width*white_key_count + white_space*(white_key_count-1);
 
    // Black out the background of where the keys are about to appear
-   renderer.SetColor(ToColor(0, 0, 0));
+   renderer.SetColor(Renderer::ToColor(0, 0, 0));
    renderer.DrawQuad(x + x_offset, y+y_offset, ActualKeyboardWidth, white_height);
 
    DrawShadow(renderer, key_tex[Shadow], x+x_offset, y+y_offset+white_height - 10, ActualKeyboardWidth);
@@ -163,7 +163,7 @@ int KeyboardDisplay::GetWhiteKeyCount() const
 void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height,
    int key_space, int x_offset, int y_offset) const
 {
-   Color white = ToColor(255, 255, 255);
+   Color white = Renderer::ToColor(255, 255, 255);
 
    char current_white = GetStartingNote();
    int current_octave = GetStartingOctave() + 1;
@@ -222,8 +222,6 @@ void KeyboardDisplay::DrawBlackKey(Renderer &renderer, const Tga *tex, const Key
 void KeyboardDisplay::DrawBlackKeys(Renderer &renderer, const Tga *tex, bool active_only, int white_key_count, int white_width,
    int black_width, int black_height, int key_space, int x_offset, int y_offset, int black_offset) const
 {
-   Color black = ToColor(0x20, 0x20, 0x20);
-
    char current_white = GetStartingNote();
    int current_octave = GetStartingOctave() + 1;
    for (int i = 0; i < white_key_count; ++i)
@@ -295,8 +293,8 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
 
    // MACNOTE: Having 'static' keyword on these two makes the guide NOT appear
    // in Release mode.  (Debug mode works either way.)
-   const Color thick(ToColor(0x48,0x48,0x48));
-   const Color thin(ToColor(0x50,0x50,0x50));
+   const Color thick(Renderer::ToColor(0x48,0x48,0x48));
+   const Color thin(Renderer::ToColor(0x50,0x50,0x50));
 
    char current_white = GetStartingNote() - 1;
    int current_octave = GetStartingOctave() + 1;
@@ -405,7 +403,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
    switch (m_size)
    {
    case KeyboardSize37: keyboard_type_offset = 4 - WhiteNotesPerOctave; break;
-   case KeyboardSize49: keyboard_type_offset = 0 - WhiteNotesPerOctave; break; // TODO!
+   case KeyboardSize49: keyboard_type_offset = 0 - WhiteNotesPerOctave; break;
    case KeyboardSize61: keyboard_type_offset = 7 - WhiteNotesPerOctave; break; // TODO!
    case KeyboardSize76: keyboard_type_offset = 5 - WhiteNotesPerOctave; break; // TODO!
    case KeyboardSize88: keyboard_type_offset = 2 - WhiteNotesPerOctave; break;

@@ -274,7 +274,7 @@ NoteId MidiEvent::NoteNumber() const
 void MidiEvent::ShiftNote(int shift_amount)
 {
    if (Type() != MidiEventType_NoteOn && Type() != MidiEventType_NoteOff) return;
-   m_data1 += shift_amount;
+   m_data1 = m_data1 + static_cast<unsigned char>(shift_amount);
 }
 
 int MidiEvent::ProgramNumber() const

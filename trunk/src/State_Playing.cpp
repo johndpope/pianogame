@@ -450,7 +450,7 @@ void PlayingState::Draw(Renderer &renderer) const
    {
       renderer.SetColor(0, 0, 0, int(alpha * 160));
       renderer.DrawQuad(0, GetStateHeight() / 3, GetStateWidth(), 80);
-      const Color c = ToColor(255, 255, 255, int(alpha * 0xFF));
+      const Color c = Renderer::ToColor(255, 255, 255, int(alpha * 0xFF));
       TextWriter title(GetStateWidth()/2, GetStateHeight()/3 + 25, renderer, true, 24);
       title << Text(title_text, c);
 
@@ -473,11 +473,11 @@ void PlayingState::Draw(Renderer &renderer) const
    score << static_cast<int>(m_state.stats.score);
 
    TextWriter multipliers(Layout::ScreenMarginX + 236, text_y + 9, renderer, false, Layout::TitleFontSize);
-   multipliers << Text(multiplier_text, ToColor(138, 226, 52));
+   multipliers << Text(multiplier_text, Renderer::ToColor(138, 226, 52));
 
    int speed_x_offset = (m_state.song_speed >= 100 ? 0 : 11);
    TextWriter speed(Layout::ScreenMarginX + 413 + speed_x_offset, text_y + 9, renderer, false, Layout::TitleFontSize);
-   speed << Text(speed_text, ToColor(114, 159, 207));
+   speed << Text(speed_text, Renderer::ToColor(114, 159, 207));
 
    double non_zero_playback_speed = ( (m_state.song_speed == 0) ? 0.1 : (m_state.song_speed/100.0) );
    microseconds_t tot_seconds = static_cast<microseconds_t>((m_state.midi->GetSongLengthInMicroseconds() / 100000.0) / non_zero_playback_speed);

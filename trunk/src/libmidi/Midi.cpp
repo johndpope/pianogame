@@ -18,6 +18,7 @@ Midi Midi::ReadFromFile(const wstring &filename)
    fstream file(reinterpret_cast<const wchar_t*>((filename).c_str()), ios::in|ios::binary);
 #else
    // TODO: This isn't Unicode!
+   // MACTODO: Test to see if opening a unicode filename works.  I bet it doesn't.
    std::string narrow(filename.begin(), filename.end());
    fstream file(narrow.c_str(), ios::in | ios::binary);
 #endif

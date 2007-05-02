@@ -1,24 +1,9 @@
 #include "Tga.h"
 
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Windows.h>
-#else
-#include <Carbon/Carbon.h>
-#endif
-
+#include "os.h"
+#include "os_graphics.h"
 #include "string_util.h"
 #include "SynthesiaError.h"
-
-#ifdef WIN32
-#include <gl/gl.h>
-#else
-#include <OpenGL/OpenGL.h>
-#include <AGL/gl.h>
-
-#endif
 
 Tga* Tga::Load(const std::wstring &resource_name)
 {
@@ -135,7 +120,7 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
    unsigned char *image_data = reinterpret_cast<unsigned char*>(malloc(data_size));
 
    Tga *t = 0;
-   if (type == TgaCompressed) t = LoadCompressed(pos, image_data, data_size, width, height, bpp);
+   if (type == TgaCompressed) t = LoadCompressed(pos, image_data, width, height, bpp);
    if (type == TgaUncompressed) t = LoadUncompressed(pos, image_data, data_size, width, height, bpp);
 
    free(image_data);
@@ -155,7 +140,7 @@ Tga *Tga::LoadUncompressed(const unsigned char *src, unsigned char *dest, unsign
    return BuildFromParameters(dest, width, height, bpp);
 }
 
-Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned int size, unsigned int width, unsigned int height, unsigned int bpp)
+Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height, unsigned int bpp)
 {
    const unsigned char *pos = src;
 
