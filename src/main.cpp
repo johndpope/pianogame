@@ -329,10 +329,9 @@ int main(int argc, char *argv[])
       Renderer::SetVSyncInterval(1);
 
       // All of this OpenGL stuff only needs to be set once
-      glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClearDepth(1.0f);
-      glDepthFunc(GL_LEQUAL);
-      glEnable(GL_DEPTH_TEST);
+      glDisable(GL_DEPTH_TEST);
       glEnable(GL_TEXTURE_2D);
 
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
