@@ -52,12 +52,23 @@ The Legend of Zelda: Ocarina of Time - Zelda's Lullaby
 
 Changes
 
+Release 0.6.1
+-------------
+FIX: Picked a font for the Mac version to use that is actually a default
+     system font.  (Apparently "Palatino" only ships with iLife now.)
+FIX: On the Mac, fixed a problem where the (modal!) file open dialog could
+     be hidden underneath the game window, forcing you to quit the program.
+FIX: Disabled OpenGL depth testing to fix a problem where text would sometimes
+     not appear above other controls (TrackBox, SongBox, etc.)
+
+
 Release 0.6.0
 -------------
 NEW: Mac Version!
 NEW: All new note and keyboard graphics!
 NEW: All new menu graphics.
 NEW: Right-click association option in installer.
+CHG: Rebranded as Synthesia
 CHG: Switched from base 2D OS drawing to 3D accelerated OpenGL drawing.
 CHG: Moved status display to the bottom of the screen during play.
 CHG: Made default music folder less imposing.  Now the game will only default
