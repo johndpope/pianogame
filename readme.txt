@@ -60,6 +60,8 @@ FIX: On the Mac, fixed a problem where the (modal!) file open dialog could
      be hidden underneath the game window, forcing you to quit the program.
 FIX: Disabled OpenGL depth testing to fix a problem where text would sometimes
      not appear above other controls (TrackBox, SongBox, etc.)
+FIX: Score state now displays correctly at low resolutions (like 800x600).
+FIX: Title bar no longer pops when changing speed at the beginning of gameplay.
 
 
 Release 0.6.0

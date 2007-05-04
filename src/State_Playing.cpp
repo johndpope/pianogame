@@ -47,7 +47,7 @@ void PlayingState::ResetSong()
 
    // NOTE: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
-   const static microseconds_t LeadIn = 6000000;
+   const static microseconds_t LeadIn = 5500000;
    const static microseconds_t LeadOut = 1000000;
 
    if (!m_state.midi) return;
@@ -63,6 +63,7 @@ void PlayingState::ResetSong()
    m_current_combo = 0;
 
    m_note_offset = 0;
+   m_max_allowed_title_alpha = 1.0;
 }
 
 PlayingState::PlayingState(const SharedState &state)
@@ -292,6 +293,22 @@ void PlayingState::Listen()
 
 void PlayingState::Update()
 {
+   // Calculate how visible the title bar should be
+   const static double fade_in_ms = 350.0;
+   const static double stay_ms = 2500.0;
+   const static double fade_ms = 500.0;
+
+   m_title_alpha = 0.0;
+   unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
+   if (double(ms) <= stay_ms) m_title_alpha = std::min(1.0, ms / fade_in_ms);
+   if (double(ms) >= stay_ms) m_title_alpha = std::min(std::max((fade_ms - (ms - stay_ms)) / fade_ms, 0.0), 1.0);
+
+   // Lock down the alpha so that if you are slowing the song down as it
+   // fades out, it doesn't cut back into a much higher alpha value
+   m_title_alpha = std::min(m_title_alpha, m_max_allowed_title_alpha);
+   if (double(ms) > stay_ms) m_max_allowed_title_alpha = m_title_alpha;
+
+
    microseconds_t delta_microseconds = static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000;
 
    // The 100 term is really paired with the playback speed, but this
@@ -429,17 +446,9 @@ void PlayingState::Draw(Renderer &renderer) const
    m_keyboard->Draw(renderer, key_tex, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
       m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
 
-   // Show the title for a while and then fade it out
-   const static double fade_in_ms = 350.0;
-   const static double stay_ms = 2500.0;
-   const static double fade_ms = 500.0;
-
-   double alpha = 0.0;
-   unsigned long ms = GetStateMilliseconds() * max(m_state.song_speed, 50) / 100;
-   if (double(ms) <= stay_ms) alpha = std::min(1.0, ms / fade_in_ms);
-   if (double(ms) >= stay_ms) alpha = std::min(std::max((fade_ms - (ms - stay_ms)) / fade_ms, 0.0), 1.0);
-
    wstring title_text = m_state.song_title;
+
+   double alpha = m_title_alpha;
    if (m_paused)
    {
       alpha = 1.0;
