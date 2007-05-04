@@ -49,8 +49,20 @@ void StatsState::Update()
 
 void StatsState::Draw(Renderer &renderer) const
 {
-   Layout::DrawTitle(renderer, m_state.song_title);
-   Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
+   const bool ConstrainedHeight = (GetStateHeight() < 720);
+
+   int left = GetStateWidth() / 2 + 40;
+   const int InstructionsY = ConstrainedHeight ? 120 : 263;
+
+   renderer.SetColor(White);
+   renderer.DrawTga(GetTexture(StatsText), left - 270, InstructionsY - 113);
+
+   if (!ConstrainedHeight)
+   {
+      Layout::DrawTitle(renderer, m_state.song_title);
+      Layout::DrawHorizontalRule(renderer, GetStateWidth(), Layout::ScreenMarginY);
+   }
+
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
    Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonRetrySong));
@@ -85,12 +97,6 @@ void StatsState::Draw(Renderer &renderer) const
 
    int average_speed = 0;
    if (s.notes_user_could_have_played > 0) average_speed = s.speed_integral / s.notes_user_could_have_played;
-
-   int left = GetStateWidth() / 2 + 40;
-   const static int InstructionsY = 263;
-
-   renderer.SetColor(White);
-   renderer.DrawTga(GetTexture(StatsText), left - 270, 150);
 
    // Choose a dynamic color for the grade
    const double p = hit_percent / 100.0;
