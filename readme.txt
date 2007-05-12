@@ -5,7 +5,7 @@ Visit http://www.synthesiagame.com/ for more information.
 
 Synthesia is mostly written by Nicholas Piegdon.
 
-Although, the following people have also contributed:
+The following people have also contributed:
 - Daniel Lawrence for the name Synthesia
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
@@ -19,7 +19,7 @@ Synthesia's video game music samples are provided by Game Music Themes.
 Visit http://www.gamemusicthemes.com/ for high quality piano MIDI and sheets.
 
 Bubble Bobble - Main Theme
-  Composed by David Whittaker / Arranged by Gori Fater
+  Composed by Zuntata / Arranged by Gori Fater
 
 Dragon Warrior - Town Theme
   Composed by Koichi Sugiyama / Arranged by Russell Copeland
@@ -62,6 +62,9 @@ FIX: Disabled OpenGL depth testing to fix a problem where text would sometimes
      not appear above other controls (TrackBox, SongBox, etc.)
 FIX: Score state now displays correctly at low resolutions (like 800x600).
 FIX: Title bar no longer pops when changing speed at the beginning of gameplay.
+FIX: Text centering and placement on the Mac is now properly implemented.
+FIX: MIDI files with non-all-lowercase file extensions can now be selected
+     in the File Open dialog box.
 
 
 Release 0.6.0

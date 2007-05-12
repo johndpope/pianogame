@@ -14,6 +14,7 @@ typedef AGLContext Context;
 #endif
 
 class Tga;
+class Text;
 class TextWriter;
 
 struct Color
@@ -58,6 +59,7 @@ private:
 
    Context m_context;
    
+   friend class Text;
    friend class TextWriter;
 };
 
