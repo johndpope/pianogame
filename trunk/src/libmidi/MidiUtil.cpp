@@ -89,7 +89,6 @@ std::wstring MidiError::GetErrorDescription() const
    case MidiError_MetaEventOnInput:                   return L"MIDI Input device sent a Meta Event.";
 
    case MidiError_RequestedTempoFromNonTempoEvent:    return L"Tempo data was requested from a non-tempo MIDI event.";
-   case MidiError_UnresolvedNoteEvents:               return L"Found a 'note on' event without a matching 'note off'.";
 
    default:                                           return WSTRING(L"Unknown MidiError Code (" << m_error << L").");
    }
@@ -281,6 +280,6 @@ std::wstring const InstrumentNames[InstrumentCount] = {
    //
    // NOTE: These aren't actually General MIDI instruments!
    //
-   L"Percussion", // for Tracks that use Channel 10
+   L"Percussion", // for Tracks that use Channel 10 or 16
    L"Various"     // for Tracks that use more than one
 };

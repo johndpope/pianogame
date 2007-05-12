@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 #else
 
       InitEvents();
-      
+
       Rect windowRect;
       windowRect.top = 0;
       windowRect.left = 0;
@@ -268,8 +268,8 @@ int main(int argc, char *argv[])
 
       OSStatus status;
       status = CreateNewWindow(kOverlayWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
-      if (status != noErr) throw SynthesiaError(L"Unable to create window.");
-      
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to create window.  Error code: " << static_cast<int>(status)));
+
       static const EventTypeSpec windowControlEvents[] = 
       {
       { kEventClassWindow, kEventWindowUpdate },
@@ -286,14 +286,14 @@ int main(int argc, char *argv[])
       { kEventClassWindow, kEventWindowCursorChange },
       { kEventClassWindow, kEventWindowClosed }
       };
-      
+
       if (OtherWindowEventHandlerRef != 0) RemoveEventHandler(OtherWindowEventHandlerRef);
-         
+
       status = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
-      if (status != noErr) throw SynthesiaError(L"Unable to install window event handler.");
-   
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to install window event handler.  Error code: " << static_cast<int>(status)));
+
       SetWindowTitleWithCFString(window, MacStringFromWide(friendly_app_name).get());
-   
+
       RGBColor windowColor;
       windowColor.red   = 65535 * 0.25;
       windowColor.green = 65535 * 0.25;
@@ -302,31 +302,22 @@ int main(int argc, char *argv[])
 
       // MACTODO: The fade effect is way cooler
       status = TransitionWindow(window, kWindowZoomTransitionEffect, kWindowShowTransitionAction, 0);
-      if (status != noErr) throw SynthesiaError(L"Unable to transition the window.");
-      
-      // MACTODO: Find out about these deprecated port things
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to transition the window.  Error code: " << static_cast<int>(status)));
+
       SetPortWindowPort(window);
-      GrafPtr cgrafSave = 0;
-      GetPort(&cgrafSave);
-      
+
       GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_NONE };
       AGLPixelFormat aglPixelFormat = aglChoosePixelFormat(NULL, 0, attrib);
       if (!aglPixelFormat) throw SynthesiaError(L"Couldn't set AGL pixel format.");
-      
+
       aglContext = aglCreateContext(aglPixelFormat, (aglGetCurrentContext() != 0) ? aglGetCurrentContext() : 0);
       aglSetDrawable(aglContext, GetWindowPort(window));
       if (!aglSetCurrentContext(aglContext)) throw SynthesiaError(L"Error in SetupAppleGLContext(): Could not set current AGL context.");
 
-      SetPort(cgrafSave);
-      
       aglSetCurrentContext(aglContext);
       aglUpdateContext(aglContext);
-      
-      
-#endif
 
-      // Enable v-sync for release versions
-      Renderer::SetVSyncInterval(1);
+#endif
 
       // All of this OpenGL stuff only needs to be set once
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -373,6 +364,7 @@ int main(int argc, char *argv[])
                state_manager.Update(window_state.JustActivated());
 
                Renderer renderer(dc);
+               renderer.SetVSyncInterval(1);
                state_manager.Draw(renderer);
             }
          }
@@ -528,7 +520,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler(GetApplicationEventTarget(), NewEventHandlerUPP(AppEventHandlerProc), GetEventTypeCount(appControlEvents), appControlEvents, 0, &AppEventHandlerRef);
-   if (ret != noErr) throw SynthesiaError(L"Unable to install app event handler.");
+   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install app event handler.  Error code: " << static_cast<int>(ret)));
    
    static const EventTypeSpec mouseControlEvents[] =
    {
@@ -538,7 +530,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( MouseEventHandlerProc ), GetEventTypeCount(mouseControlEvents), mouseControlEvents, 0, &MouseEventHandlerRef );
-   if (ret != noErr) throw SynthesiaError(L"Unable to install mouse event handler.");
+   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install mouse event handler.  Error code: " << static_cast<int>(ret)));
    
    static const EventTypeSpec keyControlEvents[] =
    {
@@ -548,7 +540,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( KeyEventHandlerProc ), GetEventTypeCount(keyControlEvents), keyControlEvents, 0, &KeyEventHandlerRef );
-   if (ret != noErr) throw SynthesiaError(L"Unable to install key event handler.");
+   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install key event handler.  Error code: " << static_cast<int>(ret)));
 }
 
 
@@ -562,6 +554,8 @@ static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
       state_manager.Update(window_state.JustActivated());
 
       Renderer renderer(aglContext);
+      renderer.SetVSyncInterval(1);
+      
       state_manager.Draw(renderer);
    }
    catch (const SynthesiaError &e)
@@ -602,8 +596,6 @@ static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef
          
       case kEventAppShown:
       case kEventAppActivated:
-
-         // MACTODO: Test
          window_state.Activate();
          if (!FileSelector::IsRequestOpen())
          {

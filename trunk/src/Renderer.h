@@ -14,6 +14,7 @@ typedef AGLContext Context;
 #endif
 
 class Tga;
+class TextWriter;
 
 struct Color
 {
@@ -24,12 +25,14 @@ class Renderer
 {
 public:
 
-   static void SetVSyncInterval(int interval = 1);
    static Color ToColor(int r, int g, int b, int a = 0xFF);
 
    Renderer(Context context);
 
    void SwapBuffers();
+
+   // 0 will disable vsync, 1 will enable.  (In Windows, >1 will skip frames.)
+   void SetVSyncInterval(int interval = 1);
 
    void SetOffset(int x, int y) { m_xoffset = x; m_yoffset = y; }
    void ResetOffset() { SetOffset(0,0); }
@@ -46,18 +49,16 @@ public:
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h) const;
    void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h) const;
 
-   // TODO: REMOVE!
-   Context GetContext() { return m_context; }
-
-   // TODO: REMOVE!
-   int GetXoffset() const { return m_xoffset; }
-   int GetYoffset() const { return m_yoffset; }
-
 private:
+
+   // NOTE: These are used externally by the friend
+   // class TextWriter (along with the context)
    int m_xoffset;
    int m_yoffset;
 
    Context m_context;
+   
+   friend class TextWriter;
 };
 
 #endif

@@ -38,6 +38,7 @@ Color Renderer::ToColor(int r, int g, int b, int a)
 void Renderer::SetVSyncInterval(int interval)
 {
 #ifdef WIN32
+
    const char *extensions = reinterpret_cast<const char*>(static_cast<const unsigned char*>(glGetString( GL_EXTENSIONS )));
 
    // Check if the WGL_EXT_swap_control extension is supported.
@@ -48,7 +49,15 @@ void Renderer::SetVSyncInterval(int interval)
    if (wglSwapIntervalEXT) wglSwapIntervalEXT(interval);
 
 #else
-   // MACNOTE: Don't do anything for now.  Investigate V-Sync some other time.
+
+   GLint i = interval;
+   GLboolean ret = aglSetInteger(m_context, AGL_SWAP_INTERVAL, &i);
+   if (ret == GL_FALSE)
+   {
+      // LOGTODO!
+      // This is non-critical.  V-Sync might just not be supported.
+   }
+
 #endif
 }
 

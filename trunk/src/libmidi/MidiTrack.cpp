@@ -139,17 +139,16 @@ void MidiTrack::BuildNoteSet()
       m_active_notes[id] = info;
    }
 
-   // NOTE: No reason to report this error. It's non-critical
-   // so there is no reason we need to shut down for it.
-   // That would be needlessly restrictive against promiscuous
-   // MIDI files.  As-is, a note just won't be inserted if
-   // it isn't closed properly.
-   /*
    if (m_active_notes.size() > 0)
    {
-      throw MidiError(MidiError_UnresolvedNoteEvents);
+      // LOGTODO!
+   
+      // This is mostly non-critical.
+      //
+      // Erroring out would be needlessly restrictive against
+      // promiscuous MIDI files.  As-is, a note just won't be
+      // inserted if it isn't closed properly.
    }
-   */
 }
 
 void MidiTrack::DiscoverInstrument()
