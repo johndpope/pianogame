@@ -156,7 +156,7 @@
 		43EC024E0BE50E560075E132 /* play_NotesWhiteColor.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = play_NotesWhiteColor.tga; path = graphics/play_NotesWhiteColor.tga; sourceTree = "<group>"; };
 		43EC024F0BE50E560075E132 /* title_ChooseTracks.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = title_ChooseTracks.tga; path = graphics/title_ChooseTracks.tga; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Synthesia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Synthesia.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Synthesia.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Synthesia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

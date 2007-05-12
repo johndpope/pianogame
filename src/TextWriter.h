@@ -19,7 +19,12 @@
 
 class Renderer;
 
-// A nice ostream-like class
+// A nice ostream-like class for drawing OS-specific (or OpenGL) text to the
+// screen in varying colors, fonts, and sizes.
+//
+// MACNOTE: Mac version of text-placement routine inserts a bizarre space
+// after each successive << operator.
+//
 class TextWriter
 {
 public:

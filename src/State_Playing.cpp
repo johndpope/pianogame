@@ -45,7 +45,7 @@ void PlayingState::ResetSong()
    if (m_state.midi_out) m_state.midi_out->Reset();
    if (m_state.midi_in) m_state.midi_in->Reset();
 
-   // NOTE: These should be moved to a configuration file
+   // TODO: These should be moved to a configuration file
    // along with ALL other "const static something" variables.
    const static microseconds_t LeadIn = 5500000;
    const static microseconds_t LeadOut = 1000000;

@@ -19,6 +19,9 @@ enum SynthesiaErrorCode
 class SynthesiaError : public std::exception
 {
 public:
+
+   // TODO: This would be a sweet place to add stack-trace information...
+
    SynthesiaError(SynthesiaErrorCode error) : m_error(error), m_optional_string(L"") { }
    SynthesiaError(const std::wstring error) : m_error(Error_StringSpecified), m_optional_string(error) { }
    std::wstring GetErrorDescription() const;

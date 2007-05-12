@@ -34,7 +34,7 @@
 class MacStringFromWide
 {
 public:
-   MacStringFromWide(const std::wstring &wide) : cf(0)
+   MacStringFromWide(const std::wstring &wide, bool keep_around = false) : cf(0), m_keep_around(keep_around)
    {
       // TODO: This isn't Unicode!
       std::string narrow(wide.begin(), wide.end());
@@ -49,11 +49,12 @@ public:
    
    ~MacStringFromWide()
    {
-      CFRelease(cf);
+      if (!m_keep_around) CFRelease(cf);
    }
    
 private:
    CFStringRef cf;
+   bool m_keep_around;
 };
 
 static std::wstring WideFromMacString(CFStringRef cf)

@@ -13,8 +13,10 @@ using namespace std;
 
 #ifdef WIN32
 #include <strsafe.h>
+const static wchar_t PathDelimiter = L'\\';
 #else
 #include "ApplicationServices/ApplicationServices.h"
+const static wchar_t PathDelimiter = L'/';
 #endif
 
 namespace FileSelector
@@ -33,21 +35,23 @@ static pascal Boolean NavOpenFilterProc(AEDesc *item, void *info, NavCallBackUse
 
    FSRef fsRef;
    status = AEGetDescData(item, &fsRef, sizeof(fsRef));
-   if (status != noErr) throw SynthesiaError(L"Couldn't get item description.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get item description.  Error code: " << static_cast<int>(status)));
 
    const static int BufferSize(1024);
    char path_buffer[BufferSize];
    status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
-   if (status != noErr) throw SynthesiaError(L"Couldn't get file path.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
 
    std::string path(path_buffer);
    if (path.length() < 5) return false;
    
+   std::string path_lower(StringLower<std::string>(path));
+   
    bool allowed = false;
    const static std::string allowed1(".mid");
    const static std::string allowed2(".midi");
-   allowed = allowed || (path.substr(path.length() - allowed1.length()) == allowed1);
-   allowed = allowed || (path.substr(path.length() - allowed2.length()) == allowed2);
+   allowed = allowed || (path_lower.substr(path_lower.length() - allowed1.length()) == allowed1);
+   allowed = allowed || (path_lower.substr(path_lower.length() - allowed2.length()) == allowed2);
 
    return allowed;
 }
@@ -89,9 +93,8 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
 
       if (!SetCurrentDirectory(default_dir.c_str()))
       {
-         // TODO: Log something some day, but take no other action.
-         //
-         // This is alright.
+         // LOGTODO!
+         // This is non-critical.  No action required.
       }
    }
 
@@ -131,23 +134,24 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    
    NavDialogCreationOptions options;
    status  = NavGetDefaultDialogCreationOptions(&options);
-   if (status != noErr) throw SynthesiaError(L"Couldn't create dialog options.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create dialog options.  Error code: " << static_cast<int>(status)));
    
    options.windowTitle = CFSTR("Synthesia: Choose a MIDI song to play");
    
+   // TODO: Should clean this up at shut-down
    static NavObjectFilterUPP navFilterUPP(0);
    if (navFilterUPP == 0) navFilterUPP = NewNavObjectFilterUPP(NavOpenFilterProc);
    
    NavDialogRef navDialog(0);
    status = NavCreateChooseFileDialog(&options, 0, 0, 0, navFilterUPP, 0, &navDialog);
-   if (status != noErr) throw SynthesiaError(L"Couldn't create open dialog.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create open dialog.  Error code: " << static_cast<int>(status)));
    
    WindowRef window = FrontWindow();
    if (window) HideWindow(window);
    
    request_open = true;
    status = NavDialogRun(navDialog);
-   if (status != noErr) throw SynthesiaError(L"Couldn't run open dialog.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't run open dialog.  Error code: " << static_cast<int>(status)));
    request_open = false;
 
    if (window) ShowWindow(window);
@@ -166,7 +170,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    
    long item_count = 0;
    status = AECountItems(&navReply.selection, &item_count);
-   if (status != noErr) throw SynthesiaError(L"Couldn't count resulting items from open dialog.");
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't count resulting items from open dialog.  Error code: " << static_cast<int>(status)));
       
    for (long i = 1; i <= item_count; i++)
    {
@@ -175,18 +179,20 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
       {         
          CFStringRef file_title;
          status = LSCopyDisplayNameForRef( &fsRef, &file_title );
-         if (status != noErr) throw SynthesiaError(L"Couldn't get file title.");
+         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file title.  Error code: " << static_cast<int>(status)));
 
          const static int BufferSize(1024);
          char path_buffer[BufferSize];
          status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
-         if (status != noErr) throw SynthesiaError(L"Couldn't get file path.");
+         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
 
          std::string narrow_path(path_buffer);
          std::wstring filepath(narrow_path.begin(), narrow_path.end());
          
          if (returned_file_title) *returned_file_title = WideFromMacString(file_title);
          if (returned_filename) *returned_filename = filepath;
+         
+         CFRelease(file_title);
       }
    }
    
@@ -222,12 +228,6 @@ std::wstring TrimFilename(const std::wstring &filename)
    // Strip off path
    for (wstring::size_type i = song_title.length(); i != 0; --i)
    {
-#ifdef WIN32
-      const static wchar_t PathDelimiter = L'\\';
-#else
-      const static wchar_t PathDelimiter = L'/';
-#endif
-   
       if (song_title[i-1] == PathDelimiter)
       {
          song_title = song_title.substr(i, song_title.length());

@@ -25,10 +25,6 @@ void StringTile::Draw(Renderer &renderer) const
    renderer.SetColor(whole_tile.hovering ? hover : no_hover);
    renderer.DrawTga(m_graphics, 0, 0);
 
-   // NOTE: Title drawing disabled.  Expected to be in the texture
-   //TextWriter title(10, 10, renderer, false, 14);
-   //title << Text(m_title, ToColor(0xB0, 0xB0, 0xB0));
-
    TextWriter text(20, 46, renderer, false, 14);
    text << m_string;
 

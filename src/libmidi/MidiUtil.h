@@ -57,8 +57,7 @@ enum MidiErrorCode
    MidiError_UnexpectedInput,
    MidiError_MetaEventOnInput,
 
-   MidiError_RequestedTempoFromNonTempoEvent,
-   MidiError_UnresolvedNoteEvents
+   MidiError_RequestedTempoFromNonTempoEvent
 };
 
 class MidiError : public std::exception
