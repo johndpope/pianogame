@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
       // is just a weird system command-line argument and you can't drag files
       // onto the icon anyway.  Ignore.
       //
-      // MACTODO: Ask if this is actually the case!
+      // MACTODO: Check if this is actually the case!
       command_line = L"";
       
 #endif
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
       windowRect.bottom = (short)Compatible::GetDisplayHeight();
 
       OSStatus status;
-      status = CreateNewWindow(kOverlayWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
+      status = CreateNewWindow(kPlainWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
       if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to create window.  Error code: " << static_cast<int>(status)));
 
       static const EventTypeSpec windowControlEvents[] = 
@@ -597,16 +597,11 @@ static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef
       case kEventAppShown:
       case kEventAppActivated:
          window_state.Activate();
-         if (!FileSelector::IsRequestOpen())
-         {
-            ShowWindow(window);
-         }
          break;
          
       case kEventAppHidden:
       case kEventAppDeactivated:
          window_state.Deactivate();
-         HideWindow(window);
          break;
          
       case kEventAppQuit:

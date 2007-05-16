@@ -59,13 +59,6 @@ static pascal Boolean NavOpenFilterProc(AEDesc *item, void *info, NavCallBackUse
 #endif
 
 
-static bool request_open = false;
-bool IsRequestOpen()
-{
-   return request_open;
-}
-
-
 void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned_file_title)
 {
    // Grab the filename of the last song we played
@@ -146,15 +139,8 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    status = NavCreateChooseFileDialog(&options, 0, 0, 0, navFilterUPP, 0, &navDialog);
    if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create open dialog.  Error code: " << static_cast<int>(status)));
    
-   WindowRef window = FrontWindow();
-   if (window) HideWindow(window);
-   
-   request_open = true;
    status = NavDialogRun(navDialog);
    if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't run open dialog.  Error code: " << static_cast<int>(status)));
-   request_open = false;
-
-   if (window) ShowWindow(window);
    
    NavReplyRecord navReply;
    status = NavDialogGetReply(navDialog, &navReply);
