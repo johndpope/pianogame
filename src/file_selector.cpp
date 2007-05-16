@@ -105,7 +105,6 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ofn.lpstrDefExt =     L"mid";
    ofn.Flags =           OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
-   request_open = true;
    if (GetOpenFileName(&ofn))
    {
       std::wstring filename = WSTRING(ofn.lpstrFile);
@@ -116,7 +115,6 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
       if (returned_filename) *returned_filename = filename;
       return;
    }
-   request_open = false;
 
    if (returned_file_title) *returned_file_title = L"";
    if (returned_filename) *returned_filename = L"";
