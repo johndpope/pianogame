@@ -50,16 +50,23 @@ The Legend of Zelda: Ocarina of Time - Zelda's Lullaby
 
 --------------------------------------------------------------------------------
 
-Changes
+
+Change Log
+
 
 Release 0.6.1
 -------------
+CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
+     be on top and the Dock and Application bar can both be made visible by
+     hovering the mouse over there positions for a second or so.  (The game
+     window also no longer must be hidden during file selection or error boxes.)
 FIX: Picked a font for the Mac version to use that is actually a default
      system font.  (Apparently "Palatino" only ships with iLife now.)
 FIX: On the Mac, fixed a problem where the (modal!) file open dialog could
-     be hidden underneath the game window, forcing you to quit the program.
+     be hidden underneath the game window, leaving you not choice but to force-
+     quit the program.
 FIX: Disabled OpenGL depth testing to fix a problem where text would sometimes
-     not appear above other controls (TrackBox, SongBox, etc.)
+     not appear above other controls (TrackBox, SongBox, etc.) in Windows
 FIX: Score state now displays correctly at low resolutions (like 800x600).
 FIX: Title bar no longer pops when changing speed at the beginning of gameplay.
 FIX: Text centering and placement on the Mac is now properly implemented.
