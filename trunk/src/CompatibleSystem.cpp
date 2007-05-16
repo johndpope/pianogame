@@ -34,18 +34,12 @@ namespace Compatible
       DialogRef dialog;
       DialogItemIndex item;
 
-      // We need to hide the window else the dialog is drawn *under* the main window
-      WindowRef window = FrontWindow();
-      HideWindow(window);
-      
       // The cursor might have been hidden.
       ShowMouseCursor();
 
       CreateStandardAlert(kAlertStopAlert, MacStringFromWide(message_box_title).get(), MacStringFromWide(err).get(), 0, &dialog);
       RunStandardAlert(dialog, 0, &item);
       
-      // We don't need to re-show the window.  This was an error.  The app is closing.
-
 #endif
    }
 
