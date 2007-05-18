@@ -31,7 +31,7 @@
 	<key>CFBundleIconFile</key>
 	<string>app_icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.halitestudios.synthesia</string>
+	<string>com.synthesia</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

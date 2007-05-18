@@ -113,7 +113,7 @@ const static std::wstring friendly_app_name = WSTRING(L"Synthesia " << Synthesia
 
 const static wstring error_header1 = L"Synthesia detected a";
 const static wstring error_header2 = L" problem and must close:\n\n";
-const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@halitestudios.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@synthesiagame.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
 
 class EdgeTracker
 {
