@@ -30,6 +30,54 @@ using namespace std;
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+
+struct MonitorInfo
+{
+   HMONITOR monitor;
+   RECT rect;
+};
+
+#include <vector>
+typedef std::vector<MonitorInfo> MonitorList;
+
+std::wstring GetMonitorAssociatedDriverName(MONITORINFOEX *info)
+{
+   const std::wstring monitor_device(info->szDevice);
+
+   // Find the driver name associated with this monitor (this is not for
+   // dual-monitor setups, but rather dual video-card setups.  When you
+   // call CreateDC, if you don't specify the device name, the DC is created
+   // for the primary display device by default. This is bad in the case
+   // of dual video-cards.)
+   DISPLAY_DEVICE dev;
+   dev.cb = sizeof(DISPLAY_DEVICE);
+
+   int dev_id = 0;
+   for (;;)
+   {
+      if (!EnumDisplayDevices(0, dev_id++, &dev, 0)) return L"UNKNOWN";
+
+      const std::wstring device(dev.DeviceName);
+
+      if (monitor_device == device) return std::wstring(dev.DeviceString);
+   }
+   
+   return L"UNKNOWN";
+}
+
+BOOL CALLBACK MonitorEnumCallback(HMONITOR monitor, HDC, LPRECT rect, LPARAM lParam)
+{
+   MonitorList *monitors = (MonitorList*)lParam;
+
+   MonitorInfo info;
+   info.monitor = monitor;
+   info.rect = *rect;
+
+   monitors->push_back(info);
+
+   return TRUE;
+}
+
 #else
 
 static AGLContext aglContext;
@@ -232,30 +280,63 @@ int main(int argc, char *argv[])
       ReasonableSynthVolume volume_correction;
 
 #ifdef WIN32
-      HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
-         WS_POPUP, 0, 0, WindowWidth, WindowHeight, HWND_DESKTOP, 0, instance, 0);
 
-      HDC dc = GetDC(hwnd);
-      if (!dc) throw std::exception("Couldn't get window device context.");
+      MonitorList monitors;
+      EnumDisplayMonitors(0, 0, MonitorEnumCallback, LPARAM(&monitors));
+
+      std::wstring monitor_str = UserSetting::Get(L"Monitor", L"0");
+      if (monitor_str.length() == 0) monitor_str = L"0";
+
+      int monitor_id = (monitor_str[0] - L'0');
+      if (monitor_id >= static_cast<int>(monitors.size()))
+      {
+         MessageBox(0, WSTRING(L"Monitor '" << monitor_str << "' is invalid.  Using monitor 0.").c_str(), L"Invalid Monitor", MB_ICONWARNING);
+         UserSetting::Set(L"Monitor", L"0");
+
+         monitor_id = 0;
+      }
+
+      MonitorInfo info = monitors[monitor_id];
+
+      MONITORINFOEX monitorInfo;
+      monitorInfo.cbSize = sizeof(MONITORINFOEX);
+
+      if (!GetMonitorInfo(info.monitor, &monitorInfo)) throw std::exception("Couldn't get monitor information.");
+      const std::wstring driver_name(GetMonitorAssociatedDriverName(&monitorInfo));
+
+      HDC dc_dev = ::CreateDC(driver_name.c_str(), monitorInfo.szDevice, 0, 0);
+      RECT extents = monitorInfo.rcMonitor;
+
+      HWND hwnd = CreateWindow(application_name.c_str(), friendly_app_name.c_str(),
+         WS_POPUP, extents.left, extents.top, extents.right - extents.left, extents.bottom - extents.top, HWND_DESKTOP, 0, instance, 0);
+
+      HDC dc_win = GetDC(hwnd);
+
+      if (!dc_win) throw std::exception("Couldn't get window device context.");
+      if (!dc_dev) throw std::exception("Couldn't get display device context.");
       
       // Grab the current pixel format and change a few fields
-      int pixel_format_id = GetPixelFormat(dc);
+      int pixel_format_id = GetPixelFormat(dc_dev);
       PIXELFORMATDESCRIPTOR pfd;
-      DescribePixelFormat(dc, pixel_format_id, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
       pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+      DescribePixelFormat(dc_dev, pixel_format_id, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
       pfd.nVersion = 1;
-      pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+      pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_GENERIC_ACCELERATED | PFD_DOUBLEBUFFER;
       pfd.iPixelType = PFD_TYPE_RGBA;
       pfd.iLayerType = PFD_MAIN_PLANE;
 
       // After our changes, get the closest match the device has to offer
-      pixel_format_id = ChoosePixelFormat(dc, &pfd);
+      pixel_format_id = ChoosePixelFormat(dc_dev, &pfd);
       if (!pixel_format_id) throw std::exception("Unable to find a good pixel format.");
-      if (!SetPixelFormat(dc, pixel_format_id, &pfd)) throw std::exception("Couldn't set pixel format.");
+      if (!SetPixelFormat(dc_dev, pixel_format_id, &pfd)) throw std::exception("Couldn't set pixel format.");
 
-      HGLRC glrc = wglCreateContext(dc);
+      pixel_format_id = ChoosePixelFormat(dc_win, &pfd);
+      if (!pixel_format_id) throw std::exception("Unable to find a good (window) pixel format.");
+      if (!SetPixelFormat(dc_win, pixel_format_id, &pfd)) throw std::exception("Couldn't set (window) pixel format.");
+
+      HGLRC glrc = wglCreateContext(dc_dev);
       if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
-      if (!wglMakeCurrent(dc, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
+      if (!wglMakeCurrent(dc_win, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
 #else
 
       InitEvents();
@@ -341,6 +422,7 @@ int main(int argc, char *argv[])
 
       state_manager.SetInitialState(new TitleState(state));
 
+      // LOGTODO: glGetString(): GL_VENDOR, GL_RENDERER, GL_VERSION, GL_EXTENSIONS
 
 #ifdef WIN32
       ShowWindow(hwnd, iCmdShow);
@@ -363,16 +445,17 @@ int main(int argc, char *argv[])
             {
                state_manager.Update(window_state.JustActivated());
 
-               Renderer renderer(dc);
+               Renderer renderer(dc_win);
                renderer.SetVSyncInterval(1);
                state_manager.Draw(renderer);
             }
          }
       }
 
-      wglMakeCurrent(dc, 0);
+      wglMakeCurrent(dc_win, 0);
       wglDeleteContext(glrc);
-      ReleaseDC(hwnd, dc);
+      ReleaseDC(hwnd, dc_win);
+      DeleteDC(dc_dev);
       DestroyWindow(hwnd);
 
       UnregisterClass(application_name.c_str(), instance);
