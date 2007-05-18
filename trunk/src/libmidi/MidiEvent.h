@@ -24,7 +24,7 @@ struct MidiEventSimple
 class MidiEvent
 {
 public:
-   static MidiEvent ReadFromStream(std::istream &stream, unsigned char last_status);
+   static MidiEvent ReadFromStream(std::istream &stream, unsigned char last_status, bool contains_delta_pulses = true);
    static MidiEvent Build(const MidiEventSimple &simple);
    static MidiEvent NullEvent();
 

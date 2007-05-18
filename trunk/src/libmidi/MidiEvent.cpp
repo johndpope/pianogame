@@ -9,11 +9,12 @@
 #include "../string_util.h"
 using namespace std;
 
-MidiEvent MidiEvent::ReadFromStream(istream &stream, unsigned char last_status)
+MidiEvent MidiEvent::ReadFromStream(istream &stream, unsigned char last_status, bool contains_delta_pulses)
 {
    MidiEvent ev;
 
-   ev.m_delta_pulses = parse_variable_length(stream);
+   if (contains_delta_pulses) ev.m_delta_pulses = parse_variable_length(stream);
+   else ev.m_delta_pulses = 0;
 
    // MIDI uses a compression mechanism called "running status".
    // Anytime you read a status byte that doesn't have the highest-

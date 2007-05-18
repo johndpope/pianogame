@@ -5,6 +5,7 @@
 #include "MidiEvent.h"
 #include "MidiComm.h"
 #include "MidiUtil.h"
+#include "MidiTrack.h"
 
 #include <string>
 #include <sstream>
@@ -337,13 +338,62 @@ void midi_input(const MIDIPacketList *packet_list, void *read_ref_con, void *sou
 {
    MidiCommIn *comm_in = (MidiCommIn*)source_ref_con;
 
-   // TODO: There is no guarantee that events are coming in one at a time!   
+   UInt16 total_length = 0;
+
+   // Run through the packets first to calculate the size of the required buffer
    const MIDIPacket *packet = &packet_list->packet[0];
    for (int i = 0; i < packet_list->numPackets; ++i)
    {
-      comm_in->InputCallback(packet->data[0], packet->data[1], packet->data[2]);
+      total_length += packet->length;
       packet = MIDIPacketNext(packet);
    }
+
+   // Create a buffer for all the packets
+   char *data = new char[total_length + 1];
+   data[total_length] = 0;
+   
+   packet = &packet_list->packet[0];
+   UInt16 offset = 0;
+   for (int i = 0; i < packet_list->numPackets; ++i)
+   {
+      for (UInt16 byte = 0; byte < packet->length; ++byte) data[offset+byte] = packet->data[byte];
+      offset += packet->length;
+
+      packet = MIDIPacketNext(packet);
+   }
+
+   // NOTE: The following was pulled directly from MidiTrack.cpp.  I don't like the duplication.
+
+   // We have to jump through a couple hoops because istringstream
+   // can't handle binary data unless constructed through an std::string. 
+   string buffer_string(data, total_length);
+   istringstream event_stream(buffer_string, ios::binary);
+   delete[] data;
+
+   MidiEventList events;
+
+   // Read events until we run out of stream
+   char last_status = 0;
+   while (event_stream.peek() != char_traits<char>::eof())
+   {
+      MidiEvent ev = MidiEvent::ReadFromStream(event_stream, last_status, false); 
+      last_status = ev.StatusCode();
+      
+      events.push_back(ev);
+   }
+
+   // Run all the events through the callback
+   for (size_t i = 0; i < events.size(); ++i)
+   {
+      const MidiEvent& ev = events[i];
+      if (ev.Type() == MidiEventType_SysEx) continue;
+
+      MidiEventSimple simple;
+      ev.GetSimpleEvent(&simple);
+      
+      comm_in->InputCallback(simple.status, simple.byte1, simple.byte2);
+   }
+   
 }
 
 MidiCommIn::MidiCommIn(unsigned int device_id)
