@@ -223,8 +223,6 @@ void TitleState::Update()
 
    if (m_state.midi_out)
    {
-      PlayDevicePreview(static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000);
-
       if (m_output_tile->HitPreviewButton())
       {
          m_state.midi_out->Reset();
@@ -237,6 +235,10 @@ void TitleState::Update()
 
             PlayDevicePreview(0);
          }
+      }
+      else
+      {
+         PlayDevicePreview(static_cast<microseconds_t>(GetDeltaMilliseconds()) * 1000);
       }
    }
 
