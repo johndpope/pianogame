@@ -222,7 +222,7 @@ void GameStateManager::Draw(Renderer &renderer)
    const static float gray = 64.0f / 255.0f;
    glClearColor(gray, gray, gray, 1.0f);
 
-   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
