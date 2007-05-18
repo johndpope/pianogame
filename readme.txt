@@ -56,10 +56,20 @@ Change Log
 
 Release 0.6.1
 -------------
+NEW: Added a low-tech solution to choose between different monitors connected
+     to the SAME video card (doesn't work in multi-video-card situations.)
+     (Set the string key HKCU\Software\Synthesia\Monitor to "0" for primary
+     monitory, "1" for secondary, etc.)
 CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
      be on top and the Dock and Application bar can both be made visible by
      hovering the mouse over there positions for a second or so.  (The game
      window also no longer must be hidden during file selection or error boxes.)
+FIX: On the Mac, fixed MIDI that used RPN / NRPN controller events (e.g. to
+     set pitch bend) so they're now handled correctly.
+FIX: On the Mac, there was a potential problem with some input devices that
+     might send bursts of events all at once.  Previously, only the first
+     event in the incoming list of events was recognized.  Now, any number of
+     incoming events will be recognized correctly.
 FIX: Picked a font for the Mac version to use that is actually a default
      system font.  (Apparently "Palatino" only ships with iLife now.)
 FIX: On the Mac, fixed a problem where the (modal!) file open dialog could
