@@ -526,12 +526,43 @@ MidiCommOut::~MidiCommOut()
    CloseComponent(m_device);
 }
 
+
 void MidiCommOut::Write(const MidiEvent &out)
 {
    MidiEventSimple simple;
    if (out.GetSimpleEvent(&simple))
    {
       MusicDeviceMIDIEvent(m_device, simple.status, simple.byte1, simple.byte2, 0);
+      
+      if (out.Type() == MidiEventType_Controller)
+      {
+         // If we just set the data byte for some previous controller event,
+         // "close off" changes to it. That way, if the output device doesn't
+         // accept this (N)RPN event, it won't  accidentally overwrite the last
+         // one that it did.
+
+         // MACTODO: Find out if this is only necessary for the DLS Synth.  It
+         // seems like a reasonably good practice to follow all the time.
+         
+         // NOTE: Hopefully there aren't any (N)RPN types that rely on sequentially
+         // changing these values smoothly.  That seems like a pretty special
+         // case though.  I'll cross that bridge when I come to it.
+         
+         // Detect coarse data byte changes
+         if (simple.byte1 == 0x06)
+         {
+            MusicDeviceMIDIEvent(m_device, simple.status, 0x64, 0x7F, 0); // RPN (coarse) reset
+            MusicDeviceMIDIEvent(m_device, simple.status, 0x62, 0x7F, 0); // NRPN (coarse) reset
+         }
+         
+         // Detect fine data byte changes
+         if (simple.byte1 == 0x26)
+         {
+            MusicDeviceMIDIEvent(m_device, simple.status, 0x65, 0x7F, 0); // RPN (fine) reset
+            MusicDeviceMIDIEvent(m_device, simple.status, 0x63, 0x7F, 0); // NRPN (fine) reset
+         }
+      }
+
    }
 }
 
