@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
       MONITORINFOEX monitorInfo;
       monitorInfo.cbSize = sizeof(MONITORINFOEX);
 
-      if (!GetMonitorInfo(info.monitor, &monitorInfo)) throw std::exception("Couldn't get monitor information.");
+      if (!GetMonitorInfo(info.monitor, &monitorInfo)) throw SynthesiaError(L"Couldn't get monitor information.");
       const std::wstring driver_name(GetMonitorAssociatedDriverName(&monitorInfo));
 
       HDC dc_dev = ::CreateDC(driver_name.c_str(), monitorInfo.szDevice, 0, 0);
@@ -312,8 +312,8 @@ int main(int argc, char *argv[])
 
       HDC dc_win = GetDC(hwnd);
 
-      if (!dc_win) throw std::exception("Couldn't get window device context.");
-      if (!dc_dev) throw std::exception("Couldn't get display device context.");
+      if (!dc_win) throw SynthesiaError(L"Couldn't get window device context.");
+      if (!dc_dev) throw SynthesiaError(L"Couldn't get display device context.");
       
       // Grab the current pixel format and change a few fields
       int pixel_format_id = GetPixelFormat(dc_dev);
@@ -327,16 +327,16 @@ int main(int argc, char *argv[])
 
       // After our changes, get the closest match the device has to offer
       pixel_format_id = ChoosePixelFormat(dc_dev, &pfd);
-      if (!pixel_format_id) throw std::exception("Unable to find a good pixel format.");
-      if (!SetPixelFormat(dc_dev, pixel_format_id, &pfd)) throw std::exception("Couldn't set pixel format.");
+      if (!pixel_format_id) throw SynthesiaError(L"Unable to find a good pixel format.");
+      if (!SetPixelFormat(dc_dev, pixel_format_id, &pfd)) throw SynthesiaError(L"Couldn't set pixel format.");
 
       pixel_format_id = ChoosePixelFormat(dc_win, &pfd);
-      if (!pixel_format_id) throw std::exception("Unable to find a good (window) pixel format.");
-      if (!SetPixelFormat(dc_win, pixel_format_id, &pfd)) throw std::exception("Couldn't set (window) pixel format.");
+      if (!pixel_format_id) throw SynthesiaError(L"Unable to find a good (window) pixel format.");
+      if (!SetPixelFormat(dc_win, pixel_format_id, &pfd)) throw SynthesiaError(L"Couldn't set (window) pixel format.");
 
       HGLRC glrc = wglCreateContext(dc_dev);
-      if (!glrc) throw std::exception("Couldn't create OpenGL rendering context.");
-      if (!wglMakeCurrent(dc_win, glrc)) throw std::exception("Couldn't make OpenGL rendering context current.");
+      if (!glrc) throw SynthesiaError(L"Couldn't create OpenGL rendering context.");
+      if (!wglMakeCurrent(dc_win, glrc)) throw SynthesiaError(L"Couldn't make OpenGL rendering context current.");
 #else
 
       InitEvents();
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
    }
    catch (const std::exception &e)
    {
-      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.what() << error_footer);
+      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
       Compatible::ShowError(wrapped_description);
    }
    catch (...)
@@ -655,7 +655,7 @@ static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
    }
    catch (const std::exception &e)
    {
-      wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.what() << error_footer);
+      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
       Compatible::ShowError(wrapped_description);
       Compatible::GracefulShutdown();
    }

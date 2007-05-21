@@ -538,7 +538,7 @@ void MidiCommOut::Write(const MidiEvent &out)
       {
          // If we just set the data byte for some previous controller event,
          // "close off" changes to it. That way, if the output device doesn't
-         // accept this (N)RPN event, it won't  accidentally overwrite the last
+         // accept this (N)RPN event, it won't accidentally overwrite the last
          // one that it did.
 
          // MACTODO: Find out if this is only necessary for the DLS Synth.  It
@@ -547,6 +547,10 @@ void MidiCommOut::Write(const MidiEvent &out)
          // NOTE: Hopefully there aren't any (N)RPN types that rely on sequentially
          // changing these values smoothly.  That seems like a pretty special
          // case though.  I'll cross that bridge when I come to it.
+         //
+         // I tried "closing" controller changes just *before* a data (N)RPN
+         // event (in order to cut off some hypothetical previous (N)RPN event
+         // at the last possible second), but it didn't appear to work.
          
          // Detect coarse data byte changes
          if (simple.byte1 == 0x06)
