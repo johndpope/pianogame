@@ -30,7 +30,15 @@
 
 #include <Carbon/Carbon.h>
 
-// Helper class to avoid all the CFRelease nonsense
+// Helper class to avoid all the CFRelease nonsense.  Of course, this means you
+// MUST use the converted string in the same scope.  It's easy to forget with
+// temporaries.
+//
+// SomeMacFunctionCall(MacStringFromWide(L"woo!").get());   // OK
+//
+// CFStringRef s = MacStringFromWide(L"woo!").get();        // BAD! Auto-released right away!
+// CFStringRef s = MacStringFromWide(L"woo!", true), get(); // OK, but have to CFRelease(s) later.
+// 
 class MacStringFromWide
 {
 public:
@@ -72,12 +80,6 @@ static std::wstring WideFromMacString(CFStringRef cf)
 #endif
 
 
-
-// Apparently "widen" is deprecated
-#ifdef WIN32
-#pragma warning(disable : 4996)
-#endif
-
 // string_type here can be things like std::string or std::wstring
 template<class string_type>
 const string_type StringLower(string_type s)
@@ -114,6 +116,15 @@ public:
          str.length();
       const char* pSrcBeg = str.c_str();
       std::vector<E> tmp(srcLen);
+
+      // Visual C++ 2005 has deprecated several Standard C++ Library
+      // functions that aren't actually deprecated in the standard.
+      //
+      // std::ctype<>::widen is one of them.  "suppress" only stops
+      // the warning for the very next line.
+      #ifdef WIN32
+      #pragma warning(suppress : 4996)
+      #endif
 
       pCType_->widen(pSrcBeg, pSrcBeg + srcLen, &tmp[0]);
       return std::basic_string<E, T, A>(&tmp[0], srcLen);
