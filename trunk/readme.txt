@@ -66,6 +66,9 @@ CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
      window also no longer must be hidden during file selection or error boxes.)
 FIX: On the Mac, fixed MIDI that used RPN / NRPN controller events (e.g. to
      set pitch bend) so they're now handled correctly.
+FIX: On the Mac, output devices are now reset much harder than before, so
+     output device internal state that may be set by one song isn't carried
+     over to another.
 FIX: On the Mac, there was a potential problem with some input devices that
      might send bursts of events all at once.  Previously, only the first
      event in the incoming list of events was recognized.  Now, any number of

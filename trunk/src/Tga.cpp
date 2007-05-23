@@ -117,13 +117,13 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
    }
 
    const unsigned int data_size = width * height * bpp/8;
-   unsigned char *image_data = reinterpret_cast<unsigned char*>(malloc(data_size));
+   unsigned char *image_data = new unsigned char[data_size];
 
    Tga *t = 0;
    if (type == TgaCompressed) t = LoadCompressed(pos, image_data, width, height, bpp);
    if (type == TgaUncompressed) t = LoadUncompressed(pos, image_data, data_size, width, height, bpp);
 
-   free(image_data);
+   delete[] image_data;
    return t;
 }
 
@@ -147,7 +147,8 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
    const unsigned int BytesPerPixel = bpp / 8;
    const unsigned int PixelCount = height * width;
 
-   unsigned char *pixel_buffer = reinterpret_cast<unsigned char*>(malloc(BytesPerPixel));
+   const static unsigned int MaxBytesPerPixel = 4;
+   unsigned char pixel_buffer[MaxBytesPerPixel];
 
    unsigned int pixel = 0;
    unsigned int byte = 0;
@@ -174,13 +175,7 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
             byte += BytesPerPixel;
             pixel++;
 
-            if (pixel > PixelCount)
-            {
-               throw SynthesiaError(L"Too many pixels in TGA.");
-
-               free(pixel_buffer);
-               return 0;
-            }
+            if (pixel > PixelCount) throw SynthesiaError(L"Too many pixels in TGA.");
          }
       }
       else
@@ -200,18 +195,10 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
             byte += BytesPerPixel;
             pixel++;
 
-            if (pixel > PixelCount)
-            {
-               throw SynthesiaError(L"Too many pixels in TGA.");
-
-               free(pixel_buffer);
-               return 0;
-            }
+            if (pixel > PixelCount) throw SynthesiaError(L"Too many pixels in TGA.");
          }
       }
    }
-
-   free(pixel_buffer);
 
    return BuildFromParameters(dest, width, height, bpp);
 }
