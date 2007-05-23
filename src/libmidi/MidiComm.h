@@ -100,6 +100,9 @@ private:
 #ifdef WIN32
    HMIDIOUT m_output_device;
 #else
+   void Acquire(unsigned int device_id);
+   void Release();
+
    AudioUnit m_device;
    AudioUnit m_output;
 #endif
