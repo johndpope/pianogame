@@ -481,7 +481,7 @@ MidiCommDescriptionList MidiCommOut::GetDeviceList()
    return devices;
 }
 
-MidiCommOut::MidiCommOut(unsigned int device_id)
+void MidiCommOut::Acquire(unsigned int device_id)
 {
    // MACNOTE: For now we ignore device_id.  We only support the built-in synth
    m_description.id = 0;
@@ -516,14 +516,25 @@ MidiCommOut::MidiCommOut(unsigned int device_id)
 
    // start the output
    AudioOutputUnitStart(m_output);
+
 }
 
-MidiCommOut::~MidiCommOut()
+void MidiCommOut::Release()
 {
    AudioOutputUnitStop(m_output);
 
    CloseComponent(m_output);
    CloseComponent(m_device);
+}
+
+MidiCommOut::MidiCommOut(unsigned int device_id)
+{
+   Acquire(device_id);
+}
+
+MidiCommOut::~MidiCommOut()
+{
+   Release();
 }
 
 
@@ -577,6 +588,10 @@ void MidiCommOut::Reset()
       AudioUnitReset(m_device, kAudioUnitScope_Group, i);
       AudioUnitReset(m_output, kAudioUnitScope_Group, i);
    }
+
+   const unsigned int id = m_description.id;
+   Release();
+   Acquire(id);
 }
 
 
