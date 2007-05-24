@@ -80,6 +80,8 @@ BOOL CALLBACK MonitorEnumCallback(HMONITOR monitor, HDC, LPRECT rect, LPARAM lPa
 
 #else
 
+static std::wstring external_command_line(L"");
+
 static AGLContext aglContext;
 static WindowRef window(0);
 
@@ -92,11 +94,15 @@ static EventHandlerRef KeyEventHandlerRef(0);
 static EventHandlerRef AppEventHandlerRef(0);
 static EventHandlerRef MainWindowEventHandlerRef(0);
 static EventHandlerRef OtherWindowEventHandlerRef(0);
+static EventHandlerRef AppleEventHandlerRef(0);
 
 static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
 static pascal OSStatus MouseEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
 static pascal OSStatus KeyEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
 static pascal OSStatus WindowEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
+static pascal OSStatus AppleEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void *);
+
+static pascal OSErr OpenEventHandlerProc(const AppleEvent *event, AppleEvent *, long);
 
 #endif
 
@@ -172,6 +178,8 @@ int main(int argc, char *argv[])
    {
       wstring command_line;
 
+      UserSetting::Initialize(application_name);
+
 #ifdef WIN32
       // CommandLineToArgvW is only available in Windows XP or later.  So,
       // rather than maintain separate binaries for Win2K, I do a runtime
@@ -202,12 +210,33 @@ int main(int argc, char *argv[])
       }
 #else
 
+      OSStatus status;
+
       // Apparently the command-line isn't useful in Mac applications.  There
-      // is just a weird system command-line argument and you can't drag files
-      // onto the icon anyway.  Ignore.
-      //
-      // MACTODO: Check if this is actually the case!
+      // is just a weird system command-line argument.  Ignore.
       command_line = L"";
+      
+      // The actual way to accept dragged-in files is by registering an Apple Event.
+      static const EventTypeSpec appleEvents[] = { { kEventClassAppleEvent, kEventAppleEvent } };
+      status = InstallEventHandler(GetApplicationEventTarget(), NewEventHandlerUPP(AppleEventHandlerProc), GetEventTypeCount(appleEvents), appleEvents, 0, &AppleEventHandlerRef);
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to install Apple Event handler.  Error code: " << static_cast<int>(status)));
+
+      OSErr err = AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, OpenEventHandlerProc, 0, false);
+      if (err != noErr) throw SynthesiaError(WSTRING(L"Unable to install open-document event handler.  Error code: " << static_cast<int>(err)));
+
+      // Now we run the application event loop a little early for a short duration
+      // so we can intercept any dragged-in-file events before we proceed.
+      EventRef event;
+      while ((status = ReceiveNextEvent(0, 0, std::numeric_limits<double>::epsilon(), true, &event)) != eventLoopTimedOutErr)
+      {
+         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't receive early event.  Error code: " << static_cast<int>(status)));
+
+         SendEventToEventTarget(event, GetApplicationEventTarget());
+         ReleaseEvent(event);
+      }
+
+      // Check to see if during that event processing we read a filename.
+      if (external_command_line.length() > 0) command_line = external_command_line;
       
 #endif
 
@@ -216,8 +245,6 @@ int main(int argc, char *argv[])
       // dialog later).
       if (command_line.length() > 0 && command_line[0] == L'\"') command_line = command_line.substr(1, command_line.length() - 1);
       if (command_line.length() > 0 && command_line[command_line.length()-1] == L'\"') command_line = command_line.substr(0, command_line.length() - 1);
-
-      UserSetting::Initialize(application_name);
 
       Midi *midi = 0;
 
@@ -339,39 +366,14 @@ int main(int argc, char *argv[])
       if (!wglMakeCurrent(dc_win, glrc)) throw SynthesiaError(L"Couldn't make OpenGL rendering context current.");
 #else
 
-      InitEvents();
-
       Rect windowRect;
       windowRect.top = 0;
       windowRect.left = 0;
       windowRect.right = (short)Compatible::GetDisplayWidth();
       windowRect.bottom = (short)Compatible::GetDisplayHeight();
 
-      OSStatus status;
       status = CreateNewWindow(kPlainWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
       if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to create window.  Error code: " << static_cast<int>(status)));
-
-      static const EventTypeSpec windowControlEvents[] = 
-      {
-      { kEventClassWindow, kEventWindowUpdate },
-      { kEventClassWindow, kEventWindowDrawContent },
-      { kEventClassWindow, kEventWindowActivated },
-      { kEventClassWindow, kEventWindowDeactivated },
-      { kEventClassWindow, kEventWindowGetClickActivation },
-      { kEventClassWindow, kEventWindowBoundsChanging },
-      { kEventClassWindow, kEventWindowBoundsChanged },
-      { kEventClassWindow, kEventWindowShown },
-      { kEventClassWindow, kEventWindowShowing },
-      { kEventClassWindow, kEventWindowHidden },
-      { kEventClassWindow, kEventWindowHiding },
-      { kEventClassWindow, kEventWindowCursorChange },
-      { kEventClassWindow, kEventWindowClosed }
-      };
-
-      if (OtherWindowEventHandlerRef != 0) RemoveEventHandler(OtherWindowEventHandlerRef);
-
-      status = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to install window event handler.  Error code: " << static_cast<int>(status)));
 
       SetWindowTitleWithCFString(window, MacStringFromWide(friendly_app_name).get());
 
@@ -380,6 +382,8 @@ int main(int argc, char *argv[])
       windowColor.green = 65535 * 0.25;
       windowColor.blue  = 65535 * 0.25;
       SetWindowContentColor(window, &windowColor);
+
+      InitEvents();
 
       // MACTODO: The fade effect is way cooler
       status = TransitionWindow(window, kWindowZoomTransitionEffect, kWindowShowTransitionAction, 0);
@@ -624,6 +628,28 @@ void InitEvents()
    
    ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( KeyEventHandlerProc ), GetEventTypeCount(keyControlEvents), keyControlEvents, 0, &KeyEventHandlerRef );
    if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install key event handler.  Error code: " << static_cast<int>(ret)));
+      
+   static const EventTypeSpec windowControlEvents[] = 
+   {
+   { kEventClassWindow, kEventWindowUpdate },
+   { kEventClassWindow, kEventWindowDrawContent },
+   { kEventClassWindow, kEventWindowActivated },
+   { kEventClassWindow, kEventWindowDeactivated },
+   { kEventClassWindow, kEventWindowGetClickActivation },
+   { kEventClassWindow, kEventWindowBoundsChanging },
+   { kEventClassWindow, kEventWindowBoundsChanged },
+   { kEventClassWindow, kEventWindowShown },
+   { kEventClassWindow, kEventWindowShowing },
+   { kEventClassWindow, kEventWindowHidden },
+   { kEventClassWindow, kEventWindowHiding },
+   { kEventClassWindow, kEventWindowCursorChange },
+   { kEventClassWindow, kEventWindowClosed }
+   };
+   
+   if (OtherWindowEventHandlerRef != 0) RemoveEventHandler(OtherWindowEventHandlerRef);
+   
+   ret = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
+   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install window event handler.  Error code: " << static_cast<int>(ret)));
 }
 
 
@@ -668,6 +694,59 @@ static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
 
 }
 
+static pascal OSErr OpenEventHandlerProc(const AppleEvent *event, AppleEvent *, long)
+{
+   AEDescList docs;
+   OSStatus status = AEGetParamDesc(event, keyDirectObject, typeAEList, &docs);
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get Apple Event parameter description.  Error code: " << static_cast<int>(status)));
+   
+   // We can only handle the first dragged-in file, so
+   // all that matters is that the list isn't empty.
+   long item_count = 0;
+   AECountItems(&docs, &item_count);
+   if (item_count == 0) return noErr;
+   
+   FSRef ref;
+   status = AEGetNthPtr(&docs, 1, typeFSRef, 0, 0, &ref, sizeof(ref), 0);
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't look up Apple Event pointer.  Error code: " << static_cast<int>(status)));
+   
+   const static int BufferSize(1024);
+   char path_buffer[BufferSize];
+   status = FSRefMakePath(&ref, (UInt8*)path_buffer, BufferSize);
+   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
+
+   std::string narrow_path(path_buffer);
+   std::wstring path(narrow_path.begin(), narrow_path.end());
+
+   external_command_line = path;
+   
+   return noErr;
+}
+
+
+OSStatus AppleEventHandlerProc(EventHandlerCallRef callRef, EventRef inEvent, void*)
+{
+    // Events of type kEventAppleEvent must be removed from the queue
+    //  before being passed to AEProcessAppleEvent.
+    bool release = false;
+    if (IsEventInQueue(GetMainEventQueue(), inEvent))
+    {
+        // RemoveEventFromQueue will release the event, which will
+        //  destroy it if we don't retain it first.
+        RetainEvent(inEvent);
+        release = true;
+        RemoveEventFromQueue(GetMainEventQueue(), inEvent);
+    }
+ 
+    // Convert the event ref to the type AEProcessAppleEvent expects.
+    EventRecord eventRecord;
+    ConvertEventRefToEventRecord(inEvent, &eventRecord);
+    AEProcessAppleEvent(&eventRecord);
+ 
+    if (release) ReleaseEvent(inEvent);
+ 
+    return noErr;
+}
 
 static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *)
 {
@@ -693,8 +772,12 @@ static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef
          
          RemoveEventHandler(MouseEventHandlerRef);
          RemoveEventHandler(KeyEventHandlerRef);
+         RemoveEventHandler(AppleEventHandlerRef);
          RemoveEventHandler(AppEventHandlerRef);
          RemoveEventHandler(MainWindowEventHandlerRef);
+
+         AERemoveEventHandler(kCoreEventClass,  kAEOpenDocuments, OpenEventHandlerProc, false);
+
          break;
          
       case kEventAppTerminated:
