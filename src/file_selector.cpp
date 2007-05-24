@@ -159,25 +159,25 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    for (long i = 1; i <= item_count; i++)
    {
       FSRef fsRef;
-      if (AEGetNthPtr(&navReply.selection, i, typeFSRef, 0, 0, &fsRef, sizeof(FSRef), 0) == noErr)
-      {         
-         CFStringRef file_title;
-         status = LSCopyDisplayNameForRef( &fsRef, &file_title );
-         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file title.  Error code: " << static_cast<int>(status)));
+      status = AEGetNthPtr(&navReply.selection, i, typeFSRef, 0, 0, &fsRef, sizeof(FSRef), 0);
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get FSRef pointer from open dialog.  Error code: " << static_cast<int>(status)));
 
-         const static int BufferSize(1024);
-         char path_buffer[BufferSize];
-         status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
-         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
-
-         std::string narrow_path(path_buffer);
-         std::wstring filepath(narrow_path.begin(), narrow_path.end());
-         
-         if (returned_file_title) *returned_file_title = WideFromMacString(file_title);
-         if (returned_filename) *returned_filename = filepath;
-         
-         CFRelease(file_title);
-      }
+      CFStringRef file_title;
+      status = LSCopyDisplayNameForRef( &fsRef, &file_title );
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file title.  Error code: " << static_cast<int>(status)));
+      
+      const static int BufferSize(1024);
+      char path_buffer[BufferSize];
+      status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
+      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
+      
+      std::string narrow_path(path_buffer);
+      std::wstring filepath(narrow_path.begin(), narrow_path.end());
+      
+      if (returned_file_title) *returned_file_title = WideFromMacString(file_title);
+      if (returned_filename) *returned_filename = filepath;
+      
+      CFRelease(file_title);
    }
    
    NavDisposeReply(&navReply);
