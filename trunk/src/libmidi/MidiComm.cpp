@@ -12,6 +12,7 @@
 using namespace std;
 
 #include "../os.h"
+#include "../CompatibleSystem.h"
 #include "../string_util.h"
 
 #ifdef WIN32
@@ -103,33 +104,57 @@ MidiCommIn::~MidiCommIn()
 // HMIDIIN definition out of this classes header.
 void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long)
 {
-   switch (msg)
+   try
    {
-   case MIM_DATA:
+      switch (msg)
       {
-         unsigned char status = LOBYTE(LOWORD(p1));
-         unsigned char byte1  = HIBYTE(LOWORD(p1));
-         unsigned char byte2  = LOBYTE(HIWORD(p1));
-         MidiEvent ev = MidiEvent::Build(MidiEventSimple(status, byte1, byte2));
+      case MIM_DATA:
+         {
+            unsigned char status = LOBYTE(LOWORD(p1));
+            unsigned char byte1  = HIBYTE(LOWORD(p1));
+            unsigned char byte2  = LOBYTE(HIWORD(p1));
+            MidiEvent ev = MidiEvent::Build(MidiEventSimple(status, byte1, byte2));
 
-         EnterCriticalSection(&m_buffer_mutex);
-         m_event_buffer.push(ev);
-         LeaveCriticalSection(&m_buffer_mutex);
+            EnterCriticalSection(&m_buffer_mutex);
+            m_event_buffer.push(ev);
+            LeaveCriticalSection(&m_buffer_mutex);
+         }
+         break;
+
+
+      case MIM_OPEN:
+      case MIM_CLOSE:
+         // Ignore
+         break;
+
+      case MIM_LONGDATA:
+         // Ignore SysEx
+         break;
+
+      case MIM_MOREDATA:
+         // This should never be called, and is
+         // non-fatal if it is.
+         break;
+
+      case MIM_ERROR:
+      case MIM_LONGERROR:
+         throw MidiError(MidiError_UnexpectedInput);
       }
-      break;
-
-
-   case MIM_OPEN:
-   case MIM_CLOSE:
-      // Ignore
-      break;
-
-   case MIM_LONGDATA:
-   case MIM_ERROR:
-   case MIM_LONGERROR:
-   case MIM_MOREDATA:
-      throw MidiError(MidiError_UnexpectedInput);
    }
+   catch (const MidiError &e)
+   {
+      // TODO: These appear in main.cpp too.  Consolidate them.
+      const static wstring error_header1 = L"Synthesia detected a";
+      const static wstring error_header2 = L" problem and must close:\n\n";
+      const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@synthesiagame.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+
+      wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
+      Compatible::ShowError(wrapped_description);
+
+      // Not much else we can do!
+      exit(1);
+   }
+
 }
 
 void MidiCommIn::Reset()

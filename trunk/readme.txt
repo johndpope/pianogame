@@ -56,14 +56,17 @@ Change Log
 
 Release 0.6.1
 -------------
-NEW: Added a low-tech solution to choose between different monitors connected
-     to the SAME video card (doesn't work in multi-video-card situations.)
-     (Set the string key HKCU\Software\Synthesia\Monitor to "0" for primary
-     monitory, "1" for secondary, etc.)
+NEW: On the Mac, you can now drag a MIDI file to the application on the Dock or
+     in Finder or right click a MIDI file and choosing "Open With..." to open.
+NEW: In Windows, added a low-tech solution to choose between different monitors
+     connected to the SAME video card (doesn't work in multi-video-card
+     situations.) (Set the string key HKCU\Software\Synthesia\Monitor to "0" for
+     primary monitory, "1" for secondary, etc.)
 CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
      be on top and the Dock and Application bar can both be made visible by
      hovering the mouse over there positions for a second or so.  (The game
      window also no longer must be hidden during file selection or error boxes.)
+FIX: In Windows, incoming MIDI SysEx messages are no longer flagged as errors.
 FIX: On the Mac, fixed MIDI that used RPN / NRPN controller events (e.g. to
      set pitch bend) so they're now handled correctly.
 FIX: On the Mac, output devices are now reset much harder than before, so
