@@ -63,6 +63,7 @@ NEW: In Windows, added a low-tech solution to choose between different monitors
      connected to the SAME video card (doesn't work in multi-video-card
      situations.) (Set the string key HKCU\Software\Synthesia\Monitor to "0"
      for primary monitory, "1" for secondary, etc.)
+CHG: Mac OpenGL display now has v-sync enabled.
 CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
      be on top and the Dock and Application bar can both be made visible by
      hovering the mouse over there positions for a second or so.  The game
