@@ -85,8 +85,10 @@ std::wstring MidiError::GetErrorDescription() const
    case MidiError_MM_Unknown:                         return L"An unknown MIDI I/O error has occurred.";
 
    case MidiError_NoInputAvailable:                   return L"Attempted to read MIDI event from an empty input buffer.";
-   case MidiError_UnexpectedInput:                    return L"Received unexpected MIDI input from device.";
    case MidiError_MetaEventOnInput:                   return L"MIDI Input device sent a Meta Event.";
+
+   case MidiError_InputError:                         return L"MIDI input driver reported an error.";
+   case MidiError_InvalidInputErrorBehavior:          return L"Invalid InputError value.  Choices are 'report', 'ignore', and 'use'.";
 
    case MidiError_RequestedTempoFromNonTempoEvent:    return L"Tempo data was requested from a non-tempo MIDI event.";
 

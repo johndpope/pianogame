@@ -54,9 +54,11 @@ enum MidiErrorCode
    MidiError_MM_Unknown,
 
    MidiError_NoInputAvailable,
-   MidiError_UnexpectedInput,
    MidiError_MetaEventOnInput,
 
+   MidiError_InputError,
+   MidiError_InvalidInputErrorBehavior,
+   
    MidiError_RequestedTempoFromNonTempoEvent
 };
 

@@ -12,6 +12,7 @@
 using namespace std;
 
 #include "../os.h"
+#include "../UserSettings.h"
 #include "../CompatibleSystem.h"
 #include "../string_util.h"
 
@@ -121,14 +122,14 @@ void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long
          }
          break;
 
-
       case MIM_OPEN:
       case MIM_CLOSE:
          // Ignore
          break;
 
       case MIM_LONGDATA:
-         // Ignore SysEx
+      case MIM_LONGERROR:
+         // Ignore SysEx and SysEx errors
          break;
 
       case MIM_MOREDATA:
@@ -137,8 +138,28 @@ void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long
          break;
 
       case MIM_ERROR:
-      case MIM_LONGERROR:
-         throw MidiError(MidiError_UnexpectedInput);
+         {
+            // LOGTODO: This is a VERY good candidate to log someday.
+
+            // Find out how we're supposed to treat this error
+            const std::wstring behavior = UserSetting::Get(L"InputError", L"report");
+            if (behavior == L"report") throw MidiError(MidiError_InputError);
+            if (behavior == L"ignore") break;
+            if (behavior == L"use")
+            {
+               unsigned char status = LOBYTE(LOWORD(p1));
+               unsigned char byte1  = HIBYTE(LOWORD(p1));
+               unsigned char byte2  = LOBYTE(HIWORD(p1));
+               MidiEvent ev = MidiEvent::Build(MidiEventSimple(status, byte1, byte2));
+
+               EnterCriticalSection(&m_buffer_mutex);
+               m_event_buffer.push(ev);
+               LeaveCriticalSection(&m_buffer_mutex);
+               break;
+            }
+            throw MidiError(MidiError_InvalidInputErrorBehavior);
+         }
+         break;
       }
    }
    catch (const MidiError &e)
