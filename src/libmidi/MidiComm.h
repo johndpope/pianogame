@@ -103,6 +103,10 @@ private:
    void Acquire(unsigned int device_id);
    void Release();
 
+   MIDIClientRef m_client;
+   MIDIPortRef m_port;
+   MIDIEndpointRef m_endpoint;
+
    AudioUnit m_device;
    AudioUnit m_output;
 #endif
