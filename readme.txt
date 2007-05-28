@@ -56,17 +56,18 @@ Change Log
 
 Release 0.6.1
 -------------
+NEW: On the Mac, output to external devices is now available.
 NEW: On the Mac, you can now drag a MIDI file to the application on the Dock or
      in Finder or right click a MIDI file and choosing "Open With..." to open.
 NEW: In Windows, added a low-tech solution to choose between different monitors
      connected to the SAME video card (doesn't work in multi-video-card
-     situations.) (Set the string key HKCU\Software\Synthesia\Monitor to "0" for
-     primary monitory, "1" for secondary, etc.)
+     situations.) (Set the string key HKCU\Software\Synthesia\Monitor to "0"
+     for primary monitory, "1" for secondary, etc.)
 CHG: Mac game window is now much less obtrusive.  Other windows are allowed to
      be on top and the Dock and Application bar can both be made visible by
-     hovering the mouse over there positions for a second or so.  (The game
-     window also no longer must be hidden during file selection or error boxes.)
-FIX: In Windows, incoming MIDI SysEx messages are no longer flagged as errors.
+     hovering the mouse over there positions for a second or so.  The game
+     window also no longer must be hidden during file selection or error boxes.
+FIX: In Windows, MIDI SysEx messages in input are no longer flagged as errors.
 FIX: On the Mac, fixed MIDI that used RPN / NRPN controller events (e.g. to
      set pitch bend) so they're now handled correctly.
 FIX: On the Mac, output devices are now reset much harder than before, so
@@ -82,7 +83,7 @@ FIX: On the Mac, fixed a problem where the (modal!) file open dialog could
      be hidden underneath the game window, leaving you not choice but to force-
      quit the program.
 FIX: Disabled OpenGL depth testing to fix a problem where text would sometimes
-     not appear above other controls (TrackBox, SongBox, etc.) in Windows
+     not appear above other controls (TrackBox, SongBox, etc.) in Windows.
 FIX: Score state now displays correctly at low resolutions (like 800x600).
 FIX: Title bar no longer pops when changing speed at the beginning of gameplay.
 FIX: Text centering and placement on the Mac is now properly implemented.
