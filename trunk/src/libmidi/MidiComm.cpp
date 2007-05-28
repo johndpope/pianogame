@@ -439,6 +439,9 @@ MidiCommIn::~MidiCommIn()
    MIDIEndpointRef source = MIDIGetSource(m_description.id);
    MIDIPortDisconnectSource(m_port, source);
 
+   // This disposes the port too.
+   MIDIClientDispose(m_client);
+
    pthread_mutex_destroy(&m_mutex);
 }
 
@@ -493,63 +496,109 @@ MidiEvent MidiCommIn::Read()
 
 
 
+static bool built_output_list = false;
+static MidiCommDescriptionList out_list(MidiCommOut::GetDeviceList());
+
 MidiCommDescriptionList MidiCommOut::GetDeviceList()
 {
+   if (built_output_list) return out_list;
+
    MidiCommDescriptionList devices;
 
+   // Add the built-in synth
    MidiCommDescription mac_synth;
    mac_synth.id = 0;
    mac_synth.name = L"Built-in MIDI Synthesizer";
-   
    devices.push_back(mac_synth);
 
+   // Add any external devices
+   ItemCount destinations = MIDIGetNumberOfDestinations();
+   for (int i = 0; i < destinations; ++i)
+   {
+      MIDIEndpointRef endpoint = MIDIGetDestination(i);
+
+      CFStringRef cf_name = BuildEndpointName(endpoint);
+      
+      MidiCommDescription d;
+      d.id = i + 1;
+      d.name = WideFromMacString(cf_name);
+      CFRelease(cf_name);
+      
+      devices.push_back(d);
+   }
+
+   built_output_list = true;
    return devices;
 }
 
 void MidiCommOut::Acquire(unsigned int device_id)
 {
-   // MACNOTE: For now we ignore device_id.  We only support the built-in synth
-   m_description.id = 0;
-   m_description.name = L"Built-in MIDI Synthesizer";
+   m_description = GetDeviceList()[device_id];
 
-
-   // Open the Music Device
-   ComponentDescription compdesc;
-   compdesc.componentType = kAudioUnitComponentType;
-   compdesc.componentSubType = kAudioUnitSubType_MusicDevice;
-   compdesc.componentManufacturer = kAudioUnitID_DLSSynth;
-   compdesc.componentFlags = 0;
-   compdesc.componentFlagsMask = 0;
-
-   Component compid = FindNextComponent(NULL, &compdesc);
-   m_device = static_cast<AudioUnit>(OpenComponent(compid));
-
-   // open the output unit
-   m_output = static_cast<AudioUnit>(OpenDefaultComponent(kAudioUnitComponentType, kAudioUnitSubType_Output));
-
-   // connect the units
-   AudioUnitConnection auconnect;
-   auconnect.sourceAudioUnit = m_device;
-   auconnect.sourceOutputNumber = 0;
-   auconnect.destInputNumber = 0;
-   AudioUnitSetProperty(m_output, kAudioUnitProperty_MakeConnection, kAudioUnitScope_Input, 0,
+   if (m_description.id == 0)
+   {
+      // Open the Music Device
+      ComponentDescription compdesc;
+      compdesc.componentType = kAudioUnitComponentType;
+      compdesc.componentSubType = kAudioUnitSubType_MusicDevice;
+      compdesc.componentManufacturer = kAudioUnitID_DLSSynth;
+      compdesc.componentFlags = 0;
+      compdesc.componentFlagsMask = 0;
+      
+      Component compid = FindNextComponent(NULL, &compdesc);
+      m_device = static_cast<AudioUnit>(OpenComponent(compid));
+      
+      // open the output unit
+      m_output = static_cast<AudioUnit>(OpenDefaultComponent(kAudioUnitComponentType, kAudioUnitSubType_Output));
+      
+      // connect the units
+      AudioUnitConnection auconnect;
+      auconnect.sourceAudioUnit = m_device;
+      auconnect.sourceOutputNumber = 0;
+      auconnect.destInputNumber = 0;
+      AudioUnitSetProperty(m_output, kAudioUnitProperty_MakeConnection, kAudioUnitScope_Input, 0,
                            static_cast<void*>(&auconnect), sizeof(AudioUnitConnection));
-
-   // initialize the units
-   AudioUnitInitialize(m_device);
-   AudioUnitInitialize(m_output);
-
-   // start the output
-   AudioOutputUnitStart(m_output);
+      
+      // initialize the units
+      AudioUnitInitialize(m_device);
+      AudioUnitInitialize(m_output);
+      
+      // start the output
+      AudioOutputUnitStart(m_output);
+   }
+   else
+   {
+      MIDIClientCreate(CFSTR("Synthesia"), 0, this, &m_client);
+      MIDIOutputPortCreate(m_client, CFSTR("Synthesia Out"), &m_port);
+      
+      // The -1 here is because device_id 0 represents the built-in
+      // synth and pushes all the other devices over by one.
+      m_endpoint = MIDIGetDestination(device_id - 1);
+   }
 
 }
 
 void MidiCommOut::Release()
 {
-   AudioOutputUnitStop(m_output);
+   if (m_description.id == 0)
+   {
+      AudioOutputUnitStop(m_output);
 
-   CloseComponent(m_output);
-   CloseComponent(m_device);
+      CloseComponent(m_output);
+      CloseComponent(m_device);
+   }
+   else
+   {
+      // Send an "All Sound Off" and "All Controllers Off" to each channel real fast
+      for (int i = 0; i < 16; ++i)
+      {
+         Write(MidiEvent::Build(MidiEventSimple(0xB0 | i, 120, 0)));
+         Write(MidiEvent::Build(MidiEventSimple(0xB0 | i, 121, 0)));
+      }
+   
+      // This disposes the port too.
+      MIDIClientDispose(m_client);
+   }
 }
 
 MidiCommOut::MidiCommOut(unsigned int device_id)
@@ -566,8 +615,11 @@ MidiCommOut::~MidiCommOut()
 void MidiCommOut::Write(const MidiEvent &out)
 {
    MidiEventSimple simple;
-   if (out.GetSimpleEvent(&simple))
+   if (!out.GetSimpleEvent(&simple)) return;
+   
+   if (m_description.id == 0)
    {
+      
       MusicDeviceMIDIEvent(m_device, simple.status, simple.byte1, simple.byte2, 0);
       
       if (out.Type() == MidiEventType_Controller)
@@ -576,9 +628,6 @@ void MidiCommOut::Write(const MidiEvent &out)
          // "close off" changes to it. That way, if the output device doesn't
          // accept this (N)RPN event, it won't accidentally overwrite the last
          // one that it did.
-
-         // MACTODO: Find out if this is only necessary for the DLS Synth.  It
-         // seems like a reasonably good practice to follow all the time.
          
          // NOTE: Hopefully there aren't any (N)RPN types that rely on sequentially
          // changing these values smoothly.  That seems like a pretty special
@@ -588,6 +637,11 @@ void MidiCommOut::Write(const MidiEvent &out)
          // event (in order to cut off some hypothetical previous (N)RPN event
          // at the last possible second), but it didn't appear to work.
          
+         // NOTE: This appears to only be necessary for the DLS Synth.  I suppose
+         // I've only got a VERY limited pool of MIDI devices to work with though,
+         // and I'm sure there are a handful of devices out there that have the
+         // same problem.  Again, I'll cross that bridge when I come to it.
+
          // Detect coarse data byte changes
          if (simple.byte1 == 0x06)
          {
@@ -602,18 +656,27 @@ void MidiCommOut::Write(const MidiEvent &out)
             MusicDeviceMIDIEvent(m_device, simple.status, 0x63, 0x7F, 0); // NRPN (fine) reset
          }
       }
-
+      
    }
+   else
+   {
+      const static int PacketBufferSize = 128;
+      Byte packet_buffer[PacketBufferSize];
+      MIDIPacketList *packets = reinterpret_cast<MIDIPacketList*>(packet_buffer);
+      
+      MIDIPacket *packet = MIDIPacketListInit(packets);
+      
+      const static int MessageSize = 3;
+      const Byte message[MessageSize] = { simple.status, simple.byte1, simple.byte2 };
+      packet = MIDIPacketListAdd(packets, PacketBufferSize, packet, 0, MessageSize, message);
+      
+      MIDISend(m_port, m_endpoint, packets);
+   }
+   
 }
 
 void MidiCommOut::Reset()
 {
-   for (int i = 0; i < 16; ++i)
-   {
-      AudioUnitReset(m_device, kAudioUnitScope_Group, i);
-      AudioUnitReset(m_output, kAudioUnitScope_Group, i);
-   }
-
    const unsigned int id = m_description.id;
    Release();
    Acquire(id);
