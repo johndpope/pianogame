@@ -1,0 +1,15 @@
+
+- Run a song with output off.
+- Run a song with output on.
+- Run a song with input set to none.
+- Run a song with input set to something (but still played automatically).
+- Run a song with input set to something, with a You Play track.
+- Run a song with two You Play tracks.
+- Page through lists of tracks in a bigger MIDI.
+- Run at each major resolution, playing with a single "You Play" all the way through to score.
+- Alt-Tab out of and into each state including file-open dialog.
+
+
+- Confirm pitch bend sensitivity (RPN/NRPN data) works.
+  pitch_bend.mid (Bent notes should match piano notes.)
+
