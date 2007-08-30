@@ -637,9 +637,12 @@ void MidiCommOut::Write(const MidiEvent &out)
       
       MIDIPacket *packet = MIDIPacketListInit(packets);
       
-      const static int MessageSize = 3;
-      const Byte message[MessageSize] = { simple.status, simple.byte1, simple.byte2 };
-      packet = MIDIPacketListAdd(packets, PacketBufferSize, packet, 0, MessageSize, message);
+      int messageSize = 3;
+      if (out.Type() == MidiEventType_ProgramChange || out.Type() == MidiEventType_ChannelPressure) messageSize = 2;
+      
+      const static int MaxMessageSize = 3;
+      const Byte message[MaxMessageSize] = { simple.status, simple.byte1, simple.byte2 };
+      packet = MIDIPacketListAdd(packets, PacketBufferSize, packet, 0, messageSize, message);
       
       MIDISend(m_port, m_endpoint, packets);
    }
