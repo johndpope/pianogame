@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Synthesia"
+	Name="PianoGame"
 	ProjectGUID="{39F61D85-03F7-4874-A767-2675F4CD1545}"
 	RootNamespace="Synthesia"
 	Keyword="Win32Proj"

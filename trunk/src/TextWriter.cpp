@@ -1,13 +1,13 @@
-// Synthesia
+
 // Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
+
+#include <map>
 
 #include "TextWriter.h"
 #include "Renderer.h"
 #include "SynthesiaError.h"
 #include "os_graphics.h"
-
-#include <map>
 
 #ifdef WIN32
 // TODO: This should be deleted at shutdown
