@@ -1,9 +1,9 @@
-Synthesia teaches you to play piano using any MIDI file.
-Visit http://www.synthesiagame.com/ for more information.
+Piano Game teaches you to play piano using any MIDI file.
+Visit http://www.synthesiagame.com/ for the latest version of this project.
 
 --------------------------------------------------------------------------------
 
-Synthesia is mostly written by Nicholas Piegdon.
+Piano Game is mostly written by Nicholas Piegdon.
 
 The following people have also contributed:
 - Daniel Lawrence for the name Synthesia
@@ -15,43 +15,17 @@ The following people have also contributed:
 
 --------------------------------------------------------------------------------
 
-Synthesia's video game music samples are provided by Game Music Themes.
-Visit http://www.gamemusicthemes.com/ for high quality piano MIDI and sheets.
-
-Bubble Bobble - Main Theme
-  Composed by Zuntata / Arranged by Gori Fater
-
-Dragon Warrior - Town Theme
-  Composed by Koichi Sugiyama / Arranged by Russell Copeland
-
-Sonic the Hedgehog - Green Hill Zone
-  Composed by Masato Nakamura / Arranged by Gori Fater
-
-Super Mario Bros. - Overworld Theme
-  Composed by Koji Kondo / Arranged by BLUESCD
-
-Super Mario Bros. - Underwater Theme
-  Composed by Koji Kondo / Arranged by BLUESCD
-
-Tetris - Theme A
-  Arranged by Gori Fater
-
-The Sims - Buying Theme 1
-  Arranged by Gori Fater
-
-The Legend of Zelda: A Link to the Past - Overworld
-  Composed by Koji Kondo / Arranged by w3sp
-
-The Legend of Zelda: Ocarina of Time - Lost Woods
-  Composed by Koji Kondo / Arranged by BLUESCD
-
-The Legend of Zelda: Ocarina of Time - Zelda's Lullaby
-  Composed by Koji Kondo / Arranged by BLUESCD
-
---------------------------------------------------------------------------------
-
-
 Change Log
+
+
+Release 0.6.1b
+--------------
+CHG: Rebranded to remove copyrighted music and trademarked names.
+
+
+Release 0.6.1a
+--------------
+FIX: A few bug fixes.
 
 
 Release 0.6.1
