@@ -1,7 +1,7 @@
 !include "MUI.nsh"
 
 !define VERSION 0.6.1
-!define PROJECT_NAME Synthesia
+!define PROJECT_NAME PianoGame
 
 Name "${PROJECT_NAME} ${VERSION}"
 OutFile "${PROJECT_NAME}-${VERSION}-installer.exe"
@@ -49,24 +49,6 @@ SectionEnd
 
 
 
-Section "Sample Music" MusicSamples
-  CreateDirectory "$DOCUMENTS\${PROJECT_NAME} Music"
-  WriteRegStr HKCU "SOFTWARE\${PROJECT_NAME}" "Default Music Directory" "$DOCUMENTS\${PROJECT_NAME} Music"
-  SetOutPath "$DOCUMENTS\${PROJECT_NAME} Music"
-  File "music\Bubble Bobble - Main Theme.mid"
-  File "music\Dragon Warrior - Town Theme.mid"
-  File "music\Sonic the Hedgehog - Green Hill Zone.mid"
-  File "music\Super Mario Bros - Overworld.mid"
-  File "music\Super Mario Bros - Underwater.mid"
-  File "music\Tetris - Theme A.mid"
-  File "music\The Sims - Buying Theme 1.mid"
-  File "music\Zelda A Link to the Past - Overworld Theme.mid"
-  File "music\Zelda Ocarina of Time - Lost Woods.mid"
-  File "music\Zelda Ocarina of Time - Zelda's Lullaby.mid"
-SectionEnd
-
-
-
 Section "Start Menu Shortcuts" ShortcutMenu
   CreateDirectory "$SMPROGRAMS\${PROJECT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}\Play ${PROJECT_NAME}.lnk" "$INSTDIR\${PROJECT_NAME}.exe" "" "$INSTDIR\${PROJECT_NAME}.exe" 0
@@ -109,18 +91,6 @@ Section "Uninstall"
   Delete "$INSTDIR\${PROJECT_NAME}.exe"
   RMDir /r "$INSTDIR"
 
-  ; delete included music
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Bubble Bobble - Main Theme.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Dragon Warrior - Town Theme.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Sonic the Hedgehog - Green Hill Zone.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Super Mario Bros - Overworld.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Super Mario Bros - Underwater.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Tetris - Theme A.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\The Sims - Buying Theme 1.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda A Link to the Past - Overworld Theme.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda Ocarina of Time - Lost Woods.mid"
-  Delete "$DOCUMENTS\${PROJECT_NAME} Music\Zelda Ocarina of Time - Zelda's Lullaby.mid"
-
   ; this won't delete the directory if the user has added anything
   RMDir  "$DOCUMENTS\${PROJECT_NAME} Music"
 
@@ -140,14 +110,12 @@ SectionEnd
 
 
 LangString DESC_main_application ${LANG_ENGLISH} "Install the ${PROJECT_NAME} application files (required)."
-LangString DESC_MusicSamples ${LANG_ENGLISH} "Install 10 sample video game MIDI songs from Game Music Themes."
 LangString DESC_ShortcutMenu ${LANG_ENGLISH} "Create a ${PROJECT_NAME} start menu group on the 'All Programs' section of your start menu."
 LangString DESC_Association ${LANG_ENGLISH} "Add a right-click 'Play in ${PROJECT_NAME}' file association to MIDI files."
 LangString DESC_DesktopIcon ${LANG_ENGLISH} "Create a ${PROJECT_NAME} icon on your Windows Desktop."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${main_application} $(DESC_main_application)
-  !insertmacro MUI_DESCRIPTION_TEXT ${MusicSamples} $(DESC_MusicSamples)
   !insertmacro MUI_DESCRIPTION_TEXT ${ShortcutMenu} $(DESC_ShortcutMenu)
   !insertmacro MUI_DESCRIPTION_TEXT ${Association} $(DESC_Association)
   !insertmacro MUI_DESCRIPTION_TEXT ${DesktopIcon} $(DESC_DesktopIcon)
