@@ -1,0 +1,80 @@
+
+// Copyright (c)2007 Nicholas Piegdon
+// See license.txt for license information
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+#define IDC_STATIC -1
+#include <winresrc.h>
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MAIN_ICON           ICON        "..\\app_icon.ico"
+
+title_Logo              GRAPHICS    "..\\graphics\\title_Logo.tga"
+InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"
+
+score_RetrySong         GRAPHICS    "..\\graphics\\score_RetrySong.tga"
+title_ChooseTracks      GRAPHICS    "..\\graphics\\title_ChooseTracks.tga"
+title_Exit              GRAPHICS    "..\\graphics\\title_Exit.tga"
+tracks_BackToTitle      GRAPHICS    "..\\graphics\\tracks_BackToTitle.tga"
+tracks_PlaySong         GRAPHICS    "..\\graphics\\tracks_PlaySong.tga"
+
+title_InputBox          GRAPHICS    "..\\graphics\\title_InputBox.tga"
+title_OutputBox         GRAPHICS    "..\\graphics\\title_OutputBox.tga"
+title_SongBox           GRAPHICS    "..\\graphics\\title_SongBox.tga"
+
+trackbox                GRAPHICS    "..\\graphics\\trackbox.tga"
+
+stats_text              GRAPHICS    "..\\graphics\\stats_text.tga"
+
+play_Status             GRAPHICS    "..\\graphics\\play_Status.tga"
+play_Status2            GRAPHICS    "..\\graphics\\play_Status2.tga"
+play_Keys               GRAPHICS    "..\\graphics\\play_Keys.tga"
+
+play_NotesBlackColor    GRAPHICS    "..\\graphics\\play_NotesBlackColor.tga"
+play_NotesBlackShadow   GRAPHICS    "..\\graphics\\play_NotesBlackShadow.tga"
+play_NotesWhiteColor    GRAPHICS    "..\\graphics\\play_NotesWhiteColor.tga"
+play_NotesWhiteShadow   GRAPHICS    "..\\graphics\\play_NotesWhiteShadow.tga"
+
+play_KeyRail            GRAPHICS    "..\\graphics\\play_KeyRail.tga"
+play_KeyShadow          GRAPHICS    "..\\graphics\\play_KeyShadow.tga"
+play_KeysBlack          GRAPHICS    "..\\graphics\\play_KeysBlack.tga"
+
+#ifdef APSTUDIO_INVOKED
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define IDC_STATIC -1\r\n"
+    "#include <winresrc.h>\r\n"
+    "\r\n"
+    "\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
