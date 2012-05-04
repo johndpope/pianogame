@@ -6,7 +6,6 @@ Visit http://www.synthesiagame.com/ for the latest version of this project.
 Piano Game is mostly written by Nicholas Piegdon.
 
 The following people have also contributed:
-- Daniel Lawrence for the name Synthesia
 - Luis Anton with an early version of the MIDI input code
 - Troy Ramos with a suggestion to use Klavarskribo staff notation
 - Dave Ray for his STRING/WSTRING macro
@@ -35,7 +34,7 @@ NEW: On the Mac, you can now drag a MIDI file to the application on the Dock or
      in Finder or right click a MIDI file and choosing "Open With..." to open.
 NEW: In Windows, added a low-tech solution to choose between different monitors
      connected to the SAME video card (doesn't work in multi-video-card
-     situations.) (Set the string key HKCU\Software\Synthesia\Monitor to "0"
+     situations.) (Set the string key HKCU\Software\PianoGame\Monitor to "0"
      for primary monitory, "1" for secondary, etc.)
 CHG: Mac OpenGL display now has v-sync enabled.
 CHG: Mac game window is now much less obtrusive.  Other windows are allowed to

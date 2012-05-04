@@ -13,7 +13,7 @@
 // Windows Media Player (starting in version 11) has started changing
 // the MIDI synth volume to 0 after playing a MIDI file and exiting.
 // Seeing as how that's a common file-preview path just before starting
-// Synthesia, we have to combat the behavior ourselves.
+// Piano Game, we have to combat the behavior ourselves.
 //
 // Once initialized, it checks to see if the system MIDI synth volume
 // is "reasonable" (above 33% or so volume), and if not, it will set

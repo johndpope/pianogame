@@ -49,7 +49,7 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -129,7 +129,7 @@
 				DisableLanguageExtensions="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -212,11 +212,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\SynthesiaError.cpp"
+				RelativePath=".\src\PianoGameError.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\SynthesiaError.h"
+				RelativePath=".\src\PianoGameError.h"
 				>
 			</File>
 			<File
@@ -443,6 +443,18 @@
 		<Filter
 			Name="Resources"
 			>
+			<File
+				RelativePath=".\license.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\nsis_installer_script.nsi"
+				>
+			</File>
+			<File
+				RelativePath=".\readme.txt"
+				>
+			</File>
 			<File
 				RelativePath=".\src\resource.h"
 				>

@@ -3,7 +3,7 @@
 #include "os.h"
 #include "os_graphics.h"
 #include "string_util.h"
-#include "SynthesiaError.h"
+#include "PianoGameError.h"
 
 Tga* Tga::Load(const std::wstring &resource_name)
 {
@@ -14,13 +14,13 @@ Tga* Tga::Load(const std::wstring &resource_name)
    const HMODULE module = 0;
 
    HRSRC resource_id = FindResource(module, resource_name.c_str(), L"GRAPHICS");
-   if (!resource_id) throw SynthesiaError(L"Couldn't find TGA resource.");
+   if (!resource_id) throw PianoGameError(L"Couldn't find TGA resource.");
    
    HGLOBAL resource = LoadResource(module, resource_id);
-   if (!resource) throw SynthesiaError(L"Couldn't load TGA resource.");
+   if (!resource) throw PianoGameError(L"Couldn't load TGA resource.");
 
    const unsigned char *bytes = reinterpret_cast<unsigned char*>(LockResource(resource));
-   if (!bytes) throw SynthesiaError(L"Couldn't lock TGA resource.");
+   if (!bytes) throw PianoGameError(L"Couldn't lock TGA resource.");
 
    Tga *ret = LoadFromData(bytes);
    FreeResource(resource);
@@ -31,12 +31,12 @@ Tga* Tga::Load(const std::wstring &resource_name)
    std::wstring full_name = WSTRING(resource_name << L".tga");
    
    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetMainBundle(), MacStringFromWide(full_name).get(), 0, 0);
-   if (!url) throw SynthesiaError(L"Couldn't find TGA resource.");
+   if (!url) throw PianoGameError(L"Couldn't find TGA resource.");
 
    OSStatus status;
    CFDataRef data;
    Boolean success = CFURLCreateDataAndPropertiesFromResource(0, url, &data, 0, 0, &status);
-   if (!success || status != 0) throw SynthesiaError(L"Couldn't load TGA resource.");
+   if (!success || status != 0) throw PianoGameError(L"Couldn't load TGA resource.");
    
    const UInt8 *bytes = CFDataGetBytePtr(data);   
 
@@ -92,7 +92,7 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
 
    if (type == TgaUnknown)
    {
-      throw SynthesiaError(L"Unsupported TGA type.");
+      throw PianoGameError(L"Unsupported TGA type.");
    }
 
    // We're done with the type header
@@ -108,12 +108,12 @@ Tga *Tga::LoadFromData(const unsigned char *bytes)
 
    if (width <= 0 || height <= 0)
    {
-      throw SynthesiaError(L"Invalid TGA dimensions.");
+      throw PianoGameError(L"Invalid TGA dimensions.");
    }
 
    if (bpp != 24 && bpp != 32)
    {
-      throw SynthesiaError(L"Unsupported TGA BPP.");
+      throw PianoGameError(L"Unsupported TGA BPP.");
    }
 
    const unsigned int data_size = width * height * bpp/8;
@@ -175,7 +175,7 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
             byte += BytesPerPixel;
             pixel++;
 
-            if (pixel > PixelCount) throw SynthesiaError(L"Too many pixels in TGA.");
+            if (pixel > PixelCount) throw PianoGameError(L"Too many pixels in TGA.");
          }
       }
       else
@@ -195,7 +195,7 @@ Tga *Tga::LoadCompressed(const unsigned char *src, unsigned char *dest, unsigned
             byte += BytesPerPixel;
             pixel++;
 
-            if (pixel > PixelCount) throw SynthesiaError(L"Too many pixels in TGA.");
+            if (pixel > PixelCount) throw PianoGameError(L"Too many pixels in TGA.");
          }
       }
    }
