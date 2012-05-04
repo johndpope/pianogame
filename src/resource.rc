@@ -24,7 +24,6 @@ IDI_MAIN_ICON           ICON        "..\\app_icon.ico"
 
 title_Logo              GRAPHICS    "..\\graphics\\title_Logo.tga"
 InterfaceButtons        GRAPHICS    "..\\graphics\\InterfaceButtons.tga"
-title_GameMusicThemes   GRAPHICS    "..\\graphics\\title_GameMusicThemes.tga"
 
 score_RetrySong         GRAPHICS    "..\\graphics\\score_RetrySong.tga"
 title_ChooseTracks      GRAPHICS    "..\\graphics\\title_ChooseTracks.tga"

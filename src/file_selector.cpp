@@ -2,7 +2,7 @@
 // Copyright (c)2007 Nicholas Piegdon
 // See license.txt for license information
 
-#include "SynthesiaError.h"
+#include "PianoGameError.h"
 #include "file_selector.h"
 #include "UserSettings.h"
 #include "string_util.h"
@@ -35,12 +35,12 @@ static pascal Boolean NavOpenFilterProc(AEDesc *item, void *info, NavCallBackUse
 
    FSRef fsRef;
    status = AEGetDescData(item, &fsRef, sizeof(fsRef));
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get item description.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get item description.  Error code: " << static_cast<int>(status)));
 
    const static int BufferSize(1024);
    char path_buffer[BufferSize];
    status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
 
    std::string path(path_buffer);
    if (path.length() < 5) return false;
@@ -95,7 +95,7 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    ZeroMemory(&ofn, sizeof(OPENFILENAME));
    ofn.lStructSize =     sizeof(OPENFILENAME);
    ofn.hwndOwner =       0;
-   ofn.lpstrTitle =      L"Synthesia: Choose a MIDI song to play";
+   ofn.lpstrTitle =      L"Piano Game: Choose a MIDI song to play";
    ofn.lpstrFilter =     L"MIDI Files (*.mid)\0*.mid;*.midi\0All Files (*.*)\0*.*\0";
    ofn.lpstrFile =       filename;
    ofn.nMaxFile =        BufferSize;
@@ -125,9 +125,9 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    
    NavDialogCreationOptions options;
    status  = NavGetDefaultDialogCreationOptions(&options);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create dialog options.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't create dialog options.  Error code: " << static_cast<int>(status)));
    
-   options.windowTitle = CFSTR("Synthesia: Choose a MIDI song to play");
+   options.windowTitle = CFSTR("Piano Game: Choose a MIDI song to play");
    
    // TODO: Should clean this up at shut-down
    static NavObjectFilterUPP navFilterUPP(0);
@@ -135,10 +135,10 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    
    NavDialogRef navDialog(0);
    status = NavCreateChooseFileDialog(&options, 0, 0, 0, navFilterUPP, 0, &navDialog);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create open dialog.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't create open dialog.  Error code: " << static_cast<int>(status)));
    
    status = NavDialogRun(navDialog);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't run open dialog.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't run open dialog.  Error code: " << static_cast<int>(status)));
    
    NavReplyRecord navReply;
    status = NavDialogGetReply(navDialog, &navReply);
@@ -154,22 +154,22 @@ void RequestMidiFilename(std::wstring *returned_filename, std::wstring *returned
    
    long item_count = 0;
    status = AECountItems(&navReply.selection, &item_count);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't count resulting items from open dialog.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't count resulting items from open dialog.  Error code: " << static_cast<int>(status)));
       
    for (long i = 1; i <= item_count; i++)
    {
       FSRef fsRef;
       status = AEGetNthPtr(&navReply.selection, i, typeFSRef, 0, 0, &fsRef, sizeof(FSRef), 0);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get FSRef pointer from open dialog.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get FSRef pointer from open dialog.  Error code: " << static_cast<int>(status)));
 
       CFStringRef file_title;
       status = LSCopyDisplayNameForRef( &fsRef, &file_title );
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file title.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get file title.  Error code: " << static_cast<int>(status)));
       
       const static int BufferSize(1024);
       char path_buffer[BufferSize];
       status = FSRefMakePath(&fsRef, (UInt8*)path_buffer, BufferSize);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
       
       std::string narrow_path(path_buffer);
       std::wstring filepath(narrow_path.begin(), narrow_path.end());

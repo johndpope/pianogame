@@ -323,7 +323,7 @@ void TitleState::Update()
 
    m_tooltip = L"";
 
-   if (m_back_button.hovering) m_tooltip = L"Click to exit Synthesia.";
+   if (m_back_button.hovering) m_tooltip = L"Click to exit Piano Game.";
    if (m_continue_button.hovering) m_tooltip = L"Click to continue on to the track selection screen.";
 
    if (m_file_tile->WholeTile().hovering) m_tooltip = L"Click to choose a different MIDI file.";
@@ -371,7 +371,6 @@ void TitleState::Draw(Renderer &renderer) const
 
    renderer.SetColor(White);
    renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
-   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, TitleY + (compress_height ? 120 : 150) );
 
    TextWriter version(Layout::ScreenMarginX, GetStateHeight() - Layout::ScreenMarginY - Layout::SmallFontSize * 2,
       renderer, false, Layout::SmallFontSize);
@@ -381,7 +380,7 @@ void TitleState::Draw(Renderer &renderer) const
    extra = L" debug";
 #endif
 
-   version << Text(WSTRING(L"version " << SynthesiaVersionString << extra), Gray);
+   version << Text(WSTRING(L"version " << PianoGameVersionString << extra), Gray);
 
    Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 

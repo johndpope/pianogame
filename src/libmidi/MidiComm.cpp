@@ -164,9 +164,9 @@ void MidiCommIn::InputCallback(unsigned int msg, unsigned long p1, unsigned long
    catch (const MidiError &e)
    {
       // TODO: These appear in main.cpp too.  Consolidate them.
-      const static wstring error_header1 = L"Synthesia detected a";
+      const static wstring error_header1 = L"Piano Game detected a";
       const static wstring error_header2 = L" problem and must close:\n\n";
-      const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@synthesiagame.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+      const static wstring error_footer = L"\n";
 
       wstring wrapped_description = WSTRING(error_header1 << L" MIDI" << error_header2 << e.GetErrorDescription() << error_footer);
       Compatible::ShowError(wrapped_description);
@@ -398,8 +398,8 @@ MidiCommIn::MidiCommIn(unsigned int device_id)
 
    m_description = MidiCommIn::GetDeviceList()[device_id];
 
-   MIDIClientCreate(CFSTR("Synthesia"), 0, this, &m_client);
-   MIDIInputPortCreate(m_client, CFSTR("Synthesia In"), midi_input, this, &m_port);
+   MIDIClientCreate(CFSTR("Piano Game"), 0, this, &m_client);
+   MIDIInputPortCreate(m_client, CFSTR("Piano Game In"), midi_input, this, &m_port);
    
    MIDIEndpointRef source = MIDIGetSource(device_id);
    MIDIPortConnectSource(m_port, source, this);
@@ -539,8 +539,8 @@ void MidiCommOut::Acquire(unsigned int device_id)
    }
    else
    {
-      MIDIClientCreate(CFSTR("Synthesia"), 0, this, &m_client);
-      MIDIOutputPortCreate(m_client, CFSTR("Synthesia Out"), &m_port);
+      MIDIClientCreate(CFSTR("Piano Game"), 0, this, &m_client);
+      MIDIOutputPortCreate(m_client, CFSTR("Piano Game Out"), &m_port);
       
       // The -1 here is because device_id 0 represents the built-in
       // synth and pushes all the other devices over by one.

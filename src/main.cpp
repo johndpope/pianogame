@@ -14,7 +14,7 @@
 #include "resource.h"
 
 #include "CompatibleSystem.h"
-#include "SynthesiaError.h"
+#include "PianoGameError.h"
 #include "libmidi/Midi.h"
 #include "libmidi/SynthVolume.h"
 
@@ -66,12 +66,12 @@ static const int WindowHeight = Compatible::GetDisplayHeight();
 
 GameStateManager state_manager(WindowWidth, WindowHeight);
 
-const static wstring application_name = L"Synthesia";
-const static std::wstring friendly_app_name = WSTRING(L"Synthesia " << SynthesiaVersionString);
+const static wstring application_name = L"PianoGame";
+const static std::wstring friendly_app_name = WSTRING(L"Piano Game " << PianoGameVersionString);
 
-const static wstring error_header1 = L"Synthesia detected a";
+const static wstring error_header1 = L"Piano Game detected a";
 const static wstring error_header2 = L" problem and must close:\n\n";
-const static wstring error_footer = L"\n\nIf you don't think this should have happened, please\ncontact Nicholas (nicholas@synthesiagame.com) and\ndescribe what you were doing when the problem\noccurred.  Thanks.";
+const static wstring error_footer = L"\n";
 
 class EdgeTracker
 {
@@ -171,17 +171,17 @@ int main(int argc, char *argv[])
       // The actual way to accept dragged-in files is by registering an Apple Event.
       static const EventTypeSpec appleEvents[] = { { kEventClassAppleEvent, kEventAppleEvent } };
       status = InstallEventHandler(GetApplicationEventTarget(), NewEventHandlerUPP(AppleEventHandlerProc), GetEventTypeCount(appleEvents), appleEvents, 0, &AppleEventHandlerRef);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to install Apple Event handler.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Unable to install Apple Event handler.  Error code: " << static_cast<int>(status)));
 
       OSErr err = AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, OpenEventHandlerProc, 0, false);
-      if (err != noErr) throw SynthesiaError(WSTRING(L"Unable to install open-document event handler.  Error code: " << static_cast<int>(err)));
+      if (err != noErr) throw PianoGameError(WSTRING(L"Unable to install open-document event handler.  Error code: " << static_cast<int>(err)));
 
       // Now we run the application event loop a little early for a short duration
       // so we can intercept any dragged-in-file events before we proceed.
       EventRef event;
       while ((status = ReceiveNextEvent(0, 0, std::numeric_limits<double>::epsilon(), true, &event)) != eventLoopTimedOutErr)
       {
-         if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't receive early event.  Error code: " << static_cast<int>(status)));
+         if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't receive early event.  Error code: " << static_cast<int>(status)));
 
          SendEventToEventTarget(event, GetApplicationEventTarget());
          ReleaseEvent(event);
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
          WS_POPUP, 0, 0, WindowWidth, WindowHeight, HWND_DESKTOP, 0, instance, 0);
 
       HDC dc_win = GetDC(hwnd);
-      if (!dc_win) throw SynthesiaError(L"Couldn't get window device context.");
+      if (!dc_win) throw PianoGameError(L"Couldn't get window device context.");
       
       // Grab the current pixel format and change a few fields
       int pixel_format_id = GetPixelFormat(dc_win);
@@ -278,12 +278,12 @@ int main(int argc, char *argv[])
 
       // After our changes, get the closest match the device has to offer
       pixel_format_id = ChoosePixelFormat(dc_win, &pfd);
-      if (!pixel_format_id) throw SynthesiaError(L"Unable to find a good pixel format.");
-      if (!SetPixelFormat(dc_win, pixel_format_id, &pfd)) throw SynthesiaError(L"Couldn't set (window) pixel format.");
+      if (!pixel_format_id) throw PianoGameError(L"Unable to find a good pixel format.");
+      if (!SetPixelFormat(dc_win, pixel_format_id, &pfd)) throw PianoGameError(L"Couldn't set (window) pixel format.");
 
       HGLRC glrc = wglCreateContext(dc_win);
-      if (!glrc) throw SynthesiaError(L"Couldn't create OpenGL rendering context.");
-      if (!wglMakeCurrent(dc_win, glrc)) throw SynthesiaError(L"Couldn't make OpenGL rendering context current.");
+      if (!glrc) throw PianoGameError(L"Couldn't create OpenGL rendering context.");
+      if (!wglMakeCurrent(dc_win, glrc)) throw PianoGameError(L"Couldn't make OpenGL rendering context current.");
 #else
 
       Rect windowRect;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
       windowRect.bottom = (short)Compatible::GetDisplayHeight();
 
       status = CreateNewWindow(kPlainWindowClass, kWindowStandardHandlerAttribute, &windowRect, &window);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to create window.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Unable to create window.  Error code: " << static_cast<int>(status)));
 
       SetWindowTitleWithCFString(window, MacStringFromWide(friendly_app_name).get());
 
@@ -307,17 +307,17 @@ int main(int argc, char *argv[])
 
       // MACTODO: The fade effect is way cooler
       status = TransitionWindow(window, kWindowZoomTransitionEffect, kWindowShowTransitionAction, 0);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Unable to transition the window.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Unable to transition the window.  Error code: " << static_cast<int>(status)));
 
       SetPortWindowPort(window);
 
       GLint attrib[] = { AGL_RGBA, AGL_DOUBLEBUFFER, AGL_NONE };
       AGLPixelFormat aglPixelFormat = aglChoosePixelFormat(NULL, 0, attrib);
-      if (!aglPixelFormat) throw SynthesiaError(L"Couldn't set AGL pixel format.");
+      if (!aglPixelFormat) throw PianoGameError(L"Couldn't set AGL pixel format.");
 
       aglContext = aglCreateContext(aglPixelFormat, (aglGetCurrentContext() != 0) ? aglGetCurrentContext() : 0);
       aglSetDrawable(aglContext, GetWindowPort(window));
-      if (!aglSetCurrentContext(aglContext)) throw SynthesiaError(L"Error in SetupAppleGLContext(): Could not set current AGL context.");
+      if (!aglSetCurrentContext(aglContext)) throw PianoGameError(L"Error in SetupAppleGLContext(): Could not set current AGL context.");
 
       aglSetCurrentContext(aglContext);
       aglUpdateContext(aglContext);
@@ -398,7 +398,7 @@ int main(int argc, char *argv[])
       return 0;
 #endif
    }
-   catch (const SynthesiaError &e)
+   catch (const PianoGameError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
       Compatible::ShowError(wrapped_description);
@@ -410,12 +410,12 @@ int main(int argc, char *argv[])
    }
    catch (const std::exception &e)
    {
-      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
+      wstring wrapped_description = WSTRING(L"Piano Game detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
       Compatible::ShowError(wrapped_description);
    }
    catch (...)
    {
-      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!" << error_footer);
+      wstring wrapped_description = WSTRING(L"Piano Game detected an unknown problem and must close!" << error_footer);
       Compatible::ShowError(wrapped_description);
    }
 
@@ -526,7 +526,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler(GetApplicationEventTarget(), NewEventHandlerUPP(AppEventHandlerProc), GetEventTypeCount(appControlEvents), appControlEvents, 0, &AppEventHandlerRef);
-   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install app event handler.  Error code: " << static_cast<int>(ret)));
+   if (ret != noErr) throw PianoGameError(WSTRING(L"Unable to install app event handler.  Error code: " << static_cast<int>(ret)));
    
    static const EventTypeSpec mouseControlEvents[] =
    {
@@ -536,7 +536,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( MouseEventHandlerProc ), GetEventTypeCount(mouseControlEvents), mouseControlEvents, 0, &MouseEventHandlerRef );
-   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install mouse event handler.  Error code: " << static_cast<int>(ret)));
+   if (ret != noErr) throw PianoGameError(WSTRING(L"Unable to install mouse event handler.  Error code: " << static_cast<int>(ret)));
    
    static const EventTypeSpec keyControlEvents[] =
    {
@@ -546,7 +546,7 @@ void InitEvents()
    };
    
    ret = InstallEventHandler( GetApplicationEventTarget(), NewEventHandlerUPP( KeyEventHandlerProc ), GetEventTypeCount(keyControlEvents), keyControlEvents, 0, &KeyEventHandlerRef );
-   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install key event handler.  Error code: " << static_cast<int>(ret)));
+   if (ret != noErr) throw PianoGameError(WSTRING(L"Unable to install key event handler.  Error code: " << static_cast<int>(ret)));
       
    static const EventTypeSpec windowControlEvents[] = 
    {
@@ -568,7 +568,7 @@ void InitEvents()
    if (OtherWindowEventHandlerRef != 0) RemoveEventHandler(OtherWindowEventHandlerRef);
    
    ret = InstallEventHandler(GetWindowEventTarget(window), NewEventHandlerUPP(WindowEventHandlerProc), GetEventTypeCount(windowControlEvents), windowControlEvents, 0, &OtherWindowEventHandlerRef );
-   if (ret != noErr) throw SynthesiaError(WSTRING(L"Unable to install window event handler.  Error code: " << static_cast<int>(ret)));
+   if (ret != noErr) throw PianoGameError(WSTRING(L"Unable to install window event handler.  Error code: " << static_cast<int>(ret)));
 }
 
 
@@ -586,7 +586,7 @@ static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
       
       state_manager.Draw(renderer);
    }
-   catch (const SynthesiaError &e)
+   catch (const PianoGameError &e)
    {
       wstring wrapped_description = WSTRING(error_header1 << error_header2 << e.GetErrorDescription() << error_footer);
       Compatible::ShowError(wrapped_description);
@@ -600,13 +600,13 @@ static pascal void GameLoop(EventLoopTimerRef inTimer, void *)
    }
    catch (const std::exception &e)
    {
-      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
+      wstring wrapped_description = WSTRING(L"Piano Game detected an unknown problem and must close!  '" << e.what() << "'" << error_footer);
       Compatible::ShowError(wrapped_description);
       Compatible::GracefulShutdown();
    }
    catch (...)
    {
-      wstring wrapped_description = WSTRING(L"Synthesia detected an unknown problem and must close!" << error_footer);
+      wstring wrapped_description = WSTRING(L"Piano Game detected an unknown problem and must close!" << error_footer);
       Compatible::ShowError(wrapped_description);
       Compatible::GracefulShutdown();
    }
@@ -617,7 +617,7 @@ static pascal OSErr OpenEventHandlerProc(const AppleEvent *event, AppleEvent *, 
 {
    AEDescList docs;
    OSStatus status = AEGetParamDesc(event, keyDirectObject, typeAEList, &docs);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get Apple Event parameter description.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get Apple Event parameter description.  Error code: " << static_cast<int>(status)));
    
    // We can only handle the first dragged-in file, so
    // all that matters is that the list isn't empty.
@@ -627,12 +627,12 @@ static pascal OSErr OpenEventHandlerProc(const AppleEvent *event, AppleEvent *, 
    
    FSRef ref;
    status = AEGetNthPtr(&docs, 1, typeFSRef, 0, 0, &ref, sizeof(ref), 0);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't look up Apple Event pointer.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't look up Apple Event pointer.  Error code: " << static_cast<int>(status)));
    
    const static int BufferSize(1024);
    char path_buffer[BufferSize];
    status = FSRefMakePath(&ref, (UInt8*)path_buffer, BufferSize);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get file path.  Error code: " << static_cast<int>(status)));
 
    std::string narrow_path(path_buffer);
    std::wstring path(narrow_path.begin(), narrow_path.end());

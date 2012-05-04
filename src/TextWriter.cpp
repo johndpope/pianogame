@@ -6,7 +6,7 @@
 
 #include "TextWriter.h"
 #include "Renderer.h"
-#include "SynthesiaError.h"
+#include "PianoGameError.h"
 #include "os_graphics.h"
 
 #ifdef WIN32
@@ -80,13 +80,13 @@ x(in_x), y(in_y), size(in_size), original_x(0), last_line_height(0), centered(in
       const CFStringRef font_name = CFSTR("Trebuchet MS");
       
       ATSFontFamilyRef font = ATSFontFamilyFindFromName(font_name, kATSOptionFlagsDefault);
-      if (!font) throw SynthesiaError(WSTRING(L"Couldn't get ATSFontFamilyRef for font '" << WideFromMacString(font_name) << L"'."));         
+      if (!font) throw PianoGameError(WSTRING(L"Couldn't get ATSFontFamilyRef for font '" << WideFromMacString(font_name) << L"'."));         
       
       AGLContext context = aglGetCurrentContext();
-      if (!context) throw SynthesiaError(L"Couldn't retrieve OpenGL context while creating font.");         
+      if (!context) throw PianoGameError(L"Couldn't retrieve OpenGL context while creating font.");         
       
       GLboolean ret = aglUseFont(context, font, normal, size, 0, 128, list_start);
-      if (ret == GL_FALSE) throw SynthesiaError(WSTRING(L"aglUseFont() call failed with error code: " << aglGetError()));
+      if (ret == GL_FALSE) throw PianoGameError(WSTRING(L"aglUseFont() call failed with error code: " << aglGetError()));
       
       font_size_lookup[size] = list_start;
 
@@ -95,7 +95,7 @@ x(in_x), y(in_y), size(in_size), original_x(0), last_line_height(0), centered(in
       ATSUStyle style;
 
       OSStatus status = ATSUCreateStyle(&style);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create ATSU style.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't create ATSU style.  Error code: " << static_cast<int>(status)));
 
       Fixed fixed_size = Long2Fix(size);
       
@@ -103,7 +103,7 @@ x(in_x), y(in_y), size(in_size), original_x(0), last_line_height(0), centered(in
       ByteCount sizes[] = { sizeof(Fixed) };
       ATSUAttributeValuePtr values[] = { &fixed_size };
       status = ATSUSetAttributes(style, sizeof(sizes) / sizeof(ByteCount), tags, sizes, values);
-      if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't set ATSU style attributes.  Error code: " << static_cast<int>(status)));
+      if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't set ATSU style attributes.  Error code: " << static_cast<int>(status)));
       
       atsu_style_lookup[size] = style;      
    }
@@ -182,14 +182,14 @@ void Text::calculate_position_and_advance_cursor(TextWriter &tw, int *out_x, int
    // Convert passed-in text to Unicode
    CFStringRef cftext = MacStringFromWide(m_text, true).get();
    CFDataRef unitext = CFStringCreateExternalRepresentation(kCFAllocatorDefault, cftext, kCFStringEncodingUnicode, 0);
-   if (!unitext) throw SynthesiaError(WSTRING(L"Couldn't convert string to unicode: '" << m_text << L"'"));
+   if (!unitext) throw PianoGameError(WSTRING(L"Couldn't convert string to unicode: '" << m_text << L"'"));
    CFRelease(cftext);
 
    // Create an ATSU layout
    ATSUTextLayout layout;
    const UniCharCount run_length = kATSUToTextEnd;
    OSStatus status = ATSUCreateTextLayoutWithTextPtr((ConstUniCharArrayPtr)CFDataGetBytePtr(unitext), kATSUFromTextBeginning, kATSUToTextEnd, CFDataGetLength(unitext) / 2, 1, &run_length, &atsu_style_lookup[tw.size], &layout);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't create ATSU text layout for string: '" << m_text << L"', Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't create ATSU text layout for string: '" << m_text << L"', Error code: " << static_cast<int>(status)));
 
    // Measure the size of the resulting text
    Rect drawing_rect = { 0, 0, 0, 0 };
@@ -200,7 +200,7 @@ void Text::calculate_position_and_advance_cursor(TextWriter &tw, int *out_x, int
    ATSUTextMeasurement descent = 0;
    
    status = ATSUGetUnjustifiedBounds(layout, 0, kATSUToTextEnd, &before, &after, &ascent, &descent);
-   if (status != noErr) throw SynthesiaError(WSTRING(L"Couldn't get unjustified bounds for text layout for string: '" << m_text << L"', Error code: " << static_cast<int>(status)));
+   if (status != noErr) throw PianoGameError(WSTRING(L"Couldn't get unjustified bounds for text layout for string: '" << m_text << L"', Error code: " << static_cast<int>(status)));
 
    // NOTE: the +1 here is completely arbitrary and seemed to place the text better.
    // It may just be a difference between the Windows and Mac text placement systems.
